@@ -1,0 +1,80 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// There is NO end-user authentication. All writes are performed by Cloud
+// Functions via the Admin SDK, which bypasses these rules entirely.
+//
+// Collection: sebExams
+// Document ID: random 20-char Firestore auto-id (unguessable)
+// Fields (written only by Cloud Functions):
+//   - id: string            - same as document id
+//   - title: string         - exam title
+//   - createdAt: timestamp  - creation time (immutable)
+//   - expiresAt: timestamp  - createdAt + 90 days; Firestore TTL policy field
+//   - sourceType: string    - 'text' | 'docx' | 'pdf'
+//   - promptHtml: string    - sanitized exam prompt HTML
+//   - pdfPath: string|null  - Storage path of source PDF
+//   - sebConfig: map        - { allowedApps: map<bool>, allowedWebsites: list,
+//                               quitPasswordHash: string }
+//   - blocks: list          - exam content blocks
+//   - schemaVersion: int
+//
+// Access: students (unauthenticated, inside Safe Exam Browser) may GET a
+// single exam by id, but only while expiresAt > request.time (TTL deletion
+// may lag up to ~24h, so expiry is enforced here). LIST/queries are denied
+// to prevent enumeration. No client create/update/delete.
+//
+// Collection: rateLimits
+//   Internal bookkeeping for Cloud Functions only. No client access.
+//
+// Everything else: denied by default.
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    // True if the stored exam document has a valid, not-yet-passed expiry.
+    function isUnexpiredExam() {
+      return resource != null &&
+             resource.data.expiresAt is timestamp &&
+             resource.data.expiresAt > request.time;
+    }
+
+    // ===============================================================
+    // sebExams: single-document GET only, while unexpired
+    // ===============================================================
+    match /sebExams/{examId} {
+      // Public (unauthenticated) read is an explicit product requirement:
+      // students access exams by unguessable id inside SEB without login.
+      allow get: if isUnexpiredExam();
+
+      // Prevent enumeration of all exams.
+      allow list: if false;
+
+      // All writes go through Cloud Functions (Admin SDK).
+      allow create, update, delete: if false;
+    }
+
+    // ===============================================================
+    // rateLimits: Cloud Functions only
+    // ===============================================================
+    match /rateLimits/{docId} {
+      allow read, write: if false;
+    }
+
+    // ===============================================================
+    // Default deny for everything else (including subcollections)
+    // ===============================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

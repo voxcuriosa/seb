@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm ci
+        working-directory: functions
+      - name: Personvernvakt (elevarbeid forlater aldri nettleseren)
+        run: node scripts/privacy-guard.mjs
+      - name: Enhetstester
+        run: npx vitest run
+      - name: Bygg
+        run: npm run build

@@ -1,0 +1,13 @@
+#!/bin/sh
+# Personvernvakt og hemmelighetssjekk før hver commit.
+node scripts/privacy-guard.mjs || exit 1
+
+# Stopp commit av åpenbare hemmeligheter (passord, private nøkler, .env).
+if git diff --cached --name-only | grep -E '(^|/)\.env($|\.)|\.pem$|\.key$|serviceAccount.*\.json$' >/dev/null; then
+  echo "Commit stoppet: hemmelighetsfil i staging (.env/.pem/.key/serviceAccount)."
+  exit 1
+fi
+if git diff --cached -U0 | grep -E '^\+.*(BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|FTP_PASS\s*=\s*["'"'"'][^"'"'"']+|sk-[A-Za-z0-9_-]{20,})' >/dev/null; then
+  echo "Commit stoppet: mulig passord eller privat nøkkel i endringene."
+  exit 1
+fi

@@ -1,0 +1,3 @@
+#!/bin/sh
+# Full testpakke (inkludert personvernvakten) før push.
+npx vitest run || exit 1

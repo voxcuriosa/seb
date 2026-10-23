@@ -11,11 +11,13 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:rules": "firebase emulators:exec --only firestore,storage --project demo-voxcuriosa-seb \"vitest run --config vitest.rules.config.js\"",
-    "deploy:ftp": "npm run build && python3 scripts/deploy_ftp.py"
+    "deploy:ftp": "npm run build && python3 scripts/deploy_ftp.py",
+    "prepare": "git config core.hooksPath .githooks || true",
+    "guard": "node scripts/privacy-guard.mjs"
   },
   "dependencies": {
     "@noble/ed25519": "^3.2.0",
-    "@tiptap/extension-underline": "^3.32.0",
+    "@tiptap/extension-placeholder": "^3.32.0",
     "@tiptap/pm": "^3.32.0",
     "@tiptap/react": "^3.32.0",
     "@tiptap/starter-kit": "^3.32.0",

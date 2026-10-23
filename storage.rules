@@ -1,0 +1,19 @@
+rules_version = '2';
+
+// Oppgave-PDF-er for SEB-prøver.
+// - Ingen klient kan skrive (alt skrives av Cloud Function createSebExam med Admin SDK).
+// - Elever kan lese én bestemt fil mens tilhørende prøve finnes og ikke er utløpt.
+// - Listing er sperret.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /sebExams/{examId}/oppgave.pdf {
+      allow get: if firestore.exists(/databases/(default)/documents/sebExams/$(examId))
+                 && firestore.get(/databases/(default)/documents/sebExams/$(examId)).data.expiresAt > request.time;
+      allow list, write: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
