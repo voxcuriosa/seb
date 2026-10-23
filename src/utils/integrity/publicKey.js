@@ -1,11 +1,10 @@
 /**
  * publicKey.js
- * Offentlige Ed25519-nøkler (base64, 32 byte rå nøkkel) for verifisering av serversignaturer.
- * Offentlige nøkler er ikke hemmelige. Den private nøkkelen finnes kun i Google Secret Manager
- * (SEB_SIGNING_KEY) og settes med scripts/setup-signing-key.sh, som også oppdaterer denne filen.
+ * Offentlig Ed25519-verifiseringsnøkkel for SEB-innleveringer.
+ * Brukes i Fane 2 (GradeSubmissionsTab / examPdfParser) til å verifisere
+ * at elevens innleverte PDF ble signert av voxcuriosa-seb under innlevering.
+ *
+ * Denne nøkkelen er offentlig av design.
  */
-export const ACTIVE_KEY_ID = 'k1';
-
-export const SIGNING_PUBLIC_KEYS = {
-  k1: ''
-};
+export const SUBMISSION_PUBLIC_KEY_BASE64 =
+  'MCowBQYDK2VwAyEAX0kmKa6ppy56y4/kONzJ9GrRaVmJJaix281/u0FZzQ8=';

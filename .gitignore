@@ -35,3 +35,7 @@ Thumbs.db
 !.vscode/extensions.json
 .idea/
 .gemini/
+
+.tmp*
+*.secret
+
