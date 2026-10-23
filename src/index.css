@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --color-slate-750: #283548;
+}
+
+html, body, #root {
+  min-height: 100%;
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Elevens skrivefelt (Tiptap / ProseMirror) */
+.essay-editor .ProseMirror {
+  outline: none;
+  min-height: 100%;
+  padding: 1.25rem 1.5rem 4rem;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #0f172a;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.essay-editor .ProseMirror h1 { font-size: 1.6rem; font-weight: 800; margin: 1rem 0 0.5rem; }
+.essay-editor .ProseMirror h2 { font-size: 1.25rem; font-weight: 700; margin: 0.9rem 0 0.4rem; }
+.essay-editor .ProseMirror p { margin: 0 0 0.75rem; }
+.essay-editor .ProseMirror ul { list-style: disc; padding-left: 1.5rem; margin: 0 0 0.75rem; }
+.essay-editor .ProseMirror ol { list-style: decimal; padding-left: 1.5rem; margin: 0 0 0.75rem; }
+.essay-editor .ProseMirror li > p { margin: 0 0 0.25rem; }
+.essay-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #64748b;
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Sanert oppgavetekst (HTML fra lærer / mammoth) */
+.prompt-html { color: #e2e8f0; line-height: 1.7; font-size: 0.98rem; }
+.prompt-html h1 { font-size: 1.5rem; font-weight: 800; margin: 1rem 0 0.5rem; color: #fff; }
+.prompt-html h2 { font-size: 1.25rem; font-weight: 700; margin: 0.9rem 0 0.4rem; color: #fff; }
+.prompt-html h3 { font-size: 1.1rem; font-weight: 700; margin: 0.8rem 0 0.4rem; color: #fff; }
+.prompt-html p { margin: 0 0 0.75rem; }
+.prompt-html ul { list-style: disc; padding-left: 1.5rem; margin: 0 0 0.75rem; }
+.prompt-html ol { list-style: decimal; padding-left: 1.5rem; margin: 0 0 0.75rem; }
+.prompt-html table { border-collapse: collapse; margin: 0.75rem 0; width: 100%; }
+.prompt-html th, .prompt-html td { border: 1px solid #334155; padding: 0.4rem 0.6rem; text-align: left; vertical-align: top; }
+.prompt-html th { background: #1e293b; }
+.prompt-html img { max-width: 100%; height: auto; }
+.prompt-html a { color: #6ee7b7; text-decoration: underline; }
+
+/* Lærerens enkle editor for oppgavetekst */
+.prompt-editor .ProseMirror {
+  outline: none;
+  min-height: 12rem;
+  padding: 0.75rem 1rem;
+}
+
+/* Utskrift av verifisert besvarelse */
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  .no-print { display: none !important; }
+  .print-area { color: #000 !important; background: #fff !important; }
+  .print-area * { color: #000 !important; border-color: #999 !important; background: transparent !important; }
+}

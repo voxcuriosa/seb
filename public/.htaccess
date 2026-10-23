@@ -1,0 +1,26 @@
+RewriteEngine On
+RewriteBase /seb/
+
+# SPA-fallback: alle undersider (/seb/start/:id, /seb/exam/:id, /seb/quit) serveres av index.html
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /seb/index.html [L]
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires 0
+  </FilesMatch>
+  <FilesMatch "\.(js|mjs|css|woff2|zip)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+<IfModule mod_mime.c>
+  AddType application/javascript .mjs
+</IfModule>
