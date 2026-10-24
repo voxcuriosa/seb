@@ -62,7 +62,6 @@ const APP_PROCESSES = {
   ],
   voxlex: [
     { autostart: false, iconInTaskbar: false, allowUserToChooseApp: false, title: 'VoxLex', executable: 'VoxLex.exe', originalName: 'VoxLex.exe', path: '', os: 1 },
-    { autostart: false, iconInTaskbar: false, allowUserToChooseApp: false, title: 'voxlex', executable: 'voxlex.exe', originalName: 'voxlex.exe', path: '', os: 1 },
     { autostart: true, iconInTaskbar: true, allowUserToChooseApp: false, title: 'VoxLex', executable: 'voxlex', originalName: 'voxlex', identifier: 'no.voxlex.skole', path: '/Applications/VoxLex.app', os: 0 }
   ]
 };
