@@ -1,5 +1,5 @@
 import { useEditorState } from '@tiptap/react';
-import { Bold, Italic, Underline, Heading1, Heading2, Pilcrow, List, ListOrdered, Undo2, Redo2 } from 'lucide-react';
+import { Bold, Italic, Underline, Heading1, Heading2, List, ListOrdered, Undo2, Redo2 } from 'lucide-react';
 
 function ToolButton({ onClick, active, disabled, label, children }) {
   return (
@@ -32,7 +32,6 @@ export default function EditorToolbar({ editor, children }) {
       underline: e?.isActive('underline') ?? false,
       h1: e?.isActive('heading', { level: 1 }) ?? false,
       h2: e?.isActive('heading', { level: 2 }) ?? false,
-      paragraph: e?.isActive('paragraph') ?? false,
       bullet: e?.isActive('bulletList') ?? false,
       ordered: e?.isActive('orderedList') ?? false,
       canUndo: e?.can().undo() ?? false,
@@ -50,7 +49,6 @@ export default function EditorToolbar({ editor, children }) {
       <Divider />
       <ToolButton label="Overskrift 1" active={s.h1} onClick={run((c) => c.toggleHeading({ level: 1 }))}><Heading1 size={16} /></ToolButton>
       <ToolButton label="Overskrift 2" active={s.h2} onClick={run((c) => c.toggleHeading({ level: 2 }))}><Heading2 size={16} /></ToolButton>
-      <ToolButton label="Normal tekst" active={s.paragraph && !s.bullet && !s.ordered} onClick={run((c) => c.setParagraph())}><Pilcrow size={16} /></ToolButton>
       <Divider />
       <ToolButton label="Punktliste" active={s.bullet} onClick={run((c) => c.toggleBulletList())}><List size={16} /></ToolButton>
       <ToolButton label="Nummerert liste" active={s.ordered} onClick={run((c) => c.toggleOrderedList())}><ListOrdered size={16} /></ToolButton>
