@@ -54,7 +54,8 @@ export const createSebExam = onCall(
     let pdfPath = null;
     if (clean.pdfBuffer) {
       pdfPath = `sebExams/${ref.id}/oppgave.pdf`;
-      await getStorage().bucket().file(pdfPath).save(clean.pdfBuffer, {
+      const bucket = getStorage().bucket('voxcuriosa-seb-storage');
+      await bucket.file(pdfPath).save(clean.pdfBuffer, {
         resumable: false,
         contentType: 'application/pdf',
         metadata: { cacheControl: 'private, max-age=3600' }

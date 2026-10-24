@@ -48,8 +48,8 @@ export default function TeacherPinGate({ onUnlock, busy, error }) {
         {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <ShieldCheck size={16} aria-hidden="true" />}
         <span>Lås opp</span>
       </button>
-      <p className="text-[11px] text-slate-500 leading-relaxed">
-        Kontakt Christian Borchgrevink-Vigeland for å få PIN-kode.
+      <p className="text-[11px] text-slate-500 leading-relaxed text-center">
+        Kontakt Christian Borchgrevink-Vigeland (<a href="mailto:borchgrevink@gmail.com" className="text-emerald-400 hover:text-emerald-300 underline font-semibold">borchgrevink@gmail.com</a>) for å få PIN-kode.
       </p>
     </form>
   );
