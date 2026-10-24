@@ -51,7 +51,8 @@ export default function HelpPanel({ onClose }) {
           <strong>Ja, de fungerer fullt ut på både Mac og Windows!</strong>
         </p>
         <ul className="space-y-1 list-disc pl-4 text-slate-300">
-          <li><strong>På Mac:</strong> SEB-konfigurasjonen vår er ferdig satt opp med offisielle macOS Bundle Identifiers (<code className="text-emerald-300">no.lingit.lingdys</code>, <code className="text-emerald-300">no.voxlex.skole</code>, <code className="text-emerald-300">no.kunnskapsforlaget.ordnettpluss</code>) og tillater tilgjengelighet (<code className="text-slate-400">allowAccessibility = true</code>).</li>
+          <li><strong>På Mac:</strong> SEB-konfigurasjonen vår er ferdig satt opp med offisielle macOS Bundle Identifiers (<code className="text-emerald-300">no.lingit.lingdys</code>, <code className="text-emerald-300">no.voxlex.skole</code>, <code className="text-emerald-300">no.kunnskapsforlaget.ordnettpluss</code>), viser macOS-menylinjen når hjelpeprogrammer er tillatt, og tillater tilgjengelighet (<code className="text-slate-400">allowAccessibility = true</code>).</li>
+          <li><strong>Opplesing av markert tekst i Lingdys på Mac:</strong> Fordi SEB blokkerer hurtigtasten <code className="text-slate-400">Cmd + Tab</code> som Lingdys sin «Play»-knapp bruker i bakgrunnen, bør eleven krysse av for <strong>«Les når tekst markeres»</strong> under <em>Innstillinger -&gt; Tale</em> i Lingdys. Da kan eleven markere tekst i prøverommet og trykke på knappen <strong>«Les i Lingdys»</strong> (eller <code className="text-slate-400">Cmd + C</code>) for å få teksten lest opp med Lingdys sin naturlige stemme.</li>
           <li><strong>Clarify Ordbøker (Feide):</strong> Velges under «Nettbaserte ordbøker og skolekilder» i steg 2 (<code className="text-emerald-300">https://app.clarify.no/auth</code>). Åpnes direkte som knapp i prøverommet og i SEBs verktøylinje med støtte for Feide-innlogging.</li>
           <li><strong>Huskeregel for eleven:</strong> Lokale programmer (Lingdys, VoxLex, Ordnett) bør startes på maskinen <em>før</em> eleven klikker på SEB-lenken eller åpner .seb-filen.</li>
         </ul>
@@ -109,7 +110,7 @@ export default function HelpPanel({ onClose }) {
         <li><strong className="text-white">Omstart av PC:</strong> Er i utgangspunktet frivillig, og elevene kan starte vanlige prøver rett fra skolehverdagen. <strong>Før store og viktige prøver (som heldagsprøver og tentamen) anbefales det likevel at elevene restarter PC-en først.</strong> Dette tømmer maskinminnet og forhindrer at bakgrunnsprogrammer, Discord eller skjermopptakere skaper sjeldne konflikter med Safe Exam Browser.</li>
         <li><strong className="text-white">Lagring:</strong> Bare lærerens prøveoppsett (tittel, oppgavetekst, innstillinger) lagres i EU, og slettes automatisk etter 90 dager.</li>
         <li><strong className="text-white">Fane 2 (Kontroll):</strong> Har fysisk null nettverkskall – PDF-er fra Teams leses kun lokalt i din nettleser.</li>
-        <li><strong className="text-white">Stavekontroll:</strong> Norsk bokmål og nynorsk følger med prøvefilen. Høyreklikk på ord med rød strek for å få forslag.</li>
+        <li><strong className="text-white">Stavekontroll:</strong> Innebygd stavekontroll for norsk bokmål, nynorsk, engelsk (UK/US), tysk, spansk og fransk. Høyreklikk på ord med rød strek for å få forslag.</li>
         <li><strong className="text-white">Statusmerker:</strong> «Verifisert» betyr at alt stemmer. «Verifisert, ikke signert» betyr at eleven var offline ved innlevering. «Ugyldig» betyr at filen er endret etter eksport.</li>
       </ul>
     </aside>

@@ -37,6 +37,8 @@ export function buildStandaloneSebPlist({
 }) {
   if (!examId) throw new Error('examId mangler');
   const hasQuitPassword = /^[a-f0-9]{64}$/i.test(String(quitPasswordHash || ''));
+  const hasReadingApp = Boolean(allowedApps?.lingdys || allowedApps?.voxlex);
+  const clipboardPolicy = hasReadingApp ? 2 : 0;
   const websites = Array.isArray(allowedWebsites) ? allowedWebsites : [];
   const resourcesXml = buildAdditionalResourcesXml(websites);
   const effectiveStartUrl = startURL || examRoomUrl(examId);
@@ -85,7 +87,7 @@ export function buildStandaloneSebPlist({
   <key>allowAccessibility</key>
   <true/>
   <key>clipboardPolicy</key>
-  <integer>0</integer>
+  <integer>${clipboardPolicy}</integer>
   <key>mainBrowserWindowWidth</key>
   <string>100%</string>
   <key>mainBrowserWindowHeight</key>
@@ -99,7 +101,7 @@ export function buildStandaloneSebPlist({
   <key>newBrowserWindowAllowAddressBar</key>
   <false/>
   <key>showMenuBar</key>
-  <false/>
+  ${hasAllowedApps ? '<true/>' : '<false/>'}
   <key>showTaskBar</key>
   <true/>
   <key>showQuitButton</key>

@@ -14,6 +14,7 @@
 import { escapeXml } from './sebPlistParts';
 
 export const EMBEDDED_DICTIONARY_LOCALES = ['nb-NO', 'nn-NO'];
+export const BROWSER_SPELLCHECK_LOCALES = ['nb-NO', 'nn-NO', 'en-GB', 'en-US', 'de-DE', 'es-ES', 'fr-FR'];
 
 /** Språk eleven kan velge i editoren (lang-attributtet). */
 export const SPELLCHECK_LANGUAGES = [
@@ -72,8 +73,17 @@ export function buildDictionariesXml(dictionaries = []) {
 }
 
 const wordSetCache = new Map();
-const NO_ALPHABET = 'abcdefghijklmnopqrstuvwxyzæøå';
-const PREFIXES = ['u', 'for', 'gjen', 'hoved', 'mis', 'sam', 'etter', 'til', 'over', 'under', 'på', 'av', 'inn', 'ut', 'opp', 'ned', 'om'];
+const ALPHABETS = {
+  'nb-NO': 'abcdefghijklmnopqrstuvwxyzæøå',
+  'nn-NO': 'abcdefghijklmnopqrstuvwxyzæøå',
+  'en-GB': 'abcdefghijklmnopqrstuvwxyz',
+  'en-US': 'abcdefghijklmnopqrstuvwxyz',
+  'de-DE': 'abcdefghijklmnopqrstuvwxyzäöüß',
+  'es-ES': 'abcdefghijklmnopqrstuvwxyzáéíóúüñ',
+  'fr-FR': 'abcdefghijklmnopqrstuvwxyzéèêëàâîïôùûüçœ'
+};
+const COMPOUND_LOCALES = new Set(['nb-NO', 'nn-NO', 'de-DE']);
+const PREFIXES = ['u', 'for', 'gjen', 'hoved', 'mis', 'sam', 'etter', 'til', 'over', 'under', 'på', 'av', 'inn', 'ut', 'opp', 'ned', 'om', 'un', 'ver', 'be', 'ent', 'er', 'ge', 'zer', 'auf', 'aus', 'ein', 'vor', 'mit', 'nach'];
 
 export async function extractDicFromZipBuffer(buffer) {
   const view = new DataView(buffer);
@@ -103,12 +113,14 @@ export async function extractDicFromZipBuffer(buffer) {
   return '';
 }
 
-export function buildChecker(rawDic) {
+export function buildChecker(rawDic, locale = 'nb-NO') {
+  const alphabet = ALPHABETS[locale] || ALPHABETS['nb-NO'];
+  const allowCompounds = COMPOUND_LOCALES.has(locale);
   const words = new Set();
   const lines = rawDic.split(/\r?\n/);
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i];
-    if (!line) continue;
+    if (!line || line[0] === '#' || line[0] === '\t') continue;
     const slash = line.indexOf('/');
     const tab = line.indexOf('\t');
     let end = line.length;
@@ -119,7 +131,7 @@ export function buildChecker(rawDic) {
   }
 
   const isCompound = (low) => {
-    if (low.length < 7) return false;
+    if (!allowCompounds || low.length < 7) return false;
     for (const p of PREFIXES) {
       if (low.startsWith(p) && low.length - p.length >= 4 && words.has(low.slice(p.length))) return true;
     }
@@ -137,9 +149,17 @@ export function buildChecker(rawDic) {
   const isValidWord = (token) => {
     if (!token || token.length <= 1) return true;
     if (/^[0-9.,:%+\-–—/]+$/.test(token)) return true;
-    if (token.length <= 4 && token === token.toUpperCase() && /[A-ZÆØÅ]/.test(token)) return true;
+    if (token.length <= 4 && token === token.toUpperCase() && /[A-ZÆØÅÄÖÜÉÈÊÁÍÓÚÑ]/.test(token)) return true;
     const low = token.toLowerCase();
     if (words.has(low)) return true;
+    // Engelsk/fransk apostrof-suffiks eller prefiks (f.eks. student's, don't, l'école, d'un)
+    if (low.includes("'") || low.includes('’')) {
+      const norm = low.replace(/’/g, "'");
+      if (words.has(norm)) return true;
+      if (norm.endsWith("'s") && words.has(norm.slice(0, -2))) return true;
+      const apoIdx = norm.indexOf("'");
+      if (apoIdx > 0 && apoIdx <= 2 && words.has(norm.slice(apoIdx + 1))) return true;
+    }
     if (low.includes('-')) {
       const parts = low.split('-').filter(Boolean);
       if (parts.length > 1 && parts.every((p) => p.length <= 1 || words.has(p) || isCompound(p))) return true;
@@ -176,14 +196,14 @@ export function buildChecker(rawDic) {
     }
     // 3. Erstatning av én bokstav
     for (let i = 0; i < low.length && found.length < max; i++) {
-      for (let c = 0; c < NO_ALPHABET.length && found.length < max; c++) {
-        pushIfValid(low.slice(0, i) + NO_ALPHABET[c] + low.slice(i + 1));
+      for (let c = 0; c < alphabet.length && found.length < max; c++) {
+        pushIfValid(low.slice(0, i) + alphabet[c] + low.slice(i + 1));
       }
     }
     // 4. Innsetting av én bokstav
     for (let i = 0; i <= low.length && found.length < max; i++) {
-      for (let c = 0; c < NO_ALPHABET.length && found.length < max; c++) {
-        pushIfValid(low.slice(0, i) + NO_ALPHABET[c] + low.slice(i));
+      for (let c = 0; c < alphabet.length && found.length < max; c++) {
+        pushIfValid(low.slice(0, i) + alphabet[c] + low.slice(i));
       }
     }
     return found.slice(0, max);
@@ -193,11 +213,11 @@ export function buildChecker(rawDic) {
 }
 
 /**
- * Laster og pakker ut norsk stavekontroll-ordbok (nb-NO / nn-NO) direkte i nettleseren,
- * slik at røde streker og retteforslag fungerer 100 % på både Mac (WKWebView) og Windows.
+ * Laster og pakker ut stavekontroll-ordbok (nb-NO, nn-NO, en-GB, en-US, de-DE, es-ES, fr-FR)
+ * direkte i nettleseren, slik at røde streker og retteforslag fungerer 100 % på både Mac (WKWebView) og Windows.
  */
 export function loadBrowserSpellchecker(locale = 'nb-NO', baseUrl = `${import.meta.env.BASE_URL}dictionaries/`) {
-  if (!EMBEDDED_DICTIONARY_LOCALES.includes(locale)) return Promise.resolve(null);
+  if (!BROWSER_SPELLCHECK_LOCALES.includes(locale)) return Promise.resolve(null);
   if (wordSetCache.has(locale)) return wordSetCache.get(locale);
   const promise = (async () => {
     try {
@@ -206,7 +226,7 @@ export function loadBrowserSpellchecker(locale = 'nb-NO', baseUrl = `${import.me
       const buf = await res.arrayBuffer();
       const rawDic = await extractDicFromZipBuffer(buf);
       if (!rawDic) return null;
-      return buildChecker(rawDic);
+      return buildChecker(rawDic, locale);
     } catch (err) {
       console.warn(`[SEB] Kunne ikke laste stavekontroll for ${locale}:`, err?.message);
       wordSetCache.delete(locale);

@@ -268,6 +268,7 @@ export default function SebExamRoom() {
               onChange={handleEditorChange}
               onLargePaste={(len) => addIncident('PASTE', `${len} tegn limt inn`)}
               onReady={onEditorReady}
+              hasReadingApp={Boolean(exam?.allowedApps?.lingdys || exam?.allowedApps?.voxlex)}
             />
           </section>
         </div>

@@ -1,10 +1,11 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { writeFileSync, unlinkSync } from 'node:fs';
-import { buildStandaloneSebPlist } from './src/utils/seb/sebConfigGenerator.js';
-import { buildEssayPayload, renderEssayPdf } from './src/utils/exam/essayPdfGenerator.js';
-import { parseExamPdfFile } from './src/utils/integrity/examPdfParser.js';
+import { readFileSync, writeFileSync, unlinkSync } from 'node:fs';
+import { buildStandaloneSebPlist } from '../utils/seb/sebConfigGenerator.js';
+import { BROWSER_SPELLCHECK_LOCALES, extractDicFromZipBuffer, buildChecker } from '../utils/seb/sebDictionaries.js';
+import { buildEssayPayload, renderEssayPdf } from '../utils/exam/essayPdfGenerator.js';
+import { parseExamPdfFile } from '../utils/integrity/examPdfParser.js';
 
 function fileFromBytes(bytes, name) {
   return new File([bytes], name, { type: 'application/pdf', lastModified: 1 });
@@ -28,6 +29,7 @@ describe('Slutt-til-slutt simulering av hele prøveløpet', () => {
     // Sikkerhetssjekker på SEB-profilen
     expect(plist).toContain('<key>allowSwitchToApplications</key>\n  <false/>');
     expect(plist).toContain('<key>enableAltTab</key>\n  <false/>');
+    expect(plist).toContain('<key>showMenuBar</key>\n  <false/>');
     expect(plist).toContain('<key>browserWindowAllowAddressBar</key>\n  <false/>');
     expect(plist).toContain('<key>newBrowserWindowAllowAddressBar</key>\n  <false/>');
     expect(plist).toContain('<key>URLFilterEnable</key>\n  <true/>');
@@ -87,9 +89,10 @@ describe('Slutt-til-slutt simulering av hele prøveløpet', () => {
       allowedApps: { voxlex: true, ordnett: false, lingdys: true }
     });
 
-    // Sjekk at programbytte og alt-tab KUN er tillatt for de godkjente appene
+    // Sjekk at programbytte, menylinje og alt-tab er tillatt når godkjente apper er valgt
     expect(plist).toContain('<key>allowSwitchToApplications</key>\n  <true/>');
     expect(plist).toContain('<key>enableAltTab</key>\n  <true/>');
+    expect(plist).toContain('<key>showMenuBar</key>\n  <true/>');
     expect(plist).toContain('<key>URLFilterEnable</key>\n  <true/>');
     expect(plist).toContain('app.clarify.no/*');
     expect(plist).toContain('idp.feide.no/*');
@@ -140,5 +143,30 @@ describe('Slutt-til-slutt simulering av hele prøveløpet', () => {
     expect(result.layer1).toBe(true);
     expect(result.layer2.ok).toBe(true);
     console.log('4. Fane 2 kontroll: Verdict VERIFIED-UNSIGNED (offline), SHA-256 matcher, innlimingsvarsel registrert!');
+  });
+
+  it('Scenario 3: Innebygd stavekontroll for alle 7 språk (nb-NO, nn-NO, en-GB, en-US, de-DE, es-ES, fr-FR)', async () => {
+    const samples = {
+      'nb-NO': { valid: 'skolen', invalid: 'skolne', expectSug: 'skolen' },
+      'nn-NO': { valid: 'skulen', invalid: 'skulne', expectSug: 'skulen' },
+      'en-GB': { valid: 'colour', invalid: 'coluor', expectSug: 'colour' },
+      'en-US': { valid: 'walked', invalid: 'walkd', expectSug: 'walked' },
+      'de-DE': { valid: 'gemacht', invalid: 'gemahct', expectSug: 'gemacht' },
+      'es-ES': { valid: 'hablar', invalid: 'hablra', expectSug: 'hablar' },
+      'fr-FR': { valid: 'parler', invalid: 'parlre', expectSug: 'parler' }
+    };
+
+    for (const locale of BROWSER_SPELLCHECK_LOCALES) {
+      const zipBuf = readFileSync(`public/dictionaries/${locale}.zip`);
+      const ab = zipBuf.buffer.slice(zipBuf.byteOffset, zipBuf.byteOffset + zipBuf.byteLength);
+      const rawDic = await extractDicFromZipBuffer(ab);
+      expect(rawDic.length).toBeGreaterThan(10000);
+      const checker = buildChecker(rawDic, locale);
+      const { valid, invalid, expectSug } = samples[locale];
+      expect(checker.isValidWord(valid)).toBe(true);
+      expect(checker.isValidWord(invalid)).toBe(false);
+      const suggestions = checker.suggestWords(invalid, 5);
+      expect(suggestions).toContain(expectSug);
+    }
   });
 });

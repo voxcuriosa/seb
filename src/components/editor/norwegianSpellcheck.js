@@ -10,7 +10,7 @@ import { Decoration, DecorationSet } from '@tiptap/pm/view';
 
 export const spellcheckPluginKey = new PluginKey('norwegianSpellcheck');
 
-const WORD_RE = /[A-Za-zÆØÅæøåÉéÈèÊêÓóÒòÔôÄäÖöÜü]+(?:-[A-Za-zÆØÅæøåÉéÈèÊêÓóÒòÔôÄäÖöÜü]+)*/g;
+const WORD_RE = /[A-Za-zÆØÅæøåÉéÈèÊêËëÓóÒòÔôÖöÄäÜüßÁáÀàÂâÍíÌìÎîÏïÚúÙùÛûÑñÇçŒœ]+(?:['’-][A-Za-zÆØÅæøåÉéÈèÊêËëÓóÒòÔôÖöÄäÜüßÁáÀàÂâÍíÌìÎîÏïÚúÙùÛûÑñÇçŒœ]+)*/g;
 
 function computeDecorations(doc, state) {
   if (!state?.checker) return DecorationSet.empty;

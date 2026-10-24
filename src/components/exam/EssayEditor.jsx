@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent, useEditorState } from '@tiptap/react';
-import { Languages, Check, EyeOff } from 'lucide-react';
+import { Languages, Check, EyeOff, Volume2 } from 'lucide-react';
 import EditorToolbar from '../editor/EditorToolbar';
 import { buildExtensions } from '../editor/editorExtensions';
 import { spellcheckPluginKey } from '../editor/norwegianSpellcheck';
@@ -8,14 +8,38 @@ import { SPELLCHECK_LANGUAGES, loadBrowserSpellchecker } from '../../utils/seb/s
 import { countWords } from '../../utils/integrity/textNormalize';
 import { LARGE_PASTE_THRESHOLD } from '../../config';
 
+function copyTextToSystemClipboard(text) {
+  const clean = String(text || '').trim();
+  if (!clean) return false;
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(clean).catch(() => {});
+  }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = clean;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '-9999px';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  } catch {
+    // Ignorer hvis execCommand er blokkert
+  }
+  return true;
+}
+
 /**
  * Elevens skrivefelt (Tiptap). Innliming limer bare inn ren tekst, og store
  * innliminger registreres lokalt i loggen (pasteIncidents).
  */
-export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, onLargePaste, onReady }) {
+export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, onLargePaste, onReady, hasReadingApp = false }) {
   const editorRef = useRef(null);
   const checkerRef = useRef(null);
   const [spellMenu, setSpellMenu] = useState(null);
+  const [copiedNotice, setCopiedNotice] = useState(false);
 
   const editor = useEditor({
     extensions: buildExtensions({ placeholder: 'Skriv besvarelsen din her...', enableSpellcheck: true }),
@@ -114,6 +138,22 @@ export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, 
     }
   });
 
+  const sendSelectionToReadingApp = () => {
+    let selected = '';
+    if (typeof window !== 'undefined' && window.getSelection) {
+      selected = String(window.getSelection()?.toString() || '').trim();
+    }
+    if (!selected && editor) {
+      const { from, to } = editor.state.selection;
+      selected = editor.state.doc.textBetween(from, to, ' ').trim();
+      if (!selected) selected = editor.getText({ blockSeparator: '\n' }).trim();
+    }
+    if (copyTextToSystemClipboard(selected)) {
+      setCopiedNotice(true);
+      setTimeout(() => setCopiedNotice(false), 2200);
+    }
+  };
+
   return (
     <div className="essay-editor h-full flex flex-col bg-white min-h-0 relative">
       <EditorToolbar editor={editor}>
@@ -130,6 +170,25 @@ export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, 
             {SPELLCHECK_LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
           </select>
         </label>
+        {hasReadingApp && (
+          <>
+            <span className="w-px h-6 bg-slate-700 mx-1" aria-hidden="true" />
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={sendSelectionToReadingApp}
+              title="Sender markert tekst (eller hele besvarelsen) til Lingdys for opplesing med naturlig stemme. Husk å slå på «Les når tekst markeres» under Innstillinger -> Tale i Lingdys."
+              className={`h-8 px-2.5 rounded-lg flex items-center gap-1.5 text-xs font-bold transition-colors ${
+                copiedNotice
+                  ? 'bg-emerald-500 text-slate-950'
+                  : 'bg-slate-800 text-emerald-300 hover:bg-slate-700 hover:text-white border border-slate-700'
+              }`}
+            >
+              <Volume2 size={14} aria-hidden="true" />
+              <span>{copiedNotice ? 'Sendt til Lingdys' : 'Les i Lingdys'}</span>
+            </button>
+          </>
+        )}
         <span className="ml-auto pr-2 text-xs text-slate-300 tabular-nums" aria-live="polite" title="Løpende antall ord og tegn (uten linjeskift)">
           {counts?.words ?? 0} ord, {counts?.chars ?? 0} tegn
         </span>
