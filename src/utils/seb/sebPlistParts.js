@@ -96,6 +96,28 @@ export const BASE_ALLOWED_EXPRESSIONS = [
   'gstatic.com/*'
 ];
 
+/**
+ * Microsoft 365, Teams og Feide-autentisering for Forms-prøver i norsk skole.
+ * Tillater at elevene logger på skolekontoen sin i SEB uten at resten av internett åpnes.
+ */
+export const FORMS_AUTH_EXPRESSIONS = [
+  'forms.office.com/*',
+  '*.forms.office.com/*',
+  'forms.microsoft.com/*',
+  '*.forms.microsoft.com/*',
+  'login.microsoftonline.com/*',
+  '*.login.microsoftonline.com/*',
+  'login.live.com/*',
+  '*.login.live.com/*',
+  'aadcdn.msauth.net/*',
+  '*.aadcdn.msauth.net/*',
+  '*.msftauth.net/*',
+  '*.msauthimages.net/*',
+  'account.activedirectory.windowsazure.com/*',
+  '*.feide.no/*',
+  'idp.feide.no/*'
+];
+
 function filterRule(expression) {
   return `    <dict>
       <key>action</key>
@@ -111,11 +133,21 @@ function filterRule(expression) {
 
 export function collectAllowedExpressions(allowedWebsites = []) {
   const expressions = [...BASE_ALLOWED_EXPRESSIONS];
+  let hasForms = false;
+
   for (const site of allowedWebsites || []) {
     const dom = cleanDomainFromUrl(site?.domain || site?.url);
     if (!dom) continue;
     expressions.push(`${dom}/*`, `*.${dom}/*`);
+    if (dom.includes('forms.office.com') || dom.includes('forms.microsoft.com') || dom.includes('office.com')) {
+      hasForms = true;
+    }
   }
+
+  if (hasForms) {
+    expressions.push(...FORMS_AUTH_EXPRESSIONS);
+  }
+
   return [...new Set(expressions)];
 }
 
@@ -138,18 +170,24 @@ export function buildAdditionalResourcesXml(allowedWebsites = []) {
       <true/>
       <key>autoOpen</key>
       <false/>
+      <key>confirmResourceClose</key>
+      <false/>
       <key>identifier</key>
-      <string>res_${idx + 1}</string>
-      <key>iconInTaskbar</key>
-      <true/>
-      <key>showInTaskbar</key>
+      <string>resource_${idx + 1}</string>
+      <key>policy</key>
+      <integer>0</integer>
+      <key>resetBrowsingSessionOnClose</key>
+      <false/>
+      <key>showButton</key>
       <true/>
       <key>title</key>
       <string>${escapeXml(site.title || site.domain || 'Kilde')}</string>
       <key>url</key>
       <string>${escapeXml(site.url)}</string>
-      <key>resourceType</key>
-      <integer>0</integer>
-    </dict>`).join('\n');
-  return `  <key>additionalResources</key>\n  <array>\n${items}\n  </array>`;
+    </dict>`);
+
+  return `  <key>additionalResources</key>
+  <array>
+${items.join('\n')}
+  </array>`;
 }

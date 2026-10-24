@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PenLine, FileText, FileType2, Loader2, X } from 'lucide-react';
+import { PenLine, FileText, FileType2, FileSpreadsheet, Loader2, X, ExternalLink } from 'lucide-react';
 import SimplePromptEditor from './SimplePromptEditor';
 import { sanitizeHtml } from '../../utils/sanitize';
 import { isPdfFile, formatBytes } from '../../utils/files';
@@ -8,11 +8,20 @@ import { MAX_PROMPT_PDF_BYTES } from '../../config';
 const SOURCES = [
   { id: 'text', label: 'Skriv / lim inn', icon: PenLine },
   { id: 'docx', label: 'Word-fil (.docx)', icon: FileText },
-  { id: 'pdf', label: 'PDF-fil', icon: FileType2 }
+  { id: 'pdf', label: 'PDF-fil', icon: FileType2 },
+  { id: 'forms', label: 'Microsoft Forms', icon: FileSpreadsheet }
 ];
 
-/** Steg 1: oppgavetekst. Word konverteres lokalt med mammoth, PDF lagres med prøven. */
-export default function PromptSourcePicker({ sourceType, setSourceType, promptHtml, setPromptHtml, pdfFile, setPdfFile }) {
+export default function PromptSourcePicker({
+  sourceType,
+  setSourceType,
+  promptHtml,
+  setPromptHtml,
+  pdfFile,
+  setPdfFile,
+  formsUrl,
+  setFormsUrl
+}) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [docxName, setDocxName] = useState('');
@@ -43,7 +52,7 @@ export default function PromptSourcePicker({ sourceType, setSourceType, promptHt
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Kilde for oppgavetekst">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" role="radiogroup" aria-label="Kilde for oppgavetekst">
         {SOURCES.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -60,6 +69,31 @@ export default function PromptSourcePicker({ sourceType, setSourceType, promptHt
           </button>
         ))}
       </div>
+
+      {sourceType === 'forms' && (
+        <div className="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/50 space-y-3">
+          <label className="block space-y-1.5">
+            <span className="text-xs font-black uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+              <FileSpreadsheet size={15} /> Lenke til Microsoft Forms-prøve
+            </span>
+            <input
+              type="url"
+              value={formsUrl || ''}
+              onChange={(e) => setFormsUrl?.(e.target.value)}
+              placeholder="https://forms.office.com/r/... eller https://forms.office.com/Pages/ResponsePage.aspx?..."
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 font-mono"
+            />
+          </label>
+          <div className="text-xs text-slate-300 space-y-1">
+            <p>
+              <strong>SEB åpner skjemaet direkte for eleven:</strong> Safe Exam Browser klargjøres automatisk med full støtte for Microsoft 365, Teams og Feide-innlogging.
+            </p>
+            <p className="text-emerald-200">
+              Elevene sender inn svarene direkte i Forms. Ingen PDF trengs! Elevene får en egen knapp for å avslutte SEB etter innlevering.
+            </p>
+          </div>
+        </div>
+      )}
 
       {sourceType === 'docx' && (
         <label className="flex items-center justify-between gap-3 p-4 rounded-2xl border-2 border-dashed border-slate-700 bg-slate-950 cursor-pointer hover:border-emerald-600">
@@ -96,7 +130,9 @@ export default function PromptSourcePicker({ sourceType, setSourceType, promptHt
 
       {error && <p className="text-sm font-bold text-red-300" role="alert">{error}</p>}
 
-      <SimplePromptEditor value={promptHtml} onChange={setPromptHtml} />
+      {sourceType !== 'forms' && (
+        <SimplePromptEditor value={promptHtml} onChange={setPromptHtml} />
+      )}
     </div>
   );
 }

@@ -69,6 +69,7 @@ export const createSebExam = onCall(
       createdAt: FieldValue.serverTimestamp(),
       expiresAt,
       sourceType: clean.sourceType,
+      formsUrl: clean.formsUrl || null,
       promptHtml: clean.promptHtml,
       pdfPath,
       sebConfig: clean.sebConfig,

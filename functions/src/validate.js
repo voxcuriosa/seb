@@ -14,7 +14,7 @@ export const LIMITS = {
 };
 
 export const ALLOWED_APP_IDS = ['voxlex', 'ordnett', 'lingdys'];
-const SOURCE_TYPES = ['text', 'docx', 'pdf'];
+const SOURCE_TYPES = ['text', 'docx', 'pdf', 'forms'];
 const DOMAIN_RE = /^(?=.{3,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
 
 export class ValidationError extends Error {}
@@ -101,6 +101,11 @@ export function validateExamInput(data) {
     pdfBuffer = Buffer.from(data.pdfBase64, 'base64');
     if (pdfBuffer.length > LIMITS.pdfMaxBytes) fail('PDF-en er større enn 8 MB.');
     if (pdfBuffer.subarray(0, 5).toString('latin1') !== '%PDF-') fail('Filen er ikke en gyldig PDF.');
+  } else if (sourceType === 'forms') {
+    const formsUrl = String(data.formsUrl || '').trim();
+    if (!formsUrl || (!formsUrl.startsWith('https://forms.office.com') && !formsUrl.startsWith('https://forms.microsoft.com'))) {
+      fail('Ugyldig Microsoft Forms-lenke.');
+    }
   } else if (!promptHtml.replace(/<[^>]*>/g, '').trim()) {
     fail('Oppgaveteksten er tom.');
   }
@@ -109,14 +114,29 @@ export function validateExamInput(data) {
   const quitPasswordHash = String(cfg.quitPasswordHash || '').toLowerCase();
   if (quitPasswordHash && !/^[a-f0-9]{64}$/.test(quitPasswordHash)) fail('Ugyldig passord-hash.');
 
+  // Hvis forms, sørg for at forms.office.com ligger i allowedWebsites
+  let allowedWebsites = validateWebsites(cfg.allowedWebsites);
+  if (sourceType === 'forms') {
+    const hasForms = allowedWebsites.some((w) => w.domain === 'forms.office.com');
+    if (!hasForms) {
+      allowedWebsites.unshift({
+        id: 'web_forms_main',
+        title: 'Microsoft Forms',
+        url: String(data.formsUrl || '').trim(),
+        domain: 'forms.office.com'
+      });
+    }
+  }
+
   return {
     title,
     sourceType,
     promptHtml,
     pdfBuffer,
+    formsUrl: sourceType === 'forms' ? String(data.formsUrl || '').trim() : null,
     sebConfig: {
       allowedApps: validateApps(cfg.allowedApps),
-      allowedWebsites: validateWebsites(cfg.allowedWebsites),
+      allowedWebsites,
       quitPasswordHash
     }
   };

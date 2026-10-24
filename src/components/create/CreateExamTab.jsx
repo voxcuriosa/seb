@@ -24,7 +24,7 @@ function Step({ n, title, children }) {
   );
 }
 
-const EMPTY = { title: '', sourceType: 'text', promptHtml: '', pdfFile: null, quitPassword: '' };
+const EMPTY = { title: '', sourceType: 'text', promptHtml: '', pdfFile: null, formsUrl: '', quitPassword: '' };
 
 /** Fane 1: Opprett SEB-prøve (basert på voxkunnskap SebConfigModal). */
 export default function CreateExamTab() {
@@ -42,7 +42,12 @@ export default function CreateExamTab() {
   const validationError = () => {
     if (!form.title.trim()) return 'Gi prøven en tittel.';
     if (form.sourceType === 'pdf' && !form.pdfFile) return 'Velg en oppgave-PDF.';
-    if (form.sourceType !== 'pdf' && !htmlToPlainText(form.promptHtml)) return 'Oppgaveteksten er tom.';
+    if (form.sourceType === 'forms' && (!form.formsUrl.trim() || !form.formsUrl.startsWith('https://forms.'))) {
+      return 'Lim inn en gyldig Microsoft Forms-lenke (f.eks. https://forms.office.com/r/...).';
+    }
+    if (form.sourceType !== 'pdf' && form.sourceType !== 'forms' && !htmlToPlainText(form.promptHtml)) {
+      return 'Oppgaveteksten er tom.';
+    }
     return '';
   };
 
@@ -93,6 +98,7 @@ export default function CreateExamTab() {
                 sourceType={form.sourceType} setSourceType={set('sourceType')}
                 promptHtml={form.promptHtml} setPromptHtml={set('promptHtml')}
                 pdfFile={form.pdfFile} setPdfFile={set('pdfFile')}
+                formsUrl={form.formsUrl} setFormsUrl={set('formsUrl')}
               />
               <p className="text-xs text-slate-400">Alt behandles lokalt i nettleseren. Ingen KI brukes.</p>
             </Step>

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { AlertTriangle } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { AlertTriangle, ExternalLink, FileSpreadsheet } from 'lucide-react';
 import { fetchSebExam } from '../firebase';
 import { markAsSebEnvironment } from '../utils/seb/sebEnvironment';
-import { loadDraft } from '../utils/exam/localStore';
+import { loadDraft, clearDraft } from '../utils/exam/localStore';
 import { downloadBackupTxt } from '../utils/exam/backupTxt';
 import { docToPlainText } from '../utils/exam/essayDocModel';
 import { countWords } from '../utils/integrity/textNormalize';
@@ -15,6 +15,7 @@ import PromptPanel from '../components/exam/PromptPanel';
 import EssayEditor from '../components/exam/EssayEditor';
 import RestoreBanner from '../components/exam/RestoreBanner';
 import FinishDialog from '../components/exam/FinishDialog';
+import FormsExitDialog from '../components/exam/FormsExitDialog';
 import LoadingScreen from '../components/common/LoadingScreen';
 
 const LAYOUT_CLASSES = {
@@ -23,9 +24,9 @@ const LAYOUT_CLASSES = {
   focus: 'grid-cols-1 grid-rows-1'
 };
 
-/** Selve prøverommet inne i Safe Exam Browser. Elevens tekst forlater aldri maskinen. */
 export default function SebExamRoom() {
   const { examId } = useParams();
+  const navigate = useNavigate();
   const [exam, setExam] = useState(null);
   const [status, setStatus] = useState('loading');
   const [initialDraft, setInitialDraft] = useState(null);
@@ -33,6 +34,7 @@ export default function SebExamRoom() {
   const [lang, setLang] = useState('nb-NO');
   const [restored, setRestored] = useState(null);
   const [finishOpen, setFinishOpen] = useState(false);
+  const [formsExitOpen, setFormsExitOpen] = useState(false);
   const editorRef = useRef(null);
   const startedAtRef = useRef(null);
 
@@ -57,35 +59,31 @@ export default function SebExamRoom() {
     };
   }, [examId]);
 
+  const isFormsExam = exam?.sourceType === 'forms' || Boolean(exam?.formsUrl) || exam?.sebConfig?.allowedWebsites?.some((w) => w.domain === 'forms.office.com');
+  const formsUrl = exam?.formsUrl || exam?.sebConfig?.allowedWebsites?.find((w) => w.domain === 'forms.office.com')?.url || 'https://forms.office.com';
+
   const log = useExamIntegrityLog({
     initialActiveSeconds: 0,
     initialIncidents: [],
-    enabled: status === 'ready'
+    enabled: status === 'ready' && !isFormsExam
   });
   const { reset: resetLog, addIncident } = log;
 
-  // Gjenopprett aktiv tid og logg fra lokalt utkast, og noter gjenopprettingen.
   useEffect(() => {
-    if (status !== 'ready') return;
+    if (status !== 'ready' || isFormsExam) return;
     resetLog(Number(initialDraft?.activeSeconds) || 0, Array.isArray(initialDraft?.incidents) ? initialDraft.incidents : []);
-    if (restored) addIncident('RESTORED', 'Prøven ble åpnet på nytt og teksten gjenopprettet');
-  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [status, initialDraft, resetLog, isFormsExam]);
 
-  const incidentsRef = useRef([]);
-  useEffect(() => {
-    incidentsRef.current = log.incidents;
-  }, [log.incidents]);
+  const incidentsRef = useRef(log.incidents);
+  incidentsRef.current = log.incidents;
 
   const getDraft = useCallback(() => {
-    const ed = editorRef.current;
-    if (!ed || status !== 'ready') return null;
+    if (status !== 'ready') return null;
     return {
-      doc: ed.getJSON(),
-      html: ed.getHTML(),
-      text: ed.getText({ blockSeparator: '\n' }),
-      startedAt: startedAtRef.current,
+      doc: editorRef.current?.getJSON() || null,
       activeSeconds: log.getActiveSeconds(),
       incidents: incidentsRef.current,
+      startedAt: startedAtRef.current,
       lang,
       layout
     };
@@ -94,8 +92,8 @@ export default function SebExamRoom() {
   const autosave = useExamAutosave(examId, getDraft);
   const { schedule } = autosave;
   useEffect(() => {
-    if (status === 'ready') schedule();
-  }, [lang, layout, log.incidents, status, schedule]);
+    if (status === 'ready' && !isFormsExam) schedule();
+  }, [lang, layout, log.incidents, status, schedule, isFormsExam]);
 
   const finisher = useFinishExam({
     exam,
@@ -109,6 +107,11 @@ export default function SebExamRoom() {
   const onEditorReady = useCallback((ed) => {
     editorRef.current = ed;
   }, []);
+
+  const handleFormsExitConfirm = async () => {
+    await clearDraft(examId);
+    navigate('/quit', { replace: true });
+  };
 
   if (status === 'loading') return <LoadingScreen label="Laster prøven..." />;
   if (status === 'missing') {
@@ -136,26 +139,41 @@ export default function SebExamRoom() {
         onBackup={() => downloadBackupTxt({ examTitle: exam.title, text: docToPlainText(editorRef.current?.getJSON()) })}
         onFinish={() => setFinishOpen(true)}
         finishing={finisher.phase === 'signing' || finisher.phase === 'rendering'}
+        isForms={isFormsExam}
+        onFormsExit={() => setFormsExitOpen(true)}
       />
-      {restored && <RestoreBanner savedAt={restored.savedAt} wordCount={restored.wordCount} onClose={() => setRestored(null)} />}
+      {restored && !isFormsExam && (
+        <RestoreBanner savedAt={restored.savedAt} wordCount={restored.wordCount} onClose={() => setRestored(null)} />
+      )}
 
-      <div className={`flex-1 min-h-0 grid ${LAYOUT_CLASSES[layout]}`}>
-        {layout !== 'focus' && (
-          <section aria-label="Oppgave" className={`min-h-0 overflow-hidden ${layout === 'split' ? 'md:border-r' : 'border-b'} border-slate-800`}>
-            <PromptPanel exam={exam} />
-          </section>
-        )}
-        <section aria-label="Besvarelse" className="min-h-0 overflow-hidden">
-          <EssayEditor
-            initialDoc={initialDraft?.doc}
-            lang={lang}
-            onLangChange={setLang}
-            onChange={schedule}
-            onLargePaste={(len) => addIncident('PASTE', `${len} tegn limt inn`)}
-            onReady={onEditorReady}
+      {isFormsExam ? (
+        <div className="flex-1 min-h-0 relative bg-slate-900 flex flex-col">
+          <iframe
+            src={formsUrl}
+            title={exam.title}
+            className="w-full flex-1 border-0 bg-white"
+            allow="clipboard-read; clipboard-write; fullscreen"
           />
-        </section>
-      </div>
+        </div>
+      ) : (
+        <div className={`flex-1 min-h-0 grid ${LAYOUT_CLASSES[layout]}`}>
+          {layout !== 'focus' && (
+            <section aria-label="Oppgave" className={`min-h-0 overflow-hidden ${layout === 'split' ? 'md:border-r' : 'border-b'} border-slate-800`}>
+              <PromptPanel exam={exam} />
+            </section>
+          )}
+          <section aria-label="Besvarelse" className="min-h-0 overflow-hidden">
+            <EssayEditor
+              initialDoc={initialDraft?.doc}
+              lang={lang}
+              onLangChange={setLang}
+              onChange={schedule}
+              onLargePaste={(len) => addIncident('PASTE', `${len} tegn limt inn`)}
+              onReady={onEditorReady}
+            />
+          </section>
+        </div>
+      )}
 
       <FinishDialog
         open={finishOpen}
@@ -166,6 +184,12 @@ export default function SebExamRoom() {
         onCancel={() => setFinishOpen(false)}
         onDownloadAgain={finisher.downloadAgain}
         onExitSeb={finisher.exitSeb}
+      />
+
+      <FormsExitDialog
+        open={formsExitOpen}
+        onConfirm={handleFormsExitConfirm}
+        onCancel={() => setFormsExitOpen(false)}
       />
     </div>
   );
