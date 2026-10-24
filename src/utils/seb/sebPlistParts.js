@@ -73,9 +73,44 @@ export function buildPermittedProcessesXml(allowedApps = {}) {
       parts.push(...APP_PROCESSES[appId].map(processDict));
     }
   }
-  return parts.length > 0
+  const permittedXml = parts.length > 0
     ? `  <key>permittedProcesses</key>\n  <array>\n${parts.join('\n')}\n  </array>`
     : '  <key>permittedProcesses</key>\n  <array/>';
+
+  if (allowedApps?.voxlex) {
+    // VoxLex på macOS er bygget med Tauri v2 (WKWebView) og kommuniserer lokalt mellom
+    // brukergrensesnitt og Rust-bakgrunnsprosess via WKURLSchemeHandler (ipc://localhost),
+    // som macOS ruter gjennom XPC-hjelpeprosessen com.apple.WebKit.Networking.
+    // SEB 3.6+ har com.apple.WebKit.Networking i sin standardliste over forbudte prosesser
+    // på macOS. Ved å sette active=false for denne hjelpeprosessen når VoxLex er tillatt,
+    // lar SEB hjelpeprosessen leve slik at knapper og oppslag i VoxLex fungerer under prøven.
+    return `${permittedXml}
+  <key>prohibitedProcesses</key>
+  <array>
+    <dict>
+      <key>active</key>
+      <false/>
+      <key>currentUser</key>
+      <true/>
+      <key>description</key>
+      <string></string>
+      <key>executable</key>
+      <string>com.apple.WebKit.Networking</string>
+      <key>identifier</key>
+      <string>com.apple.WebKit.Networking</string>
+      <key>ignoreInAAC</key>
+      <true/>
+      <key>os</key>
+      <integer>0</integer>
+      <key>strongKill</key>
+      <false/>
+      <key>title</key>
+      <string>Safari/WebKit Networking</string>
+    </dict>
+  </array>`;
+  }
+
+  return permittedXml;
 }
 
 /** Faste domener prøverommet trenger (app, Firebase, CDN for pdf.js-worker, samt data:/about: for lokal PDF-eksport). */

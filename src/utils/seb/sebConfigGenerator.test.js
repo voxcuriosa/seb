@@ -53,6 +53,8 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toContain('no.voxlex.skole');
     expect(xml).toContain('%LOCALAPPDATA%\\VoxLex');
     expect(xml).toContain('voxlex.exe');
+    expect(xml).toContain('com.apple.WebKit.Networking');
+    expect(xml).toContain('<key>prohibitedProcesses</key>');
     expect(xml).toContain('no.lingit.lingdys');
     expect(xml).not.toContain('OrdnettPluss.exe');
     expect(xml).toContain('<key>URLFilterEnable</key>');
