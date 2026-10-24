@@ -43,3 +43,11 @@ export function formatDuration(totalSeconds = 0) {
   if (m > 0) return `${m} min`;
   return `${s} s`;
 }
+
+export function formatStopwatch(totalSeconds = 0) {
+  const s = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return h > 0 ? `${pad(h)}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
+}

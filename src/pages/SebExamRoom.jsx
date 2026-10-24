@@ -34,6 +34,7 @@ export default function SebExamRoom() {
   const [finishOpen, setFinishOpen] = useState(false);
   const [formsExitOpen, setFormsExitOpen] = useState(false);
   const [wordCount, setWordCount] = useState(0);
+  const [startedAt, setStartedAt] = useState(null);
   const editorRef = useRef(null);
   const startedAtRef = useRef(null);
   const splitContainerRef = useRef(null);
@@ -44,7 +45,9 @@ export default function SebExamRoom() {
     Promise.all([fetchSebExam(examId).catch(() => null), loadDraft(examId).catch(() => null)]).then(([data, draft]) => {
       if (cancelled) return;
       if (!data) return setStatus('missing');
-      startedAtRef.current = draft?.startedAt || new Date().toISOString();
+      const initialStart = draft?.startedAt || new Date().toISOString();
+      startedAtRef.current = initialStart;
+      setStartedAt(initialStart);
       setExam(data);
       setInitialDraft(draft);
       if (draft?.lang) setLang(draft.lang);
@@ -171,6 +174,7 @@ export default function SebExamRoom() {
     <div className="h-screen flex flex-col bg-slate-950 overflow-hidden">
       <ExamTopBar
         title={exam.title}
+        startedAt={startedAt}
         layout={layout}
         setLayout={setLayout}
         websites={exam.sebConfig?.allowedWebsites || []}

@@ -1,5 +1,6 @@
-import { Columns2, Rows2, Maximize2, Save, FileDown, CheckCircle2, ExternalLink, AlertTriangle, LogOut, FileSpreadsheet } from 'lucide-react';
-import { formatClock } from '../../utils/exam/formatTime';
+import { useEffect, useState } from 'react';
+import { Columns2, Rows2, Maximize2, Save, FileDown, CheckCircle2, ExternalLink, AlertTriangle, LogOut, FileSpreadsheet, Clock } from 'lucide-react';
+import { formatClock, formatStopwatch } from '../../utils/exam/formatTime';
 
 const LAYOUTS = [
   { id: 'split', label: 'Side ved side', icon: Columns2 },
@@ -9,6 +10,7 @@ const LAYOUTS = [
 
 export default function ExamTopBar({
   title,
+  startedAt,
   layout,
   setLayout,
   websites,
@@ -20,11 +22,31 @@ export default function ExamTopBar({
   isForms = false,
   onFormsExit
 }) {
+  const [elapsedSec, setElapsedSec] = useState(0);
+
+  useEffect(() => {
+    const startMs = startedAt ? new Date(startedAt).getTime() : Date.now();
+    const safeStart = Number.isFinite(startMs) ? startMs : Date.now();
+    const tick = () => setElapsedSec(Math.max(0, Math.floor((Date.now() - safeStart) / 1000)));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [startedAt]);
+
   return (
     <header className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2 bg-slate-950 border-b border-slate-800 text-slate-100">
       <div className="flex items-center gap-2 max-w-[18rem]">
         {isForms && <FileSpreadsheet size={16} className="text-emerald-400 shrink-0" aria-hidden="true" />}
         <h1 className="text-sm font-black truncate" title={title}>{title}</h1>
+      </div>
+
+      <div
+        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-medium text-slate-300 tabular-nums"
+        title="Tid brukt siden prøven ble åpnet"
+        aria-label="Medgått prøvetid"
+      >
+        <Clock size={12} className="text-emerald-400 shrink-0" aria-hidden="true" />
+        <span>{formatStopwatch(elapsedSec)}</span>
       </div>
 
       {!isForms && (
