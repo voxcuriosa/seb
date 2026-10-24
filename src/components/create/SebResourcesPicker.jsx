@@ -26,10 +26,23 @@ function CheckTile({ selected, onClick, title, subtitle }) {
 }
 
 /** Steg 2: hjelpemidler og nettsider (gjenbrukt fra voxkunnskap SebConfigModal). */
-export default function SebResourcesPicker({ allowedApps, setAllowedApps, websites, setWebsites }) {
-  const [customTitle, setCustomTitle] = useState('');
-  const [customUrl, setCustomUrl] = useState('');
+export default function SebResourcesPicker({
+  allowedApps,
+  setAllowedApps,
+  websites,
+  setWebsites,
+  pendingCustom,
+  setPendingCustom
+}) {
+  const [localCustom, setLocalCustom] = useState({ title: '', url: '' });
   const [customError, setCustomError] = useState('');
+
+  const custom = pendingCustom ?? localCustom;
+  const updateCustom = setPendingCustom ?? setLocalCustom;
+  const customTitle = custom.title;
+  const customUrl = custom.url;
+  const setCustomTitle = (title) => updateCustom((prev) => ({ ...prev, title }));
+  const setCustomUrl = (url) => updateCustom((prev) => ({ ...prev, url }));
 
   const toggleApp = (id) => setAllowedApps((prev) => ({ ...prev, [id]: !prev[id] }));
   const isPresetSelected = (p) => websites.some((w) => w.id === p.id || cleanDomainFromUrl(w.url) === p.domain);
@@ -47,11 +60,13 @@ export default function SebResourcesPicker({ allowedApps, setAllowedApps, websit
     const url = normalizeWebsiteUrl(customUrl);
     const domain = cleanDomainFromUrl(url);
     if (!isValidDomain(domain)) return setCustomError('Oppgi en gyldig nettadresse (f.eks. regjeringen.no).');
-    if (websites.some((w) => cleanDomainFromUrl(w.url) === domain)) return setCustomError('Denne nettsiden er allerede lagt til.');
+    if (websites.some((w) => cleanDomainFromUrl(w.url) === domain)) {
+      updateCustom({ title: '', url: '' });
+      return setCustomError('Denne nettsiden er allerede lagt til.');
+    }
     if (websites.length >= 20) return setCustomError('Maks 20 nettsider.');
     setWebsites((prev) => [...prev, { id: `custom_${Date.now()}`, title: customTitle.trim() || domain, url, domain }]);
-    setCustomTitle('');
-    setCustomUrl('');
+    updateCustom({ title: '', url: '' });
   };
 
   const customSites = websites.filter((w) => !PRESET_SEB_WEBSITES.some((p) => p.id === w.id));
@@ -89,7 +104,14 @@ export default function SebResourcesPicker({ allowedApps, setAllowedApps, websit
             className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
           <input value={customUrl} onChange={(e) => setCustomUrl(e.target.value)} placeholder="Nettadresse (f.eks. regjeringen.no)" aria-label="Nettadresse"
             className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
-          <button type="submit" className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-black uppercase flex items-center justify-center gap-1.5">
+          <button
+            type="submit"
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase flex items-center justify-center gap-1.5 transition-colors ${
+              customUrl.trim()
+                ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
+                : 'bg-slate-800 hover:bg-slate-700 text-white'
+            }`}
+          >
             <Plus size={14} aria-hidden="true" /> Legg til
           </button>
         </form>

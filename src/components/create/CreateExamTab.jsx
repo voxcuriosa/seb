@@ -9,7 +9,7 @@ import MyExamsList from './MyExamsList';
 import QuickStepsGuide from './QuickStepsGuide';
 import { useCreateSebExam } from '../../hooks/useCreateSebExam';
 import { useMyExams } from '../../hooks/useMyExams';
-import { DEFAULT_SEB_APPS } from '../../utils/seb/sebPresets';
+import { DEFAULT_SEB_APPS, cleanDomainFromUrl, normalizeWebsiteUrl, isValidDomain } from '../../utils/seb/sebPresets';
 import { htmlToPlainText } from '../../utils/sanitize';
 
 function Step({ n, title, children }) {
@@ -33,6 +33,7 @@ export default function CreateExamTab() {
   const [form, setForm] = useState(EMPTY);
   const [allowedApps, setAllowedApps] = useState(DEFAULT_SEB_APPS);
   const [websites, setWebsites] = useState([]);
+  const [pendingCustom, setPendingCustom] = useState({ title: '', url: '' });
   const [result, setResult] = useState(null);
 
   const set = (key) => (value) => setForm((f) => ({ ...f, [key]: typeof value === 'function' ? value(f[key]) : value }));
@@ -63,7 +64,29 @@ export default function CreateExamTab() {
   const submit = async () => {
     const msg = validationError();
     if (msg) return setError(msg);
-    const res = await createExam({ ...form, allowedApps, allowedWebsites: websites });
+
+    // Hvis læreren har skrevet inn en nettadresse under «Legg til egne nettsider»
+    // uten å trykke på «+ Legg til» først, tar vi den automatisk med så den aldri går tapt.
+    let finalWebsites = [...websites];
+    if (pendingCustom.url.trim()) {
+      const url = normalizeWebsiteUrl(pendingCustom.url);
+      const domain = cleanDomainFromUrl(url);
+      if (!isValidDomain(domain)) {
+        return setError('Nettadressen i feltet «Legg til egne nettsider» er ikke gyldig (f.eks. regjeringen.no). Rettet opp eller tøm feltet.');
+      }
+      if (!finalWebsites.some((w) => cleanDomainFromUrl(w.url) === domain) && finalWebsites.length < 20) {
+        finalWebsites.push({
+          id: `custom_${Date.now()}`,
+          title: pendingCustom.title.trim() || domain,
+          url,
+          domain
+        });
+      }
+      setWebsites(finalWebsites);
+      setPendingCustom({ title: '', url: '' });
+    }
+
+    const res = await createExam({ ...form, allowedApps, allowedWebsites: finalWebsites });
     if (!res) return;
     const entry = {
       examId: res.examId,
@@ -75,7 +98,7 @@ export default function CreateExamTab() {
       sebFileArgs: {
         examId: res.examId,
         title: form.title.trim(),
-        allowedWebsites: websites,
+        allowedWebsites: finalWebsites,
         allowedApps,
         quitPasswordHash: res.quitPasswordHash,
         startURL: form.sourceType === 'forms' ? form.formsUrl.trim() : undefined
@@ -90,6 +113,7 @@ export default function CreateExamTab() {
     setForm(EMPTY);
     setAllowedApps(DEFAULT_SEB_APPS);
     setWebsites([]);
+    setPendingCustom({ title: '', url: '' });
     setResult(null);
   };
 
@@ -126,7 +150,14 @@ export default function CreateExamTab() {
             </Step>
 
             <Step n={2} title="Hjelpemidler, nettsider og passord">
-              <SebResourcesPicker allowedApps={allowedApps} setAllowedApps={setAllowedApps} websites={websites} setWebsites={setWebsites} />
+              <SebResourcesPicker
+                allowedApps={allowedApps}
+                setAllowedApps={setAllowedApps}
+                websites={websites}
+                setWebsites={setWebsites}
+                pendingCustom={pendingCustom}
+                setPendingCustom={setPendingCustom}
+              />
               <QuitPasswordField value={form.quitPassword} onChange={set('quitPassword')} required={form.sourceType === 'forms'} />
             </Step>
 

@@ -5,7 +5,7 @@ import { mkdtempSync, writeFileSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { buildStandaloneSebPlist, safeFileSlug } from './sebConfigGenerator';
-import { arrayBufferToBase64 } from './sebDictionaries';
+import { arrayBufferToBase64, extractDicFromZipBuffer, buildChecker } from './sebDictionaries';
 import { sha256Hex } from '../integrity/sha256';
 
 const websites = [
@@ -91,12 +91,23 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toMatch(/<key>examSessionClearCookiesOnEnd<\/key>\s*<true\/>/);
   });
 
-  it('kan bygges med ekte norske ordbøker', () => {
+  it('kan bygges med ekte norske ordbøker og gjenkjenner feilstavede ord i nettleseren', async () => {
     const zip = readFileSync(new URL('../../../public/dictionaries/nb-NO.zip', import.meta.url));
-    const base64 = arrayBufferToBase64(zip.buffer.slice(zip.byteOffset, zip.byteOffset + zip.byteLength));
+    const ab = zip.buffer.slice(zip.byteOffset, zip.byteOffset + zip.byteLength);
+    const base64 = arrayBufferToBase64(ab);
     expect(base64.slice(0, 4)).toBe('UEsD');
     const xml = buildStandaloneSebPlist({ examId: 'x', dictionaries: [{ localeName: 'nb-NO', base64 }] });
     expect(lint(xml)).toMatch(/OK/);
+
+    const rawDic = await extractDicFromZipBuffer(ab);
+    const checker = buildChecker(rawDic);
+    expect(checker.isValidWord('hei')).toBe(true);
+    expect(checker.isValidWord('skolen')).toBe(true);
+    expect(checker.isValidWord('historieprøve')).toBe(true);
+    expect(checker.isValidWord('jhdhdjdf')).toBe(false);
+    expect(checker.isValidWord('fsdfasdfadfafasf')).toBe(false);
+    expect(checker.isValidWord('jshsdhd')).toBe(false);
+    expect(checker.suggestWords('skolne')).toContain('skolen');
   });
 });
 

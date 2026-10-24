@@ -70,3 +70,149 @@ export function buildDictionariesXml(dictionaries = []) {
     </dict>`).join('\n');
   return `${allowedXml}\n  <key>additionalDictionaries</key>\n  <array>\n${dicts}\n  </array>`;
 }
+
+const wordSetCache = new Map();
+const NO_ALPHABET = 'abcdefghijklmnopqrstuvwxyzæøå';
+const PREFIXES = ['u', 'for', 'gjen', 'hoved', 'mis', 'sam', 'etter', 'til', 'over', 'under', 'på', 'av', 'inn', 'ut', 'opp', 'ned', 'om'];
+
+export async function extractDicFromZipBuffer(buffer) {
+  const view = new DataView(buffer);
+  const bytes = new Uint8Array(buffer);
+  let off = 0;
+  while (off + 30 <= bytes.length && view.getUint32(off, true) === 0x04034b50) {
+    const method = view.getUint16(off + 8, true);
+    const compSize = view.getUint32(off + 18, true);
+    const nameLen = view.getUint16(off + 26, true);
+    const extraLen = view.getUint16(off + 28, true);
+    const name = new TextDecoder().decode(bytes.subarray(off + 30, off + 30 + nameLen));
+    const dataStart = off + 30 + nameLen + extraLen;
+    if (name.endsWith('.dic')) {
+      const slice = bytes.subarray(dataStart, dataStart + compSize);
+      if (method === 0) return new TextDecoder('utf-8').decode(slice);
+      if (method === 8 && typeof DecompressionStream !== 'undefined') {
+        const ds = new DecompressionStream('deflate-raw');
+        const writer = ds.writable.getWriter();
+        writer.write(slice);
+        writer.close();
+        const ab = await new Response(ds.readable).arrayBuffer();
+        return new TextDecoder('utf-8').decode(ab);
+      }
+    }
+    off = dataStart + compSize;
+  }
+  return '';
+}
+
+export function buildChecker(rawDic) {
+  const words = new Set();
+  const lines = rawDic.split(/\r?\n/);
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line) continue;
+    const slash = line.indexOf('/');
+    const tab = line.indexOf('\t');
+    let end = line.length;
+    if (slash !== -1 && slash < end) end = slash;
+    if (tab !== -1 && tab < end) end = tab;
+    const w = line.slice(0, end).trim();
+    if (w && w[0] !== '-') words.add(w.toLowerCase());
+  }
+
+  const isCompound = (low) => {
+    if (low.length < 7) return false;
+    for (const p of PREFIXES) {
+      if (low.startsWith(p) && low.length - p.length >= 4 && words.has(low.slice(p.length))) return true;
+    }
+    for (let i = 3; i <= low.length - 4; i++) {
+      const left = low.slice(0, i);
+      const right = low.slice(i);
+      if (words.has(left) && words.has(right)) return true;
+      if ((left.endsWith('s') || left.endsWith('e')) && left.length >= 4 && words.has(left.slice(0, -1)) && words.has(right)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const isValidWord = (token) => {
+    if (!token || token.length <= 1) return true;
+    if (/^[0-9.,:%+\-–—/]+$/.test(token)) return true;
+    if (token.length <= 4 && token === token.toUpperCase() && /[A-ZÆØÅ]/.test(token)) return true;
+    const low = token.toLowerCase();
+    if (words.has(low)) return true;
+    if (low.includes('-')) {
+      const parts = low.split('-').filter(Boolean);
+      if (parts.length > 1 && parts.every((p) => p.length <= 1 || words.has(p) || isCompound(p))) return true;
+    }
+    return isCompound(low);
+  };
+
+  const matchCase = (suggestion, original) => {
+    if (!original) return suggestion;
+    if (original === original.toUpperCase() && original !== original.toLowerCase()) return suggestion.toUpperCase();
+    if (original[0] === original[0].toUpperCase() && original[0] !== original[0].toLowerCase()) {
+      return suggestion[0].toUpperCase() + suggestion.slice(1);
+    }
+    return suggestion;
+  };
+
+  const suggestWords = (token, max = 5) => {
+    const low = String(token || '').toLowerCase();
+    if (!low || low.length > 24) return [];
+    const found = [];
+    const seen = new Set([low]);
+    const pushIfValid = (cand) => {
+      if (seen.has(cand) || !words.has(cand)) return;
+      seen.add(cand);
+      found.push(matchCase(cand, token));
+    };
+    // 1. Bytte av nabobokstaver (f.eks. skolne -> skolen)
+    for (let i = 0; i < low.length - 1 && found.length < max; i++) {
+      pushIfValid(low.slice(0, i) + low[i + 1] + low[i] + low.slice(i + 2));
+    }
+    // 2. Sletting av én bokstav (f.eks. skoole -> skole)
+    for (let i = 0; i < low.length && found.length < max; i++) {
+      pushIfValid(low.slice(0, i) + low.slice(i + 1));
+    }
+    // 3. Erstatning av én bokstav
+    for (let i = 0; i < low.length && found.length < max; i++) {
+      for (let c = 0; c < NO_ALPHABET.length && found.length < max; c++) {
+        pushIfValid(low.slice(0, i) + NO_ALPHABET[c] + low.slice(i + 1));
+      }
+    }
+    // 4. Innsetting av én bokstav
+    for (let i = 0; i <= low.length && found.length < max; i++) {
+      for (let c = 0; c < NO_ALPHABET.length && found.length < max; c++) {
+        pushIfValid(low.slice(0, i) + NO_ALPHABET[c] + low.slice(i));
+      }
+    }
+    return found.slice(0, max);
+  };
+
+  return { words, isValidWord, suggestWords };
+}
+
+/**
+ * Laster og pakker ut norsk stavekontroll-ordbok (nb-NO / nn-NO) direkte i nettleseren,
+ * slik at røde streker og retteforslag fungerer 100 % på både Mac (WKWebView) og Windows.
+ */
+export function loadBrowserSpellchecker(locale = 'nb-NO', baseUrl = `${import.meta.env.BASE_URL}dictionaries/`) {
+  if (!EMBEDDED_DICTIONARY_LOCALES.includes(locale)) return Promise.resolve(null);
+  if (wordSetCache.has(locale)) return wordSetCache.get(locale);
+  const promise = (async () => {
+    try {
+      const res = await fetch(`${baseUrl}${locale}.zip`, { cache: 'force-cache' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const buf = await res.arrayBuffer();
+      const rawDic = await extractDicFromZipBuffer(buf);
+      if (!rawDic) return null;
+      return buildChecker(rawDic);
+    } catch (err) {
+      console.warn(`[SEB] Kunne ikke laste stavekontroll for ${locale}:`, err?.message);
+      wordSetCache.delete(locale);
+      return null;
+    }
+  })();
+  wordSetCache.set(locale, promise);
+  return promise;
+}

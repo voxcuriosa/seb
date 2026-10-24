@@ -4,9 +4,10 @@
  */
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
+import { NorwegianSpellcheck } from './norwegianSpellcheck';
 
-export function buildExtensions({ placeholder = '' } = {}) {
-  return [
+export function buildExtensions({ placeholder = '', enableSpellcheck = false } = {}) {
+  const exts = [
     StarterKit.configure({
       heading: { levels: [1, 2] },
       code: false,
@@ -18,4 +19,6 @@ export function buildExtensions({ placeholder = '' } = {}) {
     }),
     Placeholder.configure({ placeholder })
   ];
+  if (enableSpellcheck) exts.push(NorwegianSpellcheck);
+  return exts;
 }
