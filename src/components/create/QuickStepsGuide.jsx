@@ -24,7 +24,7 @@ export default function QuickStepsGuide() {
     {
       icon: Share2,
       title: 'Del i en vanlig Teams-oppgave',
-      desc: 'Lim inn startlenken eller legg ved .seb-filen under «Opprett -> Oppgave».'
+      desc: 'Lim inn startlenken under «Opprett -> Oppgave». Sett gjerne «Elever kan angre innlevering: Nei» (kan lagres som standard under tannhjulet i Oppgaver).'
     }
   ];
 

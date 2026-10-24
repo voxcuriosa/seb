@@ -15,11 +15,11 @@ export default function HelpPanel({ onClose }) {
         </section>
         <section>
           <h3 className="font-black text-emerald-300 mb-1">2. Del i Teams</h3>
-          <p>Opprett en vanlig oppgave i Teams («Opprett -&gt; Oppgave») og lim inn SEB-lenken eller legg ved .seb-filen. Elevene åpner lenken, laster ned prøvefilen og starter Safe Exam Browser.</p>
+          <p>Opprett en vanlig oppgave i Teams («Opprett -&gt; Oppgave») og lim inn SEB-lenken eller legg ved .seb-filen. Sett «Elever kan angre innlevering: Nei» (kan settes som fast standard for klassen under tannhjulet «Oppgaveinnstillinger» i Oppgaver-fanen).</p>
         </section>
         <section>
           <h3 className="font-black text-emerald-300 mb-1">3. Innlevering og kontroll</h3>
-          <p>Ved skriveprøver laster eleven ned en signert PDF som leveres i Teams og kontrolleres i fane 2. Ved Forms-prøver lagres svarene direkte i Microsoft Forms uten PDF.</p>
+          <p>Ved skriveprøver laster eleven ned en signert PDF som leveres i Teams og kontrolleres i fane 2. Sjekk at eleven står som «Innlevert» i Teams før eleven går. Ved Forms-prøver lagres svarene direkte i Microsoft Forms.</p>
         </section>
       </div>
 

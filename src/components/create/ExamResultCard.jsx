@@ -74,7 +74,7 @@ export default function ExamResultCard({ exam, onNew }) {
         <li>
           {exam.sourceType === 'forms'
             ? 'Opprett en vanlig oppgave i Teams («Opprett -> Oppgave») og lim inn SEB-lenken over (eller legg ved .seb-filen).'
-            : 'Lim lenken inn i en Teams-oppgave (eller legg ved .seb-filen).'}
+            : 'Lim lenken inn i en Teams-oppgave (eller legg ved .seb-filen). Sett «Elever kan angre innlevering: Nei» øverst i oppgaven (kan også settes som fast standard for klassen under tannhjulet «Oppgaveinnstillinger» i Teams).'}
         </li>
         <li>
           <strong className="text-amber-300 font-bold">Husk:</strong> Be elever som bruker <strong>Lingdys</strong>, <strong>VoxLex</strong> eller <strong>Ordnett Pluss</strong> om å starte disse <em>før</em> de åpner SEB-lenken.
@@ -85,7 +85,9 @@ export default function ExamResultCard({ exam, onNew }) {
             Elevene logger inn og trykker «Send inn» i Forms. Når de viser kvitteringsskjermen på pulten (eller når prøvetiden er ute), bruker de avslutningskoden din til å lukke SEB. Alle svar samles direkte i Microsoft Forms.
           </li>
         ) : (
-          <li>Elevene leverer den nedlastede PDF-en i Teams-oppgaven. Kontroller dem i fane 2.</li>
+          <li>
+            Elevene leverer den nedlastede PDF-en i Teams-oppgaven. Sjekk at eleven står som «Innlevert» i Teams før eleven forlater rommet, og kontroller PDF-ene i fane 2.
+          </li>
         )}
       </ol>
     </div>
