@@ -47,6 +47,18 @@ npm run build
 # Innholdet i dist/ kan serveres fra enhver standard webserver (Apache, Nginx, Caddy, Node.js).
 ```
 
+### Viktig for fylkeskommuner og kommuner ved bruk av Feide-pålogging (Clarify og Microsoft Forms)
+
+Når elever logger inn med Feide i **Clarify Ordbøker** eller **Microsoft Forms** inne i Safe Exam Browser, videresender Feide (`idp.feide.no`) eleven til skoleeiers egen identitetstjener (ADFS eller Microsoft Entra ID SSO). Fordi SEB har et strengt URL-filter aktivert under prøven, må skoleeiers påloggingsdomener være hvitelistet i `src/utils/seb/formsAuthList.js`.
+
+Følgende domener er allerede lagt inn som standard i `src/utils/seb/formsAuthList.js`:
+- **Microsoft Entra ID / Azure AD SSO:** `login.microsoftonline.com/*`, `*.msauth.net/*`, `*.msftauth.net/*`, `*.msidentity.com/*`, `*.microsoftazuread-sso.com/*`, `autologon.microsoftazuread-sso.com/*`, `login.windows.net/*`, `sts.windows.net/*`
+- **Feide og Sikt:** `feide.no/*`, `idp.feide.no/*`, `dataporten.no/*`, `sikt.no/*`
+- **Fylkeskommunale og kommunale Feide-domener:** `*.telemarkfylke.no/*`, `*.vestfoldfylke.no/*`, `*.vfk.no/*`, `*.afk.no/*`, `*.agderfk.no/*`, `*.bfk.no/*`, `*.ofk.no/*`, `*.innlandetfylke.no/*`, `*.rogfk.no/*`, `*.vlfk.no/*`, `*.mrfylke.no/*`, `*.trondelagfylke.no/*`, `*.nfk.no/*`, `*.tffk.no/*`, `*.ffk.no/*`, `*.osloskolen.no/*`, `*.ude.oslo.kommune.no/*`
+
+**Sjekkpunkt for IT-avdelinger og lærere i andre kommuner eller fylker:**
+Dersom deres skoleeier bruker et eget lokalt domene for Feide-innlogging (f.eks. `adfs.dinkommune.no` eller `feide.dittfylke.no`) som ikke står på listen over, vil SEB vise en melding om at adressen er blokkert under pålogging. Læreren kan da legge til domenet direkte under **«Legg til egne nettsider»** i steg 2 ved opprettelse av prøven, eller IT-avdelingen kan legge det fast inn i `src/utils/seb/formsAuthList.js`.
+
 ---
 
 ## Lisens og krav om kreditering
