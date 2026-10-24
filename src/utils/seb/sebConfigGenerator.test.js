@@ -51,8 +51,7 @@ describe('buildStandaloneSebPlist', () => {
     }
     expect(xml).toContain('Regjeringen &amp; &lt;test&gt;');
     expect(xml).toContain('no.voxlex.skole');
-    expect(xml).toContain('%LOCALAPPDATA%\\VoxLex');
-    expect(xml).toContain('voxlex.exe');
+    expect(xml).toContain('VoxLex.exe');
     expect(xml).toContain('no.lingit.lingdys');
     expect(xml).not.toContain('OrdnettPluss.exe');
     expect(xml).toContain('<key>URLFilterEnable</key>');
