@@ -62,12 +62,14 @@ export default function ExamTopBar({
 
       {websites?.length > 0 && (
         <nav className="flex items-center gap-1 flex-wrap" aria-label="Tillatte nettsider">
-          {websites.map((w) => (
-            <a key={w.id || w.url} href={w.url} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer"
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-600 text-[11px] text-slate-200">
-              {w.title}<ExternalLink size={11} aria-hidden="true" />
-            </a>
-          ))}
+          {websites
+            .filter((w) => !isForms || (w?.id !== 'web_forms_main' && !/forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(w?.url || '')))
+            .map((w) => (
+              <a key={w.id || w.url} href={w.url} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-600 text-[11px] text-slate-200">
+                {w.title}<ExternalLink size={11} aria-hidden="true" />
+              </a>
+            ))}
         </nav>
       )}
 

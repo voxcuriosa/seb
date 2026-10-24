@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { AlertTriangle, ExternalLink, GripVertical, GripHorizontal } from 'lucide-react';
+import { AlertTriangle, GripVertical, GripHorizontal } from 'lucide-react';
 import { fetchSebExam } from '../firebase';
 import { EXAM_QUIT_URL } from '../config';
 import { markAsSebEnvironment } from '../utils/seb/sebEnvironment';
@@ -17,6 +17,7 @@ import EssayEditor from '../components/exam/EssayEditor';
 import RestoreBanner from '../components/exam/RestoreBanner';
 import FinishDialog from '../components/exam/FinishDialog';
 import FormsExitDialog from '../components/exam/FormsExitDialog';
+import FormsHubView from '../components/exam/FormsHubView';
 import LoadingScreen from '../components/common/LoadingScreen';
 
 const clampPct = (v) => Math.min(82, Math.max(18, Number(v) || 48));
@@ -191,24 +192,12 @@ export default function SebExamRoom() {
       )}
 
       {isFormsExam ? (
-        <div className="flex-1 min-h-0 relative bg-slate-900 flex flex-col">
-          <div className="bg-slate-900 border-b border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300">
-            <span>Microsoft Forms-prøve. I Safe Exam Browser åpnes Forms direkte i fullskjerm for feilfri Feide- og Microsoft-innlogging.</span>
-            <a
-              href={formsUrl}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
-            >
-              <span>Åpne Forms direkte</span>
-              <ExternalLink size={12} aria-hidden="true" />
-            </a>
-          </div>
-          <iframe
-            src={formsUrl}
-            title={exam.title}
-            className="w-full flex-1 border-0 bg-white"
-            allow="clipboard-read; clipboard-write; fullscreen"
-          />
-        </div>
+        <FormsHubView
+          title={exam.title}
+          formsUrl={formsUrl}
+          websites={exam.sebConfig?.allowedWebsites || []}
+          onExit={() => setFormsExitOpen(true)}
+        />
       ) : (
         <div
           ref={splitContainerRef}

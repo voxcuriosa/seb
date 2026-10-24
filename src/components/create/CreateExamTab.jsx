@@ -89,20 +89,33 @@ export default function CreateExamTab() {
 
     const res = await createExam({ ...form, allowedApps, allowedWebsites: finalWebsites });
     if (!res) return;
+    const isForms = form.sourceType === 'forms';
+    const trimmedFormsUrl = isForms ? form.formsUrl.trim() : '';
+    const sebWebsites = isForms
+      ? [
+          {
+            id: 'web_forms_main',
+            title: 'Microsoft Forms',
+            url: trimmedFormsUrl,
+            domain: cleanDomainFromUrl(trimmedFormsUrl) || 'forms.office.com'
+          },
+          ...finalWebsites.filter((w) => !/forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(w?.url || w?.domain || ''))
+        ]
+      : finalWebsites;
     const entry = {
       examId: res.examId,
       title: form.title.trim(),
       createdAt: new Date().toISOString(),
       expiresAt: res.expiresAt,
       sourceType: form.sourceType,
-      formsUrl: form.sourceType === 'forms' ? form.formsUrl.trim() : null,
+      formsUrl: isForms ? trimmedFormsUrl : null,
       sebFileArgs: {
         examId: res.examId,
         title: form.title.trim(),
-        allowedWebsites: finalWebsites,
+        allowedWebsites: sebWebsites,
         allowedApps,
         quitPasswordHash: res.quitPasswordHash,
-        startURL: form.sourceType === 'forms' ? form.formsUrl.trim() : undefined
+        startURL: isForms && finalWebsites.length === 0 ? trimmedFormsUrl : undefined
       }
     };
     addExam(entry);

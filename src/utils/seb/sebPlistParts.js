@@ -201,13 +201,13 @@ ${rules}
   <false/>`;
 }
 
-export function buildAdditionalResourcesXml(allowedWebsites = []) {
+export function buildAdditionalResourcesXml(allowedWebsites = [], { autoOpen = false } = {}) {
   if (!allowedWebsites || allowedWebsites.length === 0) return '';
   const items = allowedWebsites.map((site, idx) => `    <dict>
       <key>active</key>
       <true/>
       <key>autoOpen</key>
-      <false/>
+      ${bool(autoOpen)}
       <key>confirm</key>
       <false/>
       <key>confirmResourceClose</key>

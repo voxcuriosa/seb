@@ -42,10 +42,12 @@ export function buildStandaloneSebPlist({
   // 2 = Isolated (privat utklippstavle kun internt i SEB når ingen hjelpeapper er valgt).
   const clipboardPolicy = hasAllowedApps ? 0 : 2;
   const websites = Array.isArray(allowedWebsites) ? allowedWebsites : [];
-  const resourcesXml = buildAdditionalResourcesXml(websites);
   const effectiveStartUrl = startURL || examRoomUrl(examId);
-  const isFormsStart = /forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(effectiveStartUrl);
+  const isFormsStart =
+    /forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(effectiveStartUrl) ||
+    websites.some((w) => /forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(`${w?.domain || ''} ${w?.url || ''}`));
   const hasClarify = websites.some((w) => /clarify\.no/i.test(`${w?.domain || ''} ${w?.url || ''}`));
+  const resourcesXml = buildAdditionalResourcesXml(websites, { autoOpen: false });
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

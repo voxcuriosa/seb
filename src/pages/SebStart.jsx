@@ -5,6 +5,10 @@ import { fetchSebExam } from '../firebase';
 import { isSebEnvironment, markAsSebEnvironment } from '../utils/seb/sebEnvironment';
 import { downloadStandaloneSebExamFile } from '../utils/seb/sebConfigGenerator';
 
+const isFormsDomain = (val = '') => /forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(String(val));
+const hasHelperWebsites = (sites = []) =>
+  Array.isArray(sites) && sites.some((w) => w?.id !== 'web_forms_main' && !isFormsDomain(`${w?.domain || ''} ${w?.url || ''}`));
+
 /** Elevens startside: laster ned .seb-filen, eller går rett til prøverommet hvis vi allerede er i SEB. */
 export default function SebStart() {
   const { examId } = useParams();
@@ -17,7 +21,8 @@ export default function SebStart() {
   useEffect(() => {
     if (isSebEnvironment() && exam) {
       markAsSebEnvironment();
-      if ((exam.sourceType === 'forms' || exam.formsUrl) && exam.formsUrl) {
+      const hasHelpers = hasHelperWebsites(exam.sebConfig?.allowedWebsites);
+      if ((exam.sourceType === 'forms' || exam.formsUrl) && exam.formsUrl && !hasHelpers) {
         window.location.replace(exam.formsUrl);
       } else {
         navigate(`/exam/${encodeURIComponent(examId)}?seb=1`, { replace: true });
@@ -44,12 +49,17 @@ export default function SebStart() {
     setDownloading(true);
     try {
       const isForms = exam.sourceType === 'forms' || Boolean(exam.formsUrl);
-      const startURL = isForms ? exam.formsUrl : null;
+      const rawSites = Array.isArray(exam.sebConfig?.allowedWebsites) ? exam.sebConfig.allowedWebsites : [];
+      const hasHelpers = hasHelperWebsites(rawSites);
+      const startURL = isForms && !hasHelpers ? exam.formsUrl : null;
+      const sebSites = isForms && exam.formsUrl && !rawSites.some((w) => isFormsDomain(`${w?.domain || ''} ${w?.url || ''}`))
+        ? [{ id: 'web_forms_main', title: 'Microsoft Forms', url: exam.formsUrl, domain: 'forms.office.com' }, ...rawSites]
+        : rawSites;
       await downloadStandaloneSebExamFile({
         examId: exam.id,
         title: exam.title,
         startURL,
-        allowedWebsites: exam.sebConfig?.allowedWebsites || [],
+        allowedWebsites: sebSites,
         allowedApps: exam.sebConfig?.allowedApps || {},
         quitPasswordHash: exam.sebConfig?.quitPasswordHash || ''
       });
