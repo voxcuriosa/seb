@@ -38,7 +38,7 @@ export default function TeacherHub() {
           <div className="ml-auto flex items-center gap-2">
             <button type="button" onClick={() => setShowPrivacy(true)}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-950/60 border border-emerald-500/40 hover:bg-emerald-900/60 text-xs font-bold text-emerald-300">
-              <Shield size={14} aria-hidden="true" /> Personvern & IT
+              <Shield size={14} aria-hidden="true" /> Personvern og IT
             </button>
             <button type="button" onClick={() => setShowHelp((s) => !s)} aria-expanded={showHelp}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-xs font-bold text-slate-200">

@@ -67,13 +67,6 @@ export const PRESET_SEB_WEBSITES = [
     url: 'https://www.faktisk.no',
     domain: 'faktisk.no',
     description: 'Faktasjekk og kildekritikk'
-  },
-  {
-    id: 'forms',
-    title: 'Microsoft Forms',
-    url: 'https://forms.office.com',
-    domain: 'forms.office.com',
-    description: 'Nettbaserte flervalgsoppgaver og spørreskjema'
   }
 ];
 

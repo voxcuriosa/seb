@@ -8,13 +8,13 @@ export default function QuickStepsGuide() {
   const steps = [
     {
       icon: FileUp,
-      title: 'Last opp prøven din som Word eller PDF',
-      desc: 'Eller skriv/lim inn teksten rett inn i editoren.'
+      title: 'Velg oppgavekilde',
+      desc: 'Skriv tekst, last opp Word/PDF, eller lim inn en lenke til Microsoft Forms.'
     },
     {
       icon: ShieldCheck,
-      title: 'Velg hjelpemidler som skal være tillatt',
-      desc: 'Ordbøker, nettsider og egne tillatte programmer.'
+      title: 'Velg hjelpemidler og kodeord',
+      desc: 'Tillat ordbøker og nettsider, og sett avslutningskode (påkrevd ved Forms).'
     },
     {
       icon: Download,
@@ -23,8 +23,8 @@ export default function QuickStepsGuide() {
     },
     {
       icon: Share2,
-      title: 'Del denne med elevene i Teams Oppgaver',
-      desc: 'Lim inn startlenken eller legg ved .seb-filen i oppgaven.'
+      title: 'Del i en vanlig Teams-oppgave',
+      desc: 'Lim inn startlenken eller legg ved .seb-filen under «Opprett -> Oppgave».'
     }
   ];
 

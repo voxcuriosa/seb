@@ -53,19 +53,21 @@ export function useCreateSebExam() {
     setPin('');
   }, []);
 
-  /** form: { title, sourceType, promptHtml, pdfFile, allowedApps, allowedWebsites, quitPassword } */
+  /** form: { title, sourceType, promptHtml, pdfFile, formsUrl, allowedApps, allowedWebsites, quitPassword } */
   const createExam = useCallback(async (form) => {
     setBusy(true);
     setError('');
     try {
+      const isForms = form.sourceType === 'forms';
       const exam = {
         title: form.title.trim(),
         sourceType: form.sourceType,
-        promptHtml: form.sourceType === 'pdf' ? form.promptHtml || '' : form.promptHtml,
+        formsUrl: isForms ? String(form.formsUrl || '').trim() : null,
+        promptHtml: isForms ? '' : (form.sourceType === 'pdf' ? form.promptHtml || '' : form.promptHtml),
         sebConfig: {
           allowedApps: form.allowedApps,
           allowedWebsites: form.allowedWebsites,
-          quitPasswordHash: form.quitPassword ? await sha256Hex(form.quitPassword) : ''
+          quitPasswordHash: form.quitPassword ? await sha256Hex(form.quitPassword.trim()) : ''
         }
       };
       if (form.sourceType === 'pdf' && form.pdfFile) {

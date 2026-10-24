@@ -61,6 +61,9 @@ describe('buildStandaloneSebPlist', () => {
     const xml = buildStandaloneSebPlist({ examId: 'x1' });
     expect(lint(xml)).toMatch(/OK/);
     expect(xml).toMatch(/<key>allowQuit<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>showQuitButton<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>examSessionClearCookiesOnStart<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>examSessionClearCookiesOnEnd<\/key>\s*<false\/>/);
     expect(xml).not.toContain('hashedQuitPassword');
     expect(xml).toContain('<array/>');
   });
@@ -70,12 +73,18 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toContain('/seb/exam/a%20b%26c?seb=1');
   });
 
-  it('bruker egendefinert startURL direkte når oppgitt (f.eks. for Microsoft Forms)', () => {
+  it('bruker egendefinert startURL direkte når oppgitt (f.eks. for Microsoft Forms) og hvitelister SSO + tømmer cookies', () => {
     const formsUrl = 'https://forms.office.com/Pages/ResponsePage.aspx?id=test123&test=1';
     const xml = buildStandaloneSebPlist({ examId: 'f1', startURL: formsUrl });
     expect(lint(xml)).toMatch(/OK/);
     expect(xml).toContain('<key>startURL</key>');
     expect(xml).toContain('<string>https://forms.office.com/Pages/ResponsePage.aspx?id=test123&amp;test=1</string>');
+    expect(xml).toContain('<string>forms.office.com/*</string>');
+    expect(xml).toContain('<string>login.microsoftonline.com/*</string>');
+    expect(xml).toContain('<string>idp.feide.no/*</string>');
+    expect(xml).not.toContain('<string>*.office.com/*</string>');
+    expect(xml).toMatch(/<key>examSessionClearCookiesOnStart<\/key>\s*<true\/>/);
+    expect(xml).toMatch(/<key>examSessionClearCookiesOnEnd<\/key>\s*<true\/>/);
   });
 
   it('kan bygges med ekte norske ordbøker', () => {

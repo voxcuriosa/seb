@@ -115,7 +115,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
             <div className="grid sm:grid-cols-2 gap-2 text-xs text-slate-300">
               <div className="flex items-start gap-2">
                 <span className="text-emerald-400 font-bold">✓</span>
-                <span><strong>Ingen brukerkontoer:</strong> Verken lærere eller elever logger inn. Ingen brukernavn, e-poster eller passord lagres.</span>
+                <span><strong>Ingen brukerkontoer i VoxCuriosa:</strong> Verken lærere eller elever logger inn hos oss. Ingen brukernavn, e-poster eller passord lagres.</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-emerald-400 font-bold">✓</span>
@@ -127,7 +127,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-emerald-400 font-bold">✓</span>
-                <span><strong>Dataminimering (GDPR art. 5):</strong> Systemet behandler kun et absolutt minimum av data for å kunne generere SEB-konfigurasjonen.</span>
+                <span><strong>Microsoft Forms-prøver:</strong> Åpnes direkte i SEB mot skolens egen Microsoft 365 / Feide-leietaker. Øktkapsler (cookies) slettes ved start og slutt for å sikre låne-PC-er.</span>
               </div>
               <div className="flex items-start gap-2 sm:col-span-2">
                 <span className="text-emerald-400 font-bold">✓</span>
@@ -140,7 +140,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
         {/* Footer */}
         <div className="p-4 border-t border-slate-800 bg-slate-950 flex items-center justify-between shrink-0">
           <span className="text-xs text-slate-400 font-mono">
-            Standard: GDPR Art. 25 (Privacy by Design) & Art. 32 (Sikkerhet)
+            Standard: GDPR Art. 25 (Privacy by Design) og Art. 32 (Sikkerhet)
           </span>
           <button
             type="button"

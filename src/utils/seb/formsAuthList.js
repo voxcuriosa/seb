@@ -1,6 +1,7 @@
 /**
  * formsAuthList.js
  * Liste over tillatte URL-uttrykk for Microsoft Forms og Feide SSO i SEB.
+ * Kun nødvendige autentiserings- og skjemadomener (ikke hele office.com eller outlook).
  */
 export const FORMS_AUTH_EXPRESSIONS = [
   'forms.office.com/*',
@@ -19,8 +20,6 @@ export const FORMS_AUTH_EXPRESSIONS = [
   'auth.gfx.ms/*',
   '*.auth.gfx.ms/*',
   '*.azureedge.net/*',
-  '*.office.com/*',
-  '*.office365.com/*',
   'account.activedirectory.windowsazure.com/*',
   '*.feide.no/*',
   'idp.feide.no/*'

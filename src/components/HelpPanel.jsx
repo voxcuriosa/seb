@@ -11,15 +11,15 @@ export default function HelpPanel({ onClose }) {
       <div className="grid md:grid-cols-3 gap-4">
         <section>
           <h3 className="font-black text-emerald-300 mb-1">1. Opprett prøve</h3>
-          <p>Lås opp med lærer-PIN. Skriv eller lim inn oppgaveteksten, importer en Word-fil, eller last opp en PDF. Velg hjelpemidler og nettsider, og eventuelt et avslutningspassord. Trykk «Lagre og generer».</p>
+          <p>Lås opp med lærer-PIN. Skriv eller lim inn oppgavetekst, last opp Word/PDF, eller lim inn en lenke til Microsoft Forms. Velg hjelpemidler, nettsider og avslutningskode (påkrevd for Forms).</p>
         </section>
         <section>
           <h3 className="font-black text-emerald-300 mb-1">2. Del i Teams</h3>
-          <p>Kopier SEB-lenken inn i en Teams-oppgave. Elevene åpner lenken, laster ned prøvefilen og starter Safe Exam Browser. Teksten lagres fortløpende på elevens maskin og overlever omstart.</p>
+          <p>Opprett en vanlig oppgave i Teams («Opprett -&gt; Oppgave») og lim inn SEB-lenken eller legg ved .seb-filen. Elevene åpner lenken, laster ned prøvefilen og starter Safe Exam Browser.</p>
         </section>
         <section>
-          <h3 className="font-black text-emerald-300 mb-1">3. Kontroller PDF-ene</h3>
-          <p>Elevene leverer PDF-en i Teams. Last ned «Student Work»-mappen og slipp den i fane 2. Hver PDF kontrolleres med SHA-256, sammenligning av synlig tekst og serversignatur.</p>
+          <h3 className="font-black text-emerald-300 mb-1">3. Innlevering og kontroll</h3>
+          <p>Ved skriveprøver laster eleven ned en signert PDF som leveres i Teams og kontrolleres i fane 2. Ved Forms-prøver lagres svarene direkte i Microsoft Forms uten PDF.</p>
         </section>
       </div>
 
@@ -30,12 +30,13 @@ export default function HelpPanel({ onClose }) {
           <span>Prøver i Microsoft Forms (med skole- og Feide-innlogging):</span>
         </div>
         <p className="leading-relaxed">
-          Når du velger Microsoft Forms som kilde, tilpasses Safe Exam Browser spesifikt for Forms-økosystemet:
+          Når du velger Microsoft Forms som kilde i steg 1, tilpasses Safe Exam Browser spesifikt for Forms-økosystemet:
         </p>
         <ul className="space-y-1 list-disc pl-4 text-slate-300">
           <li><strong>Direkte start i SEB:</strong> Prøven åpnes som hovedside i fullskjerm. Dette sikrer at innlogging med Feide og Microsoft 365 fungerer uten at sikkerhetssperrer for innramming (X-Frame-Options) blokkerer siden.</li>
-          <li><strong>Ingen PDF lages:</strong> Svarene sendes inn direkte til Microsoft Forms hos læreren.</li>
-          <li><strong>Påkrevd avslutnings-PIN:</strong> Fordi Forms ikke kan lukke SEB automatisk etter innlevering, må du sette en PIN ved opprettelse. Eleven svarer og klikker «Send inn», viser kvitteringsskjermen på maskinen sin til læreren, og læreren taster inn PIN-koden for å avslutte SEB (eller klikker på SEBs avsluttningsikon).</li>
+          <li><strong>Tømming av øktkapsler på låne-PC:</strong> SEB sletter automatisk innloggingskapsler (cookies) ved oppstart og avslutning av Forms-prøver, slik at en elevs Feide-økt aldri blir liggende igjen på en låne-PC.</li>
+          <li><strong>Slik deles den i Teams:</strong> Velg «Opprett -&gt; Oppgave» i Teams (ikke «Spørreskjema») og lim inn SEB-lenken. Husk å ha «Ett svar per person» påslått inne i Microsoft Forms.</li>
+          <li><strong>Påkrevd avslutningskode:</strong> Fordi Forms ikke kan lukke SEB automatisk, må du sette et kodeord (minst 6 tegn, f.eks. «sol-482»). Hold koden hemmelig under prøven: oppgi den ved pulten når eleven viser kvitteringsskjermen («Takk for svaret ditt»), eller skriv den på tavla når prøvetiden er ute og alle har levert.</li>
         </ul>
       </div>
 

@@ -47,9 +47,12 @@ export default function CreateExamTab() {
       if (!trimmed || (!trimmed.startsWith('https://forms.office.com') && !trimmed.startsWith('https://forms.microsoft.com'))) {
         return 'Lim inn en gyldig Microsoft Forms-lenke (f.eks. https://forms.office.com/r/...).';
       }
-      if (!form.quitPassword || form.quitPassword.trim().length < 4) {
-        return 'Avslutningspassord / PIN (minst 4 tegn) er påkrevd for Microsoft Forms-prøver, slik at du kan låse opp og avslutte SEB etter innlevering.';
+      if (!form.quitPassword || form.quitPassword.trim().length < 6) {
+        return 'Avslutningspassord / kodeord (minst 6 tegn, f.eks. «sol-482») er påkrevd for Microsoft Forms-prøver, slik at du kan låse opp og avslutte SEB etter innlevering.';
       }
+    }
+    if (form.quitPassword && form.quitPassword.trim().length > 0 && form.quitPassword.trim().length < 6) {
+      return 'Avslutningspassordet må være minst 6 tegn (eller la feltet stå tomt).';
     }
     if (form.sourceType !== 'pdf' && form.sourceType !== 'forms' && !htmlToPlainText(form.promptHtml)) {
       return 'Oppgaveteksten er tom.';
@@ -115,7 +118,11 @@ export default function CreateExamTab() {
                 pdfFile={form.pdfFile} setPdfFile={set('pdfFile')}
                 formsUrl={form.formsUrl} setFormsUrl={set('formsUrl')}
               />
-              <p className="text-xs text-slate-400">Alt behandles lokalt i nettleseren. Ingen KI brukes.</p>
+              <p className="text-xs text-slate-400">
+                {form.sourceType === 'forms'
+                  ? 'SEB åpner Forms direkte mot skolens Microsoft 365 / Feide. Ingen KI brukes, og ingen elevdata lagres i VoxCuriosa.'
+                  : 'Alt behandles lokalt i nettleseren. Ingen KI brukes.'}
+              </p>
             </Step>
 
             <Step n={2} title="Hjelpemidler, nettsider og passord">

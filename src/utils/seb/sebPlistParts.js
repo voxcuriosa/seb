@@ -4,6 +4,9 @@
  * App-blokkene er kopiert fra voxkunnskap/src/utils/localMode/sebConfigGenerator.js.
  */
 import { cleanDomainFromUrl } from './sebPresets';
+import { FORMS_AUTH_EXPRESSIONS } from './formsAuthList';
+
+export { FORMS_AUTH_EXPRESSIONS };
 
 export function escapeXml(str) {
   return String(str ?? '')
@@ -96,34 +99,6 @@ export const BASE_ALLOWED_EXPRESSIONS = [
   'gstatic.com/*'
 ];
 
-/**
- * Microsoft 365, Teams og Feide-autentisering for Forms-prøver i norsk skole.
- * Tillater at elevene logger på skolekontoen sin i SEB uten at resten av internett åpnes.
- */
-export const FORMS_AUTH_EXPRESSIONS = [
-  'forms.office.com/*',
-  '*.forms.office.com/*',
-  'forms.microsoft.com/*',
-  '*.forms.microsoft.com/*',
-  'login.microsoftonline.com/*',
-  '*.login.microsoftonline.com/*',
-  'login.live.com/*',
-  '*.login.live.com/*',
-  '*.msauth.net/*',
-  'aadcdn.msauth.net/*',
-  '*.aadcdn.msauth.net/*',
-  '*.msftauth.net/*',
-  '*.msauthimages.net/*',
-  'auth.gfx.ms/*',
-  '*.auth.gfx.ms/*',
-  '*.azureedge.net/*',
-  '*.office.com/*',
-  '*.office365.com/*',
-  'account.activedirectory.windowsazure.com/*',
-  '*.feide.no/*',
-  'idp.feide.no/*'
-];
-
 function filterRule(expression) {
   return `    <dict>
       <key>action</key>
@@ -137,15 +112,19 @@ function filterRule(expression) {
     </dict>`;
 }
 
-export function collectAllowedExpressions(allowedWebsites = []) {
+function isFormsDomain(dom = '') {
+  return dom.includes('forms.office.com') || dom.includes('forms.microsoft.com');
+}
+
+export function collectAllowedExpressions(allowedWebsites = [], startURL = '') {
   const expressions = [...BASE_ALLOWED_EXPRESSIONS];
-  let hasForms = false;
+  let hasForms = isFormsDomain(cleanDomainFromUrl(startURL));
 
   for (const site of allowedWebsites || []) {
     const dom = cleanDomainFromUrl(site?.domain || site?.url);
     if (!dom) continue;
     expressions.push(`${dom}/*`, `*.${dom}/*`);
-    if (dom.includes('forms.office.com') || dom.includes('forms.microsoft.com') || dom.includes('office.com')) {
+    if (isFormsDomain(dom)) {
       hasForms = true;
     }
   }
@@ -157,8 +136,8 @@ export function collectAllowedExpressions(allowedWebsites = []) {
   return [...new Set(expressions)];
 }
 
-export function buildUrlFilterXml(allowedWebsites = []) {
-  const rules = collectAllowedExpressions(allowedWebsites).map(filterRule).join('\n');
+export function buildUrlFilterXml(allowedWebsites = [], startURL = '') {
+  const rules = collectAllowedExpressions(allowedWebsites, startURL).map(filterRule).join('\n');
   return `  <key>urlFilterEnable</key>
   <true/>
   <key>urlFilterEnableContentFilter</key>

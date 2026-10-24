@@ -59,8 +59,8 @@ export default function SebExamRoom() {
     };
   }, [examId]);
 
-  const isFormsExam = exam?.sourceType === 'forms' || Boolean(exam?.formsUrl) || exam?.sebConfig?.allowedWebsites?.some((w) => w.domain === 'forms.office.com');
-  const formsUrl = exam?.formsUrl || exam?.sebConfig?.allowedWebsites?.find((w) => w.domain === 'forms.office.com')?.url || 'https://forms.office.com';
+  const isFormsExam = exam?.sourceType === 'forms' || Boolean(exam?.formsUrl);
+  const formsUrl = exam?.formsUrl || 'https://forms.office.com';
 
   const log = useExamIntegrityLog({
     initialActiveSeconds: 0,

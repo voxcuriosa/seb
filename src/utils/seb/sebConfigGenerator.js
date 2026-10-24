@@ -40,6 +40,7 @@ export function buildStandaloneSebPlist({
   const websites = Array.isArray(allowedWebsites) ? allowedWebsites : [];
   const resourcesXml = buildAdditionalResourcesXml(websites);
   const effectiveStartUrl = startURL || examRoomUrl(examId);
+  const isFormsStart = /forms\.(office|microsoft)\.com/i.test(effectiveStartUrl);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -96,7 +97,7 @@ export function buildStandaloneSebPlist({
   <key>showTaskBar</key>
   <true/>
   <key>showQuitButton</key>
-  <true/>
+  ${hasQuitPassword ? '<true/>' : '<false/>'}
   <key>taskBarHeight</key>
   <integer>40</integer>
   <key>showSideMenu</key>
@@ -137,9 +138,9 @@ ${buildDictionariesXml(dictionaries)}
   <key>clearBrowserCache</key>
   <false/>
   <key>examSessionClearCookiesOnStart</key>
-  <false/>
+  ${isFormsStart ? '<true/>' : '<false/>'}
   <key>examSessionClearCookiesOnEnd</key>
-  <false/>
+  ${isFormsStart ? '<true/>' : '<false/>'}
   <key>removeBrowserProfile</key>
   <false/>
   <key>removeLocalStorage</key>
@@ -152,7 +153,7 @@ ${buildDictionariesXml(dictionaries)}
   <true/>
   <key>allowSwitchToApplications</key>
   <true/>
-${buildUrlFilterXml(websites)}
+${buildUrlFilterXml(websites, effectiveStartUrl)}
 ${buildPermittedProcessesXml(allowedApps)}${resourcesXml ? `\n${resourcesXml}` : ''}
 </dict>
 </plist>`;
