@@ -41,6 +41,7 @@ export function buildStandaloneSebPlist({
   const resourcesXml = buildAdditionalResourcesXml(websites);
   const effectiveStartUrl = startURL || examRoomUrl(examId);
   const isFormsStart = /forms\.(office|microsoft)\.com/i.test(effectiveStartUrl);
+  const hasClarify = websites.some((w) => /clarify\.no/i.test(`${w?.domain || ''} ${w?.url || ''}`));
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -92,6 +93,10 @@ export function buildStandaloneSebPlist({
   <true/>
   <key>hideBrowserWindowToolbar</key>
   <false/>
+  <key>browserWindowAllowAddressBar</key>
+  <false/>
+  <key>newBrowserWindowAllowAddressBar</key>
+  <false/>
   <key>showMenuBar</key>
   <true/>
   <key>showTaskBar</key>
@@ -141,6 +146,8 @@ ${buildDictionariesXml(dictionaries)}
   <integer>2</integer>
   <key>newBrowserWindowByLinkBlockForeign</key>
   <false/>
+  <key>newBrowserWindowByScriptBlockForeign</key>
+  <false/>
   <key>enableRightMouse</key>
   <true/>
   <key>clearBrowserCache</key>
@@ -148,7 +155,7 @@ ${buildDictionariesXml(dictionaries)}
   <key>examSessionClearCookiesOnStart</key>
   ${isFormsStart ? '<true/>' : '<false/>'}
   <key>examSessionClearCookiesOnEnd</key>
-  ${isFormsStart ? '<true/>' : '<false/>'}
+  ${isFormsStart || hasClarify ? '<true/>' : '<false/>'}
   <key>removeBrowserProfile</key>
   <false/>
   <key>removeLocalStorage</key>

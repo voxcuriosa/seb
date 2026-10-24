@@ -91,6 +91,22 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toMatch(/<key>examSessionClearCookiesOnEnd<\/key>\s*<true\/>/);
   });
 
+  it('støtter Clarify Ordbøker (https://app.clarify.no/auth) med Feide-SSO og tømmer cookies ved slutt', () => {
+    const xml = buildStandaloneSebPlist({
+      examId: 'c1',
+      allowedWebsites: [{ id: 'clarify', title: 'Clarify Ordbøker (Feide)', url: 'https://app.clarify.no/auth', domain: 'app.clarify.no' }]
+    });
+    expect(lint(xml)).toMatch(/OK/);
+    expect(xml).toContain('<string>https://app.clarify.no/auth</string>');
+    expect(xml).toContain('<string>app.clarify.no/*</string>');
+    expect(xml).toContain('<string>auth.dataporten.no/*</string>');
+    expect(xml).toContain('<string>idp.feide.no/*</string>');
+    expect(xml).toMatch(/<key>URLFilterEnable<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>browserWindowAllowAddressBar<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>newBrowserWindowAllowAddressBar<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>examSessionClearCookiesOnEnd<\/key>\s*<true\/>/);
+  });
+
   it('kan bygges med ekte norske ordbøker og gjenkjenner feilstavede ord i nettleseren', async () => {
     const zip = readFileSync(new URL('../../../public/dictionaries/nb-NO.zip', import.meta.url));
     const ab = zip.buffer.slice(zip.byteOffset, zip.byteOffset + zip.byteLength);

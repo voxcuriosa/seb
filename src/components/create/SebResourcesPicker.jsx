@@ -79,8 +79,8 @@ export default function SebResourcesPicker({
       </div>
 
       <section>
-        <h3 className="text-xs font-black uppercase tracking-wider text-slate-300 mb-1">Hjelpemidler og ordbøker</h3>
-        <p className="text-xs text-slate-400 mb-3">Programmene må være installert på elevens maskin.</p>
+        <h3 className="text-xs font-black uppercase tracking-wider text-slate-300 mb-1">Installerte hjelpemidler</h3>
+        <p className="text-xs text-slate-400 mb-3">Programmene må være installert på elevens maskin (Mac eller Windows).</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {PRESET_SEB_APPS.map((app) => (
             <CheckTile key={app.id} selected={Boolean(allowedApps[app.id])} onClick={() => toggleApp(app.id)} title={app.title} subtitle={app.subtitle} />
@@ -89,7 +89,8 @@ export default function SebResourcesPicker({
       </section>
 
       <section>
-        <h3 className="text-xs font-black uppercase tracking-wider text-slate-300 mb-3">Vanlige skolekilder</h3>
+        <h3 className="text-xs font-black uppercase tracking-wider text-slate-300 mb-1">Nettbaserte ordbøker og skolekilder</h3>
+        <p className="text-xs text-slate-400 mb-3">Åpnes i eget SEB-vindu uten adressefelt (Clarify støtter Feide-innlogging).</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {PRESET_SEB_WEBSITES.map((p) => (
             <CheckTile key={p.id} selected={isPresetSelected(p)} onClick={() => togglePreset(p)} title={p.title} subtitle={p.domain} />

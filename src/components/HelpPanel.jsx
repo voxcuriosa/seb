@@ -51,7 +51,8 @@ export default function HelpPanel({ onClose }) {
         </p>
         <ul className="space-y-1 list-disc pl-4 text-slate-300">
           <li><strong>På Mac:</strong> SEB-konfigurasjonen vår er ferdig satt opp med offisielle macOS Bundle Identifiers (<code className="text-emerald-300">no.lingit.lingdys</code>, <code className="text-emerald-300">no.voxlex.skole</code>, <code className="text-emerald-300">no.kunnskapsforlaget.ordnettpluss</code>) og tillater tilgjengelighet (<code className="text-slate-400">allowAccessibility = true</code>).</li>
-          <li><strong>Huskeregel for eleven:</strong> Programmene må startes på maskinen <em>før</em> eleven klikker på SEB-lenken eller åpner .seb-filen, uansett om eleven bruker Mac eller PC.</li>
+          <li><strong>Clarify Ordbøker (Feide):</strong> Velges under «Nettbaserte ordbøker og skolekilder» i steg 2 (<code className="text-emerald-300">https://app.clarify.no/auth</code>). Åpnes direkte som knapp i prøverommet og i SEBs verktøylinje med støtte for Feide-innlogging.</li>
+          <li><strong>Huskeregel for eleven:</strong> Lokale programmer (Lingdys, VoxLex, Ordnett) bør startes på maskinen <em>før</em> eleven klikker på SEB-lenken eller åpner .seb-filen.</li>
         </ul>
       </div>
 

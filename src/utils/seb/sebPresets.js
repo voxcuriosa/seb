@@ -27,11 +27,11 @@ export const PRESET_SEB_APPS = [
 
 export const PRESET_SEB_WEBSITES = [
   {
-    id: 'snl',
-    title: 'Store norske leksikon',
-    url: 'https://snl.no',
-    domain: 'snl.no',
-    description: 'Norges største nettleksikon for alle fag'
+    id: 'clarify',
+    title: 'Clarify Ordbøker (Feide)',
+    url: 'https://app.clarify.no/auth',
+    domain: 'app.clarify.no',
+    description: 'Kvalitetssikrede ordbøker, bøyning og opplesning med Feide-innlogging'
   },
   {
     id: 'ordbokene',
@@ -39,6 +39,13 @@ export const PRESET_SEB_WEBSITES = [
     url: 'https://ordbokene.no',
     domain: 'ordbokene.no',
     description: 'Bokmålsordboka og Nynorskordboka'
+  },
+  {
+    id: 'snl',
+    title: 'Store norske leksikon',
+    url: 'https://snl.no',
+    domain: 'snl.no',
+    description: 'Norges største nettleksikon for alle fag'
   },
   {
     id: 'lovdata',

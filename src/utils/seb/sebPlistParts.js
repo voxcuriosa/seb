@@ -112,24 +112,24 @@ function filterRule(expression) {
     </dict>`;
 }
 
-function isFormsDomain(dom = '') {
-  return dom.includes('forms.office.com') || dom.includes('forms.microsoft.com');
+function needsSsoExpressions(dom = '') {
+  return dom.includes('forms.office.com') || dom.includes('forms.microsoft.com') || dom.includes('clarify.no');
 }
 
 export function collectAllowedExpressions(allowedWebsites = [], startURL = '') {
   const expressions = [...BASE_ALLOWED_EXPRESSIONS];
-  let hasForms = isFormsDomain(cleanDomainFromUrl(startURL));
+  let hasSso = needsSsoExpressions(cleanDomainFromUrl(startURL));
 
   for (const site of allowedWebsites || []) {
     const dom = cleanDomainFromUrl(site?.domain || site?.url);
     if (!dom) continue;
     expressions.push(`${dom}/*`, `*.${dom}/*`);
-    if (isFormsDomain(dom)) {
-      hasForms = true;
+    if (needsSsoExpressions(dom)) {
+      hasSso = true;
     }
   }
 
-  if (hasForms) {
+  if (hasSso) {
     expressions.push(...FORMS_AUTH_EXPRESSIONS);
   }
 
@@ -138,9 +138,12 @@ export function collectAllowedExpressions(allowedWebsites = [], startURL = '') {
 
 export function buildUrlFilterXml(allowedWebsites = [], startURL = '') {
   const rules = collectAllowedExpressions(allowedWebsites, startURL).map(filterRule).join('\n');
-  // Dekk både SEB 3.x (URLFilter*) og eldre SEB 2.x (urlFilter*) slik at filteret alltid er aktivt.
+  // SEB 3.x på macOS blokkerer lokale blob:-nedlastinger (PDF/TXT) og fylkesvise Feide-videresendinger
+  // med «URL blocked» dersom URLFilterEnable er true (fordi NSURL parser blob:https://... med host = nil).
+  // Adressefeltet i SEB er låst av (browserWindowAllowAddressBar = false), så eleven kan kun åpne
+  // ressurser som læreren eksplisitt har lagt til. Vi legger likevel ved regellisten i plist-en.
   return `  <key>URLFilterEnable</key>
-  <true/>
+  <false/>
   <key>URLFilterEnableContentFilter</key>
   <false/>
   <key>URLFilterRules</key>
@@ -148,7 +151,7 @@ export function buildUrlFilterXml(allowedWebsites = [], startURL = '') {
 ${rules}
   </array>
   <key>urlFilterEnable</key>
-  <true/>
+  <false/>
   <key>urlFilterEnableContentFilter</key>
   <false/>`;
 }
@@ -164,9 +167,15 @@ export function buildAdditionalResourcesXml(allowedWebsites = []) {
       <false/>
       <key>confirmResourceClose</key>
       <false/>
+      <key>iconInTaskbar</key>
+      <true/>
+      <key>showInTaskbar</key>
+      <true/>
       <key>identifier</key>
       <string>resource_${idx + 1}</string>
       <key>policy</key>
+      <integer>0</integer>
+      <key>resourceType</key>
       <integer>0</integer>
       <key>resetSession</key>
       <false/>
