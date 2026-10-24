@@ -83,6 +83,7 @@ export const BASE_ALLOWED_EXPRESSIONS = [
   'about:blank',
   'about:*',
   'data:*',
+  'blob:*',
   'voxcuriosa.no/*',
   '*.voxcuriosa.no/*',
   'curiosa.no/*',
