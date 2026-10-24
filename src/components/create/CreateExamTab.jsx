@@ -6,6 +6,7 @@ import SebResourcesPicker from './SebResourcesPicker';
 import QuitPasswordField from './QuitPasswordField';
 import ExamResultCard from './ExamResultCard';
 import MyExamsList from './MyExamsList';
+import QuickStepsGuide from './QuickStepsGuide';
 import { useCreateSebExam } from '../../hooks/useCreateSebExam';
 import { useMyExams } from '../../hooks/useMyExams';
 import { DEFAULT_SEB_APPS } from '../../utils/seb/sebPresets';
@@ -80,36 +81,42 @@ export default function CreateExamTab() {
       {result ? (
         <ExamResultCard exam={result} onNew={reset} />
       ) : (
-        <>
-          <Step n={1} title="Prøvens oppgavetekst">
-            <label className="block space-y-1.5">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-300">Prøvetittel</span>
-              <input value={form.title} onChange={(e) => set('title')(e.target.value)} maxLength={120} placeholder="F.eks. Prøve i historie VG3"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
-            </label>
-            <PromptSourcePicker
-              sourceType={form.sourceType} setSourceType={set('sourceType')}
-              promptHtml={form.promptHtml} setPromptHtml={set('promptHtml')}
-              pdfFile={form.pdfFile} setPdfFile={set('pdfFile')}
-            />
-            <p className="text-xs text-slate-400">Alt behandles lokalt i nettleseren. Ingen KI brukes.</p>
-          </Step>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
+          <div className="space-y-6">
+            <Step n={1} title="Prøvens oppgavetekst">
+              <label className="block space-y-1.5">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-300">Prøvetittel</span>
+                <input value={form.title} onChange={(e) => set('title')(e.target.value)} maxLength={120} placeholder="F.eks. Prøve i historie VG3"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
+              </label>
+              <PromptSourcePicker
+                sourceType={form.sourceType} setSourceType={set('sourceType')}
+                promptHtml={form.promptHtml} setPromptHtml={set('promptHtml')}
+                pdfFile={form.pdfFile} setPdfFile={set('pdfFile')}
+              />
+              <p className="text-xs text-slate-400">Alt behandles lokalt i nettleseren. Ingen KI brukes.</p>
+            </Step>
 
-          <Step n={2} title="Hjelpemidler, nettsider og passord">
-            <SebResourcesPicker allowedApps={allowedApps} setAllowedApps={setAllowedApps} websites={websites} setWebsites={setWebsites} />
-            <QuitPasswordField value={form.quitPassword} onChange={set('quitPassword')} />
-          </Step>
+            <Step n={2} title="Hjelpemidler, nettsider og passord">
+              <SebResourcesPicker allowedApps={allowedApps} setAllowedApps={setAllowedApps} websites={websites} setWebsites={setWebsites} />
+              <QuitPasswordField value={form.quitPassword} onChange={set('quitPassword')} />
+            </Step>
 
-          <Step n={3} title="Generer og del i Teams">
-            {error && <p className="text-sm font-bold text-red-300" role="alert">{error}</p>}
-            <button type="button" onClick={submit} disabled={busy}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-slate-950 font-black text-xs uppercase tracking-widest inline-flex items-center justify-center gap-2">
-              {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Save size={16} aria-hidden="true" />}
-              <span>Lagre og generer SEB-prøve</span>
-            </button>
-            <p className="text-xs text-slate-400">Prøveoppsettet lagres i EU (europe-west1) og slettes automatisk etter 90 dager. Ingen elevdata lagres.</p>
-          </Step>
-        </>
+            <Step n={3} title="Generer og del i Teams">
+              {error && <p className="text-sm font-bold text-red-300" role="alert">{error}</p>}
+              <button type="button" onClick={submit} disabled={busy}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-slate-950 font-black text-xs uppercase tracking-widest inline-flex items-center justify-center gap-2">
+                {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Save size={16} aria-hidden="true" />}
+                <span>Lagre og generer SEB-prøve</span>
+              </button>
+              <p className="text-xs text-slate-400">Prøveoppsettet lagres i EU (europe-west1) og slettes automatisk etter 90 dager. Ingen elevdata lagres.</p>
+            </Step>
+          </div>
+
+          <aside className="lg:sticky lg:top-6 space-y-4">
+            <QuickStepsGuide />
+          </aside>
+        </div>
       )}
 
       <MyExamsList exams={exams} onRemove={removeExam} />

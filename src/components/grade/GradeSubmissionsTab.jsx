@@ -3,6 +3,7 @@ import TeamsGuide from './TeamsGuide';
 import PdfDropZone from './PdfDropZone';
 import SubmissionList from './SubmissionList';
 import SubmissionDetail from './SubmissionDetail';
+import VerificationStepsGuide from './VerificationStepsGuide';
 import { useSubmissions } from '../../hooks/useSubmissions';
 
 /** Fane 2: Kontroller innleverte PDF-er (100 % lokalt). */
@@ -22,7 +23,12 @@ export default function GradeSubmissionsTab() {
       )}
 
       {items.length === 0 ? (
-        <PdfDropZone onFiles={addFiles} />
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
+          <PdfDropZone onFiles={addFiles} />
+          <aside className="lg:sticky lg:top-6 space-y-4">
+            <VerificationStepsGuide />
+          </aside>
+        </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-5 items-start">
           <aside className="space-y-3 no-print">

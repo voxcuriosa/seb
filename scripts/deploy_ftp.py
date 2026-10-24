@@ -2,8 +2,9 @@
 """
 deploy_ftp.py
 Laster opp filer fra dist/ til voxcuriosa.no/seb over FTPS (FTP_TLS).
-Passord hentes sikkert fra macOS-nøkkelringen for kontoen 'cpjvfkip' og tjenesten 'voxcuriosa-ftp'.
-Ingen passord lagres på disk eller i git.
+Passord hentes først fra .ftp-password (lokal git-ignorert fil),
+eller fra macOS-nøkkelringen for kontoen 'cpjvfkip' og tjenesten 'voxcuriosa-ftp'.
+Ingen passord sjekkes inn i git.
 """
 
 import os
@@ -14,18 +15,32 @@ from ftplib import FTP_TLS
 FTP_HOST = "cpanel46.proisp.no"
 FTP_USER = "cpjvfkip"
 FTP_REMOTE_ROOT = "public_html/seb"
-LOCAL_DIST = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dist"))
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+LOCAL_DIST = os.path.join(REPO_ROOT, "dist")
+LOCAL_PW_FILE = os.path.join(REPO_ROOT, ".ftp-password")
 
 def get_ftp_password():
+    # 1. Sjekk lokal git-ignorert fil først
+    if os.path.exists(LOCAL_PW_FILE):
+        try:
+            with open(LOCAL_PW_FILE, "r", encoding="utf-8") as f:
+                pw = f.read().strip()
+                if pw:
+                    return pw
+        except Exception as e:
+            print(f"Kunne ikke lese .ftp-password: {e}", file=sys.stderr)
+
+    # 2. Prøv macOS-nøkkelring
     cmd = ["security", "find-generic-password", "-a", FTP_USER, "-s", "voxcuriosa-ftp", "-w"]
     try:
         pw = subprocess.check_output(cmd, stderr=subprocess.PIPE).decode("utf-8").strip()
-        if not pw:
-            raise ValueError("Tomt passord returnert fra nøkkelringen.")
-        return pw
-    except subprocess.CalledProcessError as e:
-        print(f"Feil ved henting av FTP-passord fra nøkkelring: {e.stderr.decode('utf-8', errors='replace')}", file=sys.stderr)
-        sys.exit(1)
+        if pw:
+            return pw
+    except Exception:
+        pass
+
+    print("Fant verken passord i .ftp-password eller i macOS-nøkkelringen (voxcuriosa-ftp).", file=sys.stderr)
+    sys.exit(1)
 
 def ensure_remote_dir(ftp, remote_path):
     parts = remote_path.strip("/").split("/")

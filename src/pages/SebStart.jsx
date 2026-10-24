@@ -85,6 +85,11 @@ export default function SebStart() {
                 Når du trykker på knappen, lastes en prøvefil ned. Åpne den, så starter SEB og låser maskinen til du leverer.
                 Teksten din lagres bare på denne maskinen.
               </p>
+              {exam?.sebConfig?.allowedApps && Object.values(exam.sebConfig.allowedApps).some(Boolean) && (
+                <div className="mt-2 pt-2 border-t border-slate-800 pl-6 text-xs text-amber-300">
+                  <strong>Viktig før du starter:</strong> Skal du bruke hjelpeprogrammer (som <em>Lingdys</em>, <em>VoxLex</em> eller <em>Ordnett Pluss</em>)? Start disse på datamaskinen din <strong>før</strong> du åpner prøvefilen og starter SEB.
+                </div>
+              )}
             </div>
 
             <button
