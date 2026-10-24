@@ -35,6 +35,7 @@ export default function HelpPanel({ onClose }) {
         </p>
         <ul className="space-y-1 list-disc pl-4 text-slate-300">
           <li><strong>Direkte start i SEB:</strong> Prøven åpnes som hovedside i fullskjerm. Dette sikrer at innlogging med Feide og Microsoft 365 fungerer uten at sikkerhetssperrer for innramming (X-Frame-Options) blokkerer siden.</li>
+          <li><strong>Pålogging i SEB (Passord og Microsoft Authenticator):</strong> Fordi Safe Exam Browser blokkerer lokale OS-dialoger for Windows Hello og Touch ID (ansikt/fingeravtrykk/PIN på maskinen), skal eleven velge <strong>«Bruk passordet mitt / Use my password»</strong> (eventuelt sammen med <strong>Microsoft Authenticator</strong> på mobil hvis skolen bruker tofaktor) når påloggingsbildet vises.</li>
           <li><strong>Tømming av øktkapsler på låne-PC:</strong> SEB sletter automatisk innloggingskapsler (cookies) ved oppstart og avslutning av Forms-prøver, slik at en elevs Feide-økt aldri blir liggende igjen på en låne-PC.</li>
           <li><strong>Slik deles den i Teams:</strong> Velg «Opprett -&gt; Oppgave» i Teams (ikke «Spørreskjema») og lim inn SEB-lenken. Husk å ha «Ett svar per person» påslått inne i Microsoft Forms.</li>
           <li><strong>Påkrevd avslutningskode:</strong> Fordi Forms ikke kan lukke SEB automatisk, må du sette et kodeord (minst 6 tegn, f.eks. «sol-482»). Hold koden hemmelig under prøven: oppgi den ved pulten når eleven viser kvitteringsskjermen («Takk for svaret ditt»), eller skriv den på tavla når prøvetiden er ute og alle har levert.</li>

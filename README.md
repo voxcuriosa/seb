@@ -57,7 +57,8 @@ Følgende domener er allerede lagt inn som standard i `src/utils/seb/formsAuthLi
 - **Fylkeskommunale og kommunale Feide-domener:** `*.telemarkfylke.no/*`, `*.vestfoldfylke.no/*`, `*.vfk.no/*`, `*.afk.no/*`, `*.agderfk.no/*`, `*.bfk.no/*`, `*.ofk.no/*`, `*.innlandetfylke.no/*`, `*.rogfk.no/*`, `*.vlfk.no/*`, `*.mrfylke.no/*`, `*.trondelagfylke.no/*`, `*.nfk.no/*`, `*.tffk.no/*`, `*.ffk.no/*`, `*.osloskolen.no/*`, `*.ude.oslo.kommune.no/*`
 
 **Sjekkpunkt for IT-avdelinger og lærere i andre kommuner eller fylker:**
-Dersom deres skoleeier bruker et eget lokalt domene for Feide-innlogging (f.eks. `adfs.dinkommune.no` eller `feide.dittfylke.no`) som ikke står på listen over, vil SEB vise en melding om at adressen er blokkert under pålogging. Læreren kan da legge til domenet direkte under **«Legg til egne nettsider»** i steg 2 ved opprettelse av prøven, eller IT-avdelingen kan legge det fast inn i `src/utils/seb/formsAuthList.js`.
+- Dersom deres skoleeier bruker et eget lokalt domene for Feide-innlogging (f.eks. `adfs.dinkommune.no` eller `feide.dittfylke.no`) som ikke står på listen over, vil SEB vise en melding om at adressen er blokkert under pålogging. Læreren kan da legge til domenet direkte under **«Legg til egne nettsider»** i steg 2 ved opprettelse av prøven, eller IT-avdelingen kan legge det fast inn i `src/utils/seb/formsAuthList.js`.
+- Ved pålogging i SEB skal elevene velge **«Bruk passordet mitt / Use my password»** (og godkjenne i **Microsoft Authenticator** på mobil dersom tofaktor er påkrevd), ettersom SEB av sikkerhetsgrunner blokkerer lokale OS-dialoger for Windows Hello og Touch ID (ansikt/fingeravtrykk/lokal PIN).
 
 ---
 
