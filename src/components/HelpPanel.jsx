@@ -73,7 +73,7 @@ export default function HelpPanel({ onClose }) {
       </div>
 
       <ul className="text-xs text-slate-300 space-y-1.5 border-t border-slate-800 pt-3">
-        <li><strong className="text-white">Omstart av PC:</strong> Er helt frivillig. Elevene kan starte prøven rett fra skolehverdagen. I enkelte sjeldne tilfeller (for eksempel hvis et ulovlig bakgrunnsprogram eller skjermopptaker henger seg og nekter å lukkes av SEB) kan en rask omstart av elevmaskinen løse problemet.</li>
+        <li><strong className="text-white">Omstart av PC:</strong> Er i utgangspunktet frivillig, og elevene kan starte vanlige prøver rett fra skolehverdagen. <strong>Før store og viktige prøver (som heldagsprøver og tentamen) anbefales det likevel at elevene restarter PC-en først.</strong> Dette tømmer maskinminnet og forhindrer at bakgrunnsprogrammer, Discord eller skjermopptakere skaper sjeldne konflikter med Safe Exam Browser.</li>
         <li><strong className="text-white">Lagring:</strong> Bare lærerens prøveoppsett (tittel, oppgavetekst, innstillinger) lagres i EU, og slettes automatisk etter 90 dager.</li>
         <li><strong className="text-white">Fane 2 (Kontroll):</strong> Har fysisk null nettverkskall – PDF-er fra Teams leses kun lokalt i din nettleser.</li>
         <li><strong className="text-white">Stavekontroll:</strong> Norsk bokmål og nynorsk følger med prøvefilen. Høyreklikk på ord med rød strek for å få forslag.</li>

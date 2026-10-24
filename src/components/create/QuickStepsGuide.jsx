@@ -55,6 +55,9 @@ export default function QuickStepsGuide() {
         <p className="leading-relaxed">
           Skal eleven bruke hjelpeprogrammer som <strong>Lingdys</strong>, <strong>VoxLex</strong> eller <strong>Ordnett Pluss</strong>, må disse startes <em>før</em> eleven klikker på SEB-lenken eller åpner .seb-filen.
         </p>
+        <p className="leading-relaxed text-[11px] text-amber-300/80 pt-1 border-t border-amber-500/30">
+          <strong>Tips før heldagsprøver:</strong> Før store og viktige prøver anbefales det at elevene restarter PC-en først for å unngå bakgrunnskonflikter.
+        </p>
       </div>
     </div>
   );
