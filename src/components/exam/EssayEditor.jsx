@@ -198,7 +198,7 @@ export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, 
         onClick={() => editor?.commands.focus()}
         onContextMenu={handleContextMenu}
       >
-        <div className="max-w-3xl mx-auto">
+        <div className="w-full max-w-5xl">
           <EditorContent editor={editor} />
         </div>
       </div>
