@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { AlertTriangle, ExternalLink } from 'lucide-react';
+import { AlertTriangle, ExternalLink, GripVertical, GripHorizontal } from 'lucide-react';
 import { fetchSebExam } from '../firebase';
 import { EXAM_QUIT_URL } from '../config';
 import { markAsSebEnvironment } from '../utils/seb/sebEnvironment';
@@ -19,11 +19,7 @@ import FinishDialog from '../components/exam/FinishDialog';
 import FormsExitDialog from '../components/exam/FormsExitDialog';
 import LoadingScreen from '../components/common/LoadingScreen';
 
-const LAYOUT_CLASSES = {
-  split: 'grid-cols-1 md:grid-cols-2 grid-rows-[40%_60%] md:grid-rows-1',
-  stacked: 'grid-cols-1 grid-rows-[38%_62%]',
-  focus: 'grid-cols-1 grid-rows-1'
-};
+const clampPct = (v) => Math.min(82, Math.max(18, Number(v) || 48));
 
 export default function SebExamRoom() {
   const { examId } = useParams();
@@ -31,6 +27,8 @@ export default function SebExamRoom() {
   const [status, setStatus] = useState('loading');
   const [initialDraft, setInitialDraft] = useState(null);
   const [layout, setLayout] = useState('split');
+  const [splitPct, setSplitPct] = useState(48);
+  const [draggingSplit, setDraggingSplit] = useState(false);
   const [lang, setLang] = useState('nb-NO');
   const [restored, setRestored] = useState(null);
   const [finishOpen, setFinishOpen] = useState(false);
@@ -38,6 +36,7 @@ export default function SebExamRoom() {
   const [wordCount, setWordCount] = useState(0);
   const editorRef = useRef(null);
   const startedAtRef = useRef(null);
+  const splitContainerRef = useRef(null);
 
   useEffect(() => {
     markAsSebEnvironment();
@@ -50,6 +49,7 @@ export default function SebExamRoom() {
       setInitialDraft(draft);
       if (draft?.lang) setLang(draft.lang);
       if (draft?.layout) setLayout(draft.layout);
+      if (draft?.splitPct) setSplitPct(clampPct(draft.splitPct));
       if (draft?.doc && countWords(docToPlainText(draft.doc)) > 0) {
         const wc = countWords(docToPlainText(draft.doc));
         setRestored({ savedAt: draft.savedAt, wordCount: wc });
@@ -90,15 +90,37 @@ export default function SebExamRoom() {
       incidents: incidentsRef.current,
       startedAt: startedAtRef.current,
       lang,
-      layout
+      layout,
+      splitPct
     };
-  }, [status, lang, layout, log]);
+  }, [status, lang, layout, splitPct, log]);
 
   const autosave = useExamAutosave(examId, getDraft);
   const { schedule } = autosave;
   useEffect(() => {
     if (status === 'ready' && !isFormsExam) schedule();
-  }, [lang, layout, log.incidents, status, schedule, isFormsExam]);
+  }, [lang, layout, splitPct, log.incidents, status, schedule, isFormsExam]);
+
+  useEffect(() => {
+    if (!draggingSplit) return undefined;
+    const onMove = (e) => {
+      const rect = splitContainerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const pct = layout === 'stacked'
+        ? ((e.clientY - rect.top) / Math.max(1, rect.height)) * 100
+        : ((e.clientX - rect.left) / Math.max(1, rect.width)) * 100;
+      setSplitPct(clampPct(pct));
+    };
+    const onUp = () => setDraggingSplit(false);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+    };
+  }, [draggingSplit, layout]);
 
   const finisher = useFinishExam({
     exam,
@@ -177,13 +199,61 @@ export default function SebExamRoom() {
           />
         </div>
       ) : (
-        <div className={`flex-1 min-h-0 grid ${LAYOUT_CLASSES[layout]}`}>
+        <div
+          ref={splitContainerRef}
+          className={`flex-1 min-h-0 flex ${
+            layout === 'stacked' ? 'flex-col' : 'flex-col md:flex-row'
+          } ${draggingSplit ? 'select-none' : ''}`}
+        >
           {layout !== 'focus' && (
-            <section aria-label="Oppgave" className={`min-h-0 overflow-hidden ${layout === 'split' ? 'md:border-r' : 'border-b'} border-slate-800`}>
-              <PromptPanel exam={exam} />
-            </section>
+            <>
+              <section
+                aria-label="Oppgave"
+                style={layout === 'split' ? { flexBasis: `${splitPct}%` } : { height: `${splitPct}%` }}
+                className="min-h-0 min-w-0 shrink-0 grow-0 overflow-hidden"
+              >
+                <PromptPanel exam={exam} />
+              </section>
+              <div
+                role="separator"
+                tabIndex={0}
+                aria-label="Juster størrelse mellom oppgave og skrivefelt (dobbeltklikk for å midtstille)"
+                aria-orientation={layout === 'split' ? 'vertical' : 'horizontal'}
+                aria-valuenow={Math.round(splitPct)}
+                aria-valuemin={18}
+                aria-valuemax={82}
+                title="Dra for å endre bredde (dobbeltklikk for 50/50)"
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  setDraggingSplit(true);
+                }}
+                onDoubleClick={() => setSplitPct(50)}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setSplitPct((p) => clampPct(p - 4));
+                  } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setSplitPct((p) => clampPct(p + 4));
+                  }
+                }}
+                className={`group shrink-0 flex items-center justify-center transition-colors ${
+                  layout === 'split'
+                    ? 'w-2.5 cursor-col-resize border-x border-slate-800/80'
+                    : 'h-2.5 cursor-row-resize border-y border-slate-800/80'
+                } ${
+                  draggingSplit ? 'bg-emerald-500/30 border-emerald-500/60' : 'bg-slate-900 hover:bg-emerald-500/20'
+                }`}
+              >
+                {layout === 'split' ? (
+                  <GripVertical size={13} className={draggingSplit ? 'text-emerald-300' : 'text-slate-500 group-hover:text-emerald-300'} aria-hidden="true" />
+                ) : (
+                  <GripHorizontal size={13} className={draggingSplit ? 'text-emerald-300' : 'text-slate-500 group-hover:text-emerald-300'} aria-hidden="true" />
+                )}
+              </div>
+            </>
           )}
-          <section aria-label="Besvarelse" className="min-h-0 overflow-hidden">
+          <section aria-label="Besvarelse" className="flex-1 min-h-0 min-w-0 overflow-hidden">
             <EssayEditor
               initialDoc={initialDraft?.doc}
               lang={lang}

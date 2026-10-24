@@ -78,8 +78,11 @@ export function buildPermittedProcessesXml(allowedApps = {}) {
     : '  <key>permittedProcesses</key>\n  <array/>';
 }
 
-/** Faste domener prøverommet trenger (app, Firebase, CDN for pdf.js-worker). */
+/** Faste domener prøverommet trenger (app, Firebase, CDN for pdf.js-worker, samt data:/about: for lokal PDF-eksport). */
 export const BASE_ALLOWED_EXPRESSIONS = [
+  'about:blank',
+  'about:*',
+  'data:*',
   'voxcuriosa.no/*',
   '*.voxcuriosa.no/*',
   'curiosa.no/*',
@@ -138,12 +141,11 @@ export function collectAllowedExpressions(allowedWebsites = [], startURL = '') {
 
 export function buildUrlFilterXml(allowedWebsites = [], startURL = '') {
   const rules = collectAllowedExpressions(allowedWebsites, startURL).map(filterRule).join('\n');
-  // SEB 3.x på macOS blokkerer lokale blob:-nedlastinger (PDF/TXT) og fylkesvise Feide-videresendinger
-  // med «URL blocked» dersom URLFilterEnable er true (fordi NSURL parser blob:https://... med host = nil).
-  // Adressefeltet i SEB er låst av (browserWindowAllowAddressBar = false), så eleven kan kun åpne
-  // ressurser som læreren eksplisitt har lagt til. Vi legger likevel ved regellisten i plist-en.
+  // Dekk både SEB 3.x (URLFilter*) og eldre SEB 2.x (urlFilter*) slik at filteret alltid er aktivt.
+  // Merk: BASE_ALLOWED_EXPRESSIONS inkluderer data:* og about:blank fordi SEBs URL-filter på macOS
+  // støtter disse protokollene uten vertsnavn, mens lokal PDF-eksport bruker data:-URI i SEB.
   return `  <key>URLFilterEnable</key>
-  <false/>
+  <true/>
   <key>URLFilterEnableContentFilter</key>
   <false/>
   <key>URLFilterRules</key>
@@ -151,7 +153,7 @@ export function buildUrlFilterXml(allowedWebsites = [], startURL = '') {
 ${rules}
   </array>
   <key>urlFilterEnable</key>
-  <false/>
+  <true/>
   <key>urlFilterEnableContentFilter</key>
   <false/>`;
 }

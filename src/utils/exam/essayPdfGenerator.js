@@ -126,14 +126,33 @@ export function essayPdfFileName(payload) {
   return `prove-${safeTitle}-${payload.receiptCode}.pdf`;
 }
 
+function bytesToBase64(bytes) {
+  const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  let binary = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < arr.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, arr.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
+function isSebBrowser() {
+  if (typeof navigator === 'undefined') return false;
+  return /SEB|SafeExamBrowser/i.test(navigator.userAgent || '');
+}
+
 export function downloadBytes(bytes, fileName, type = 'application/pdf') {
-  const blob = new Blob([bytes], { type });
-  const url = URL.createObjectURL(blob);
+  const useDataUri = isSebBrowser();
+  const url = useDataUri
+    ? `data:${type};base64,${bytesToBase64(bytes)}`
+    : URL.createObjectURL(new Blob([bytes], { type }));
   const link = document.createElement('a');
   link.href = url;
   link.download = fileName;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  if (!useDataUri) {
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
 }

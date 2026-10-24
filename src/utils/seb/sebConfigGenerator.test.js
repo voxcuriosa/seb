@@ -101,9 +101,13 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toContain('<string>app.clarify.no/*</string>');
     expect(xml).toContain('<string>auth.dataporten.no/*</string>');
     expect(xml).toContain('<string>idp.feide.no/*</string>');
-    expect(xml).toMatch(/<key>URLFilterEnable<\/key>\s*<false\/>/);
+    expect(xml).toContain('<string>data:*</string>');
+    expect(xml).toContain('<string>about:blank</string>');
+    expect(xml).toMatch(/<key>URLFilterEnable<\/key>\s*<true\/>/);
     expect(xml).toMatch(/<key>browserWindowAllowAddressBar<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>newBrowserWindowAllowAddressBar<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>allowSwitchToApplications<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>enableAltTab<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>examSessionClearCookiesOnEnd<\/key>\s*<true\/>/);
   });
 

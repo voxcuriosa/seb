@@ -42,6 +42,7 @@ export function buildStandaloneSebPlist({
   const effectiveStartUrl = startURL || examRoomUrl(examId);
   const isFormsStart = /forms\.(office|microsoft)\.com/i.test(effectiveStartUrl);
   const hasClarify = websites.some((w) => /clarify\.no/i.test(`${w?.domain || ''} ${w?.url || ''}`));
+  const hasAllowedApps = Boolean(allowedApps?.voxlex || allowedApps?.ordnett || allowedApps?.lingdys);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -161,13 +162,13 @@ ${buildDictionariesXml(dictionaries)}
   <key>removeLocalStorage</key>
   <false/>
   <key>enableAltTab</key>
-  <true/>
+  ${hasAllowedApps ? '<true/>' : '<false/>'}
   <key>enablePrintScreen</key>
   <false/>
   <key>blockScreenSharing</key>
   <true/>
   <key>allowSwitchToApplications</key>
-  <true/>
+  ${hasAllowedApps ? '<true/>' : '<false/>'}
 ${buildUrlFilterXml(websites, effectiveStartUrl)}
 ${buildPermittedProcessesXml(allowedApps)}${resourcesXml ? `\n${resourcesXml}` : ''}
 </dict>
