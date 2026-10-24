@@ -4,6 +4,7 @@ import CreateExamTab from '../components/create/CreateExamTab';
 import HelpPanel from '../components/HelpPanel';
 import PrivacyAuditModal from '../components/PrivacyAuditModal';
 import LoadingScreen from '../components/common/LoadingScreen';
+import AuthorMailLink from '../components/common/AuthorMailLink';
 
 // Fane 2 laster pdf.js og kjører helt lokalt: lastes bare ved behov.
 const GradeSubmissionsTab = lazy(() => import('../components/grade/GradeSubmissionsTab'));
@@ -36,6 +37,14 @@ export default function TeacherHub() {
             </div>
           </div>
           <div className="ml-auto flex items-center gap-2">
+            <a
+              href="https://github.com/voxcuriosa/seb"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-bold text-slate-300 hover:text-white transition-colors"
+            >
+              <span>GitHub</span>
+            </a>
             <button type="button" onClick={() => setShowPrivacy(true)}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-950/60 border border-emerald-500/40 hover:bg-emerald-900/60 text-xs font-bold text-emerald-300">
               <Shield size={14} aria-hidden="true" /> Personvern og IT
@@ -71,11 +80,17 @@ export default function TeacherHub() {
           )}
         </div>
       </main>
-      <footer className="max-w-6xl mx-auto px-4 sm:px-6 py-6 border-t border-slate-900 text-xs text-slate-400 flex flex-wrap items-center justify-between gap-2 no-print">
-        <span>Utviklet av <strong className="text-slate-300">Christian Borchgrevink-Vigeland / VoxCuriosa</strong></span>
-        <a href="https://github.com/voxcuriosa/seb/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 underline">
-          Åpen kildekode – MIT-lisens med krav om kreditering
-        </a>
+      <footer className="max-w-6xl mx-auto px-4 sm:px-6 py-6 border-t border-slate-900 text-xs text-slate-400 flex flex-wrap items-center justify-between gap-3 no-print">
+        <span>Utviklet av <strong className="text-slate-300"><AuthorMailLink label="Christian Borchgrevink-Vigeland" className="text-slate-300 hover:text-emerald-300 underline font-semibold" /></strong> / VoxCuriosa</span>
+        <div className="flex items-center gap-4">
+          <a href="https://github.com/voxcuriosa/seb" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 underline font-mono">
+            github.com/voxcuriosa/seb
+          </a>
+          <span className="text-slate-600">·</span>
+          <a href="https://github.com/voxcuriosa/seb/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 underline">
+            MIT-lisens med krav om kreditering
+          </a>
+        </div>
       </footer>
     </div>
   );

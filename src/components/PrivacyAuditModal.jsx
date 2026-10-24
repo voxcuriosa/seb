@@ -3,7 +3,8 @@
  * Grundig teknisk redegjørelse for personvern, IT-sikkerhet og GDPR
  * tilpasset personvernombud (DPO), IT-avdelinger og lærere i norsk skole.
  */
-import { X, ShieldCheck, Server, Lock, Database, Trash2, Cpu, CheckCircle2, FileCheck } from 'lucide-react';
+import { X, ShieldCheck, Server, Lock, Database, Cpu, CheckCircle2, FileCheck } from 'lucide-react';
+import AuthorMailLink from './common/AuthorMailLink';
 
 export default function PrivacyAuditModal({ isOpen, onClose }) {
   if (!isOpen) return null;
@@ -131,7 +132,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               </div>
               <div className="flex items-start gap-2 sm:col-span-2">
                 <span className="text-emerald-400 font-bold">✓</span>
-                <span><strong>100 % Open Source (MIT-lisens med krav om kreditering):</strong> Utviklet av <strong>Christian Borchgrevink-Vigeland / VoxCuriosa</strong>. Kildekoden ligger åpent på GitHub (<a href="https://github.com/voxcuriosa/seb" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline font-mono">github.com/voxcuriosa/seb</a>). Skoler og IT-avdelinger kan fritt revidere, laste ned og drifte løsningen på egne servere mot synlig kreditering av opphavspersonen.</span>
+                <span><strong>100 % Open Source (MIT-lisens med krav om kreditering):</strong> Utviklet av <strong className="text-white"><AuthorMailLink label="Christian Borchgrevink-Vigeland" className="text-emerald-400 hover:text-emerald-300 underline font-semibold" /></strong> / VoxCuriosa. Kildekoden ligger åpent på GitHub (<a href="https://github.com/voxcuriosa/seb" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline font-mono">github.com/voxcuriosa/seb</a>). Skoler og IT-avdelinger kan fritt revidere, laste ned og drifte løsningen på egne servere mot synlig kreditering av opphavspersonen.</span>
               </div>
             </div>
           </div>

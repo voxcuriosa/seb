@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { KeyRound, Loader2, ShieldCheck } from 'lucide-react';
+import AuthorMailLink from '../common/AuthorMailLink';
 
 /** PIN-sperre for Fane 1. PIN-en sjekkes av Cloud Function (Secret Manager), aldri i nettleseren. */
 export default function TeacherPinGate({ onUnlock, busy, error }) {
@@ -49,7 +50,18 @@ export default function TeacherPinGate({ onUnlock, busy, error }) {
         <span>Lås opp</span>
       </button>
       <p className="text-[11px] text-slate-500 leading-relaxed text-center">
-        Kontakt Christian Borchgrevink-Vigeland (<a href="mailto:borchgrevink@gmail.com" className="text-emerald-400 hover:text-emerald-300 underline font-semibold">borchgrevink@gmail.com</a>) for å få PIN-kode.
+        Kontakt <AuthorMailLink label="Christian Borchgrevink-Vigeland" showEmail={true} subject="Forespørsel om lærer-PIN til SEB-prøver" /> for å få PIN-kode.
+      </p>
+      <p className="text-[11px] text-slate-500 text-center pt-1 border-t border-slate-800/80">
+        Kildekode på GitHub:{' '}
+        <a
+          href="https://github.com/voxcuriosa/seb"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-emerald-400 hover:text-emerald-300 underline font-mono"
+        >
+          github.com/voxcuriosa/seb
+        </a>
       </p>
     </form>
   );
