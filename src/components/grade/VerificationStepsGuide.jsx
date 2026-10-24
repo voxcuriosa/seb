@@ -52,6 +52,12 @@ export default function VerificationStepsGuide() {
       <p className="text-xs text-slate-400 border-t border-slate-800 pt-3">
         Fullstendig offline kontroll: Elevbesvarelsene forlater aldri datamaskinen din.
       </p>
+      <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-xs text-emerald-200 space-y-1">
+        <p className="font-bold text-emerald-300">IT & Personverngaranti:</p>
+        <p className="leading-relaxed text-slate-300">
+          Fane 2 utfører <strong>0 nettverkskall</strong>. Koden er statisk revidert av en automatisert personvernvakt før deploy.
+        </p>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import { lazy, Suspense, useState } from 'react';
-import { Lock, FilePlus2, ShieldCheck, HelpCircle, ArrowLeft } from 'lucide-react';
+import { Lock, FilePlus2, ShieldCheck, HelpCircle, ArrowLeft, Shield } from 'lucide-react';
 import CreateExamTab from '../components/create/CreateExamTab';
 import HelpPanel from '../components/HelpPanel';
+import PrivacyAuditModal from '../components/PrivacyAuditModal';
 import LoadingScreen from '../components/common/LoadingScreen';
 
 // Fane 2 laster pdf.js og kjører helt lokalt: lastes bare ved behov.
@@ -16,6 +17,7 @@ const TABS = [
 export default function TeacherHub() {
   const [tab, setTab] = useState('create');
   const [showHelp, setShowHelp] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -33,10 +35,16 @@ export default function TeacherHub() {
               <p className="text-xs text-slate-400">Safe Exam Browser uten innlogging og uten KI. Elevdata blir på elevens maskin.</p>
             </div>
           </div>
-          <button type="button" onClick={() => setShowHelp((s) => !s)} aria-expanded={showHelp}
-            className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-xs font-bold text-slate-200">
-            <HelpCircle size={15} aria-hidden="true" /> Hjelp
-          </button>
+          <div className="ml-auto flex items-center gap-2">
+            <button type="button" onClick={() => setShowPrivacy(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-950/60 border border-emerald-500/40 hover:bg-emerald-900/60 text-xs font-bold text-emerald-300">
+              <Shield size={14} aria-hidden="true" /> Personvern & IT
+            </button>
+            <button type="button" onClick={() => setShowHelp((s) => !s)} aria-expanded={showHelp}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-xs font-bold text-slate-200">
+              <HelpCircle size={15} aria-hidden="true" /> Hjelp
+            </button>
+          </div>
         </div>
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 flex gap-1" role="tablist" aria-label="Lærersenter">
           {TABS.map(({ id, label, icon: Icon }) => (
@@ -52,6 +60,7 @@ export default function TeacherHub() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {showHelp && <HelpPanel onClose={() => setShowHelp(false)} />}
+        <PrivacyAuditModal isOpen={showPrivacy} onClose={() => setShowPrivacy(false)} />
         <div role="tabpanel">
           {tab === 'create' ? (
             <CreateExamTab />
