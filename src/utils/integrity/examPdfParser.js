@@ -124,13 +124,14 @@ export async function parseExamPdfFile(file) {
   const signature = payload.type === SEB_ESSAY_TYPE
     ? await verifySebSignature(payload)
     : { status: 'missing', detail: 'Eldre format uten serversignatur.' };
-  if (signature.status === 'invalid' || signature.status === 'unknown-key') reasons.push(signature.detail);
+  const sigBad = signature.status === 'invalid' || signature.status === 'unknown-key' || signature.status === 'late';
+  if (sigBad) reasons.push(signature.detail);
 
   const formattingTrusted = payload.type === SEB_ESSAY_TYPE && payload.essayDoc
     && docToPlainText(payload.essayDoc) === payload.essayText;
 
   let verdict = 'invalid';
-  if (layer1 && layer2.ok && signature.status !== 'invalid' && signature.status !== 'unknown-key') {
+  if (layer1 && layer2.ok && !sigBad) {
     verdict = signature.status === 'valid' ? 'verified' : 'verified-unsigned';
   }
 

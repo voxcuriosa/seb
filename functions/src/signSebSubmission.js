@@ -17,7 +17,12 @@ export const KEY_ID = 'k1';
 
 let cachedKey = null;
 function privateKey() {
-  if (!cachedKey) cachedKey = createPrivateKey(SEB_SIGNING_KEY.value());
+  if (!cachedKey) {
+    const raw = String(SEB_SIGNING_KEY.value() || '').trim();
+    cachedKey = raw.includes('BEGIN')
+      ? createPrivateKey(raw)
+      : createPrivateKey({ key: Buffer.from(raw, 'base64'), format: 'der', type: 'pkcs8' });
+  }
   return cachedKey;
 }
 

@@ -146,20 +146,25 @@ describe('verifisering av PDF', () => {
 });
 
 describe('Ed25519-signatur', () => {
-  it('verifiserer gyldig signatur og avviser feil hash', async () => {
-    const priv = ed.utils.randomSecretKey();
-    const pub = await ed.getPublicKeyAsync(priv);
-    const keys = { ...SIGNING_PUBLIC_KEYS, test: Buffer.from(pub).toString('base64') };
+  it('verifiserer gyldig signatur (både 32-byte rå og 44-byte SPKI DER) og avviser feil hash eller manipulert tid', async () => {
+    const { generateKeyPairSync, createPrivateKey, sign } = await import('node:crypto');
+    const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+    const privDerB64 = privateKey.export({ format: 'der', type: 'pkcs8' }).toString('base64');
+    const pubDerB64 = publicKey.export({ format: 'der', type: 'spki' }).toString('base64');
+
+    const keys = { ...SIGNING_PUBLIC_KEYS, derTest: pubDerB64 };
     const signedAt = new Date(Date.parse(payload.completedAt) + 2000).toISOString();
-    const msg = new TextEncoder().encode(signatureMessage({ examId: payload.examId, sha256: payload.sha256, signedAt }));
-    const signature = Buffer.from(await ed.signAsync(msg, priv)).toString('base64');
-    const signed = { ...payload, signature, signedAt, keyId: 'test' };
+    const msg = Buffer.from(signatureMessage({ examId: payload.examId, sha256: payload.sha256, signedAt }), 'utf8');
+    const pk = createPrivateKey({ key: Buffer.from(privDerB64, 'base64'), format: 'der', type: 'pkcs8' });
+    const signature = sign(null, msg, pk).toString('base64');
+    const signed = { ...payload, signature, signedAt, keyId: 'derTest' };
 
     expect((await verifySebSignature(signed, keys)).status).toBe('valid');
     expect((await verifySebSignature({ ...signed, sha256: '0'.repeat(64) }, keys)).status).toBe('invalid');
     const late = { ...signed, completedAt: new Date(Date.parse(signedAt) - 10 * 60_000).toISOString() };
-    // completedAt endret => signaturen gjelder fortsatt hash, men forsinkelsen flagges
     expect((await verifySebSignature(late, keys)).status).toBe('late');
+    const nanDate = { ...signed, completedAt: 'ikke-en-dato' };
+    expect((await verifySebSignature(nanDate, keys)).status).toBe('late');
   });
 
   it('melder manglende signatur', async () => {
