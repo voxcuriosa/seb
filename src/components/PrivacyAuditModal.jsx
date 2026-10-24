@@ -131,7 +131,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               </div>
               <div className="flex items-start gap-2 sm:col-span-2">
                 <span className="text-emerald-400 font-bold">✓</span>
-                <span><strong>100 % Open Source (MIT-lisens):</strong> Kildekoden er offentlig tilgjengelig på GitHub (<a href="https://github.com/voxcuriosa/seb" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline font-mono">github.com/voxcuriosa/seb</a>). Skoler og IT-avdelinger kan fritt revidere, laste ned og kjøre løsningen på egne lokale servere hvis de foretrekker lokal drift.</span>
+                <span><strong>100 % Open Source (MIT-lisens med krav om kreditering):</strong> Utviklet av <strong>Christian Borchgrevink-Vigeland / VoxCuriosa</strong>. Kildekoden ligger åpent på GitHub (<a href="https://github.com/voxcuriosa/seb" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline font-mono">github.com/voxcuriosa/seb</a>). Skoler og IT-avdelinger kan fritt revidere, laste ned og drifte løsningen på egne servere mot synlig kreditering av opphavspersonen.</span>
               </div>
             </div>
           </div>

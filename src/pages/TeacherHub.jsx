@@ -71,6 +71,12 @@ export default function TeacherHub() {
           )}
         </div>
       </main>
+      <footer className="max-w-6xl mx-auto px-4 sm:px-6 py-6 border-t border-slate-900 text-xs text-slate-400 flex flex-wrap items-center justify-between gap-2 no-print">
+        <span>Utviklet av <strong className="text-slate-300">Christian Borchgrevink-Vigeland / VoxCuriosa</strong></span>
+        <a href="https://github.com/voxcuriosa/seb/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 underline">
+          Åpen kildekode – MIT-lisens med krav om kreditering
+        </a>
+      </footer>
     </div>
   );
 }

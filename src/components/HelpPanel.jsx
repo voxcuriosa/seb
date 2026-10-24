@@ -89,10 +89,10 @@ export default function HelpPanel({ onClose }) {
       <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-1">
         <div className="flex items-center gap-1.5 text-white font-bold">
           <Code2 size={14} className="text-emerald-400" />
-          <span>100 % Open Source (MIT-lisens):</span>
+          <span>100 % Open Source (MIT-lisens med krav om kreditering):</span>
         </div>
         <p className="leading-relaxed">
-          Kildekoden er helt åpen og kan fritt brukes, modifiseres og integreres av alle skoler, kommuner og IT-avdelinger til akkurat det man vil. IT-avdelinger som ønsker full suverenitet kan laste ned og kjøre hele løsningen på egne lokale servere:
+          Utviklet av <strong className="text-white">Christian Borchgrevink-Vigeland / VoxCuriosa</strong>. Kildekoden er åpen og kan fritt brukes, modifiseres og driftes på egne servere av skoler, kommuner og fylkeskommuner, forutsatt synlig kreditering av opphavspersonen i kode og brukergrensesnitt:
         </p>
         <a
           href="https://github.com/voxcuriosa/seb"
