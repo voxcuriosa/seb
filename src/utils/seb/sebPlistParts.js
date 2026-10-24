@@ -93,6 +93,8 @@ export const BASE_ALLOWED_EXPRESSIONS = [
   '*.firebaseapp.com/*',
   'firebaseapp.com/*',
   '*.firebaseio.com/*',
+  'firebasestorage.googleapis.com/*',
+  '*.firebasestorage.app/*',
   '*.googleapis.com/*',
   'googleapis.com/*',
   '*.cloudfunctions.net/*',

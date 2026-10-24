@@ -1,0 +1,14 @@
+[
+  {
+    "origin": [
+      "https://voxcuriosa.no",
+      "https://*.voxcuriosa.no",
+      "https://voxcuriosa-seb.web.app",
+      "https://voxcuriosa-seb.firebaseapp.com",
+      "http://localhost:5173"
+    ],
+    "method": ["GET", "HEAD", "OPTIONS"],
+    "responseHeader": ["Content-Type", "Content-Length", "ETag", "Cache-Control"],
+    "maxAgeSeconds": 3600
+  }
+]
