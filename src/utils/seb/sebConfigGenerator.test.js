@@ -39,6 +39,7 @@ describe('buildStandaloneSebPlist', () => {
     expect(lint(xml)).toMatch(/OK/);
     expect(xml).toContain('<string>https://voxcuriosa.no/seb/exam/Ab12_x?seb=1</string>');
     expect(xml).toContain('<string>https://voxcuriosa.no/seb/quit</string>');
+    expect(xml).toMatch(/<key>showQuitButton<\/key>\s*<true\/>/);
     expect(xml).toMatch(/<key>allowSpellCheck<\/key>\s*<true\/>/);
     expect(xml).toMatch(/<key>enableRightMouse<\/key>\s*<true\/>/);
     expect(xml).toMatch(/<key>clearBrowserCache<\/key>\s*<false\/>/);
@@ -67,6 +68,14 @@ describe('buildStandaloneSebPlist', () => {
   it('URL-koder examId i startURL', () => {
     const xml = buildStandaloneSebPlist({ examId: 'a b&c' });
     expect(xml).toContain('/seb/exam/a%20b%26c?seb=1');
+  });
+
+  it('bruker egendefinert startURL direkte når oppgitt (f.eks. for Microsoft Forms)', () => {
+    const formsUrl = 'https://forms.office.com/Pages/ResponsePage.aspx?id=test123&test=1';
+    const xml = buildStandaloneSebPlist({ examId: 'f1', startURL: formsUrl });
+    expect(lint(xml)).toMatch(/OK/);
+    expect(xml).toContain('<key>startURL</key>');
+    expect(xml).toContain('<string>https://forms.office.com/Pages/ResponsePage.aspx?id=test123&amp;test=1</string>');
   });
 
   it('kan bygges med ekte norske ordbøker', () => {

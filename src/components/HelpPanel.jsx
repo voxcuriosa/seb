@@ -27,15 +27,15 @@ export default function HelpPanel({ onClose }) {
       <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-1.5">
         <div className="flex items-center gap-1.5 text-white font-bold">
           <FileSpreadsheet size={15} className="text-emerald-400" />
-          <span>Prøver som gjennomføres i Microsoft Forms:</span>
+          <span>Prøver i Microsoft Forms (med skole- og Feide-innlogging):</span>
         </div>
         <p className="leading-relaxed">
-          Dersom prøven gjennomføres som et skjema i Microsoft Forms (flervalg/MCQ), skal det <strong>ikke lages eller leveres noen PDF</strong>:
+          Når du velger Microsoft Forms som kilde, tilpasses Safe Exam Browser spesifikt for Forms-økosystemet:
         </p>
         <ul className="space-y-1 list-disc pl-4 text-slate-300">
-          <li>Legg til Forms-lenken (eller tillat <code className="text-emerald-300">forms.office.com</code>) under tillatte nettsider.</li>
-          <li>Elevene svarer på og sender inn prøven direkte inne i Microsoft Forms i SEB.</li>
-          <li>Alt lagres direkte i Microsoft Forms hos læreren. Elevene avslutter deretter SEB på vanlig måte.</li>
+          <li><strong>Direkte start i SEB:</strong> Prøven åpnes som hovedside i fullskjerm. Dette sikrer at innlogging med Feide og Microsoft 365 fungerer uten at sikkerhetssperrer for innramming (X-Frame-Options) blokkerer siden.</li>
+          <li><strong>Ingen PDF lages:</strong> Svarene sendes inn direkte til Microsoft Forms hos læreren.</li>
+          <li><strong>Påkrevd avslutnings-PIN:</strong> Fordi Forms ikke kan lukke SEB automatisk etter innlevering, må du sette en PIN ved opprettelse. Eleven svarer og klikker «Send inn», viser kvitteringsskjermen på maskinen sin til læreren, og læreren taster inn PIN-koden for å avslutte SEB (eller klikker på SEBs avsluttningsikon).</li>
         </ul>
       </div>
 

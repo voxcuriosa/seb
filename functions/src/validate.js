@@ -113,6 +113,9 @@ export function validateExamInput(data) {
   const cfg = data.sebConfig || {};
   const quitPasswordHash = String(cfg.quitPasswordHash || '').toLowerCase();
   if (quitPasswordHash && !/^[a-f0-9]{64}$/.test(quitPasswordHash)) fail('Ugyldig passord-hash.');
+  if (sourceType === 'forms' && !quitPasswordHash) {
+    fail('Avslutningspassord (PIN) er påkrevd for Microsoft Forms-prøver.');
+  }
 
   // Hvis forms, sørg for at forms.office.com ligger i allowedWebsites
   let allowedWebsites = validateWebsites(cfg.allowedWebsites);

@@ -29,6 +29,7 @@ export function safeFileSlug(title = '') {
 /** Ren funksjon: bygger plist-XML. Testbar uten nettleser. */
 export function buildStandaloneSebPlist({
   examId,
+  startURL = '',
   allowedWebsites = [],
   allowedApps = {},
   quitPasswordHash = '',
@@ -38,6 +39,7 @@ export function buildStandaloneSebPlist({
   const hasQuitPassword = /^[a-f0-9]{64}$/i.test(String(quitPasswordHash || ''));
   const websites = Array.isArray(allowedWebsites) ? allowedWebsites : [];
   const resourcesXml = buildAdditionalResourcesXml(websites);
+  const effectiveStartUrl = startURL || examRoomUrl(examId);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -46,7 +48,7 @@ export function buildStandaloneSebPlist({
   <key>originatorVersion</key>
   <string>SEB_Win_3.6.0</string>
   <key>startURL</key>
-  <string>${escapeXml(examRoomUrl(examId))}</string>
+  <string>${escapeXml(effectiveStartUrl)}</string>
   <key>sebConfigPurpose</key>
   <integer>0</integer>
   <key>browserUserAgentWinDesktopMode</key>
@@ -92,6 +94,8 @@ export function buildStandaloneSebPlist({
   <key>showMenuBar</key>
   <true/>
   <key>showTaskBar</key>
+  <true/>
+  <key>showQuitButton</key>
   <true/>
   <key>taskBarHeight</key>
   <integer>40</integer>
@@ -173,6 +177,7 @@ function triggerDownload(content, fileName, type) {
 export async function downloadStandaloneSebExamFile({
   examId,
   title,
+  startURL = '',
   allowedWebsites = [],
   allowedApps = {},
   quitPassword = '',
@@ -184,6 +189,7 @@ export async function downloadStandaloneSebExamFile({
   const dictionaries = includeDictionaries ? await loadEmbeddedDictionaries() : [];
   const xml = buildStandaloneSebPlist({
     examId,
+    startURL,
     allowedWebsites,
     allowedApps,
     quitPasswordHash: effectiveHash,

@@ -148,6 +148,16 @@ export default function SebExamRoom() {
 
       {isFormsExam ? (
         <div className="flex-1 min-h-0 relative bg-slate-900 flex flex-col">
+          <div className="bg-slate-900 border-b border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300">
+            <span>Microsoft Forms-prøve. I Safe Exam Browser åpnes Forms direkte i fullskjerm for feilfri Feide- og Microsoft-innlogging.</span>
+            <a
+              href={formsUrl}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
+            >
+              <span>Åpne Forms direkte</span>
+              <ExternalLink size={12} aria-hidden="true" />
+            </a>
+          </div>
           <iframe
             src={formsUrl}
             title={exam.title}

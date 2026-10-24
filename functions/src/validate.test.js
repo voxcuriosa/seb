@@ -49,6 +49,40 @@ describe('validateExamInput', () => {
     expect(() => validateExamInput({ ...base, sebConfig: { allowedWebsites: [{ url: 'javascript:alert(1)' }] } })).toThrow(ValidationError);
   });
 
+  it('krever gyldig Forms-lenke og avslutningspassord (PIN) ved sourceType forms', () => {
+    const validHash = 'a'.repeat(64);
+    // Mangler passord
+    expect(() =>
+      validateExamInput({
+        ...base,
+        sourceType: 'forms',
+        formsUrl: 'https://forms.office.com/r/abc1234',
+        sebConfig: { quitPasswordHash: '' }
+      })
+    ).toThrow(/Avslutningspassord \(PIN\) er påkrevd/);
+
+    // Ugyldig forms-lenke
+    expect(() =>
+      validateExamInput({
+        ...base,
+        sourceType: 'forms',
+        formsUrl: 'https://notforms.com/r/abc1234',
+        sebConfig: { quitPasswordHash: validHash }
+      })
+    ).toThrow(/Ugyldig Microsoft Forms-lenke/);
+
+    // Gyldig forms
+    const res = validateExamInput({
+      ...base,
+      sourceType: 'forms',
+      formsUrl: 'https://forms.office.com/r/abc1234',
+      sebConfig: { quitPasswordHash: validHash }
+    });
+    expect(res.sourceType).toBe('forms');
+    expect(res.formsUrl).toBe('https://forms.office.com/r/abc1234');
+    expect(res.sebConfig.allowedWebsites.some((w) => w.domain === 'forms.office.com')).toBe(true);
+  });
+
   it('validerer examId', () => {
     expect(isValidExamId('AbCdEfGhIj0123456789')).toBe(true);
     expect(isValidExamId('../etc')).toBe(false);

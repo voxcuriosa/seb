@@ -84,12 +84,15 @@ export default function PromptSourcePicker({
               className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 font-mono"
             />
           </label>
-          <div className="text-xs text-slate-300 space-y-1">
+          <div className="text-xs text-slate-300 space-y-1.5">
             <p>
-              <strong>SEB åpner skjemaet direkte for eleven:</strong> Safe Exam Browser klargjøres automatisk med full støtte for Microsoft 365, Teams og Feide-innlogging.
+              <strong className="text-white">SEB åpner skjemaet direkte for eleven:</strong> Safe Exam Browser klargjøres automatisk med full støtte for Microsoft 365, Teams og Feide-innlogging i fullskjerm uten rammeblokkering.
             </p>
             <p className="text-emerald-200">
-              Elevene sender inn svarene direkte i Forms. Ingen PDF trengs! Elevene får en egen knapp for å avslutte SEB etter innlevering.
+              Elevene svarer og sender inn direkte i Forms. Ingen PDF lages.
+            </p>
+            <p className="text-amber-200">
+              <strong>Merk:</strong> Fordi Forms ikke kan lukke SEB automatisk, er avslutningspassord / PIN påkrevd i steg 2. Når eleven har levert og viser kvitteringsskjermen, låser du opp og avslutter SEB med koden din.
             </p>
           </div>
         </div>

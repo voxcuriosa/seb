@@ -15,11 +15,15 @@ export default function SebStart() {
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
-    if (isSebEnvironment()) {
+    if (isSebEnvironment() && exam) {
       markAsSebEnvironment();
-      navigate(`/exam/${encodeURIComponent(examId)}?seb=1`, { replace: true });
+      if ((exam.sourceType === 'forms' || exam.formsUrl) && exam.formsUrl) {
+        window.location.replace(exam.formsUrl);
+      } else {
+        navigate(`/exam/${encodeURIComponent(examId)}?seb=1`, { replace: true });
+      }
     }
-  }, [examId, navigate]);
+  }, [examId, exam, navigate]);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,9 +43,12 @@ export default function SebStart() {
     if (!exam || downloading) return;
     setDownloading(true);
     try {
+      const isForms = exam.sourceType === 'forms' || Boolean(exam.formsUrl);
+      const startURL = isForms ? exam.formsUrl : null;
       await downloadStandaloneSebExamFile({
         examId: exam.id,
         title: exam.title,
+        startURL,
         allowedWebsites: exam.sebConfig?.allowedWebsites || [],
         allowedApps: exam.sebConfig?.allowedApps || {},
         quitPasswordHash: exam.sebConfig?.quitPasswordHash || ''
@@ -82,8 +89,9 @@ export default function SebStart() {
                 </span>
               </div>
               <p className="text-xs text-slate-400 pl-6">
-                Når du trykker på knappen, lastes en prøvefil ned. Åpne den, så starter SEB og låser maskinen til du leverer.
-                Teksten din lagres bare på denne maskinen.
+                {exam?.sourceType === 'forms'
+                  ? 'Prøven åpnes direkte i Microsoft Forms med Feide- og skoleinnlogging. Når du har levert og ser kvitteringen, vis skjermen til læreren for å avslutte SEB med lærerens PIN-kode.'
+                  : 'Når du trykker på knappen, lastes en prøvefil ned. Åpne den, så starter SEB og låser maskinen til du leverer. Teksten din lagres bare på denne maskinen.'}
               </p>
               {exam?.sebConfig?.allowedApps && Object.values(exam.sebConfig.allowedApps).some(Boolean) && (
                 <div className="mt-2 pt-2 border-t border-slate-800 pl-6 text-xs text-amber-300">

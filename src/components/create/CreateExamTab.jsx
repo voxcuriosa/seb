@@ -42,8 +42,14 @@ export default function CreateExamTab() {
   const validationError = () => {
     if (!form.title.trim()) return 'Gi prøven en tittel.';
     if (form.sourceType === 'pdf' && !form.pdfFile) return 'Velg en oppgave-PDF.';
-    if (form.sourceType === 'forms' && (!form.formsUrl.trim() || !form.formsUrl.startsWith('https://forms.'))) {
-      return 'Lim inn en gyldig Microsoft Forms-lenke (f.eks. https://forms.office.com/r/...).';
+    if (form.sourceType === 'forms') {
+      const trimmed = form.formsUrl.trim();
+      if (!trimmed || (!trimmed.startsWith('https://forms.office.com') && !trimmed.startsWith('https://forms.microsoft.com'))) {
+        return 'Lim inn en gyldig Microsoft Forms-lenke (f.eks. https://forms.office.com/r/...).';
+      }
+      if (!form.quitPassword || form.quitPassword.trim().length < 4) {
+        return 'Avslutningspassord / PIN (minst 4 tegn) er påkrevd for Microsoft Forms-prøver, slik at du kan låse opp og avslutte SEB etter innlevering.';
+      }
     }
     if (form.sourceType !== 'pdf' && form.sourceType !== 'forms' && !htmlToPlainText(form.promptHtml)) {
       return 'Oppgaveteksten er tom.';
@@ -61,7 +67,16 @@ export default function CreateExamTab() {
       title: form.title.trim(),
       createdAt: new Date().toISOString(),
       expiresAt: res.expiresAt,
-      sebFileArgs: { examId: res.examId, title: form.title.trim(), allowedWebsites: websites, allowedApps, quitPasswordHash: res.quitPasswordHash }
+      sourceType: form.sourceType,
+      formsUrl: form.sourceType === 'forms' ? form.formsUrl.trim() : null,
+      sebFileArgs: {
+        examId: res.examId,
+        title: form.title.trim(),
+        allowedWebsites: websites,
+        allowedApps,
+        quitPasswordHash: res.quitPasswordHash,
+        startURL: form.sourceType === 'forms' ? form.formsUrl.trim() : undefined
+      }
     };
     addExam(entry);
     setResult(entry);
@@ -105,7 +120,7 @@ export default function CreateExamTab() {
 
             <Step n={2} title="Hjelpemidler, nettsider og passord">
               <SebResourcesPicker allowedApps={allowedApps} setAllowedApps={setAllowedApps} websites={websites} setWebsites={setWebsites} />
-              <QuitPasswordField value={form.quitPassword} onChange={set('quitPassword')} />
+              <QuitPasswordField value={form.quitPassword} onChange={set('quitPassword')} required={form.sourceType === 'forms'} />
             </Step>
 
             <Step n={3} title="Generer og del i Teams">
