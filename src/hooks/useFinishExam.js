@@ -4,8 +4,8 @@
  * genererer PDF lokalt, laster den ned og lar eleven bekrefte før SEB avsluttes og utkastet slettes.
  */
 import { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { callSignSebSubmission } from '../firebase';
+import { EXAM_QUIT_URL } from '../config';
 import { buildEssayPayload, renderEssayPdf, essayPdfFileName, downloadBytes } from '../utils/exam/essayPdfGenerator';
 import { clearDraft } from '../utils/exam/localStore';
 
@@ -19,7 +19,6 @@ async function requestSignature(examId, sha256) {
 }
 
 export function useFinishExam({ exam, getEssayDoc, getActiveSeconds, getIncidents, getStartedAt, onFinished, onBeforeExit }) {
-  const navigate = useNavigate();
   const [phase, setPhase] = useState('idle'); // idle | signing | rendering | done | error
   const [result, setResult] = useState(null);
 
@@ -64,8 +63,10 @@ export function useFinishExam({ exam, getEssayDoc, getActiveSeconds, getIncident
       // Slett lokalt utkast umiddelbart fra disk/cache
       await clearDraft(exam.id);
     }
-    navigate('/quit', { replace: true });
-  }, [exam, navigate, onBeforeExit]);
+    // Viktig for SEB: Må gjøre en ekte HTTP-navigering (ikke SPA pushState),
+    // slik at SEBs RequestHandler.OnBeforeBrowse fanger opp quitURL og låser opp maskinen.
+    window.location.href = EXAM_QUIT_URL;
+  }, [exam, onBeforeExit]);
 
   return { finish, phase, result, downloadAgain, exitSeb };
 }

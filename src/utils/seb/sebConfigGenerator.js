@@ -119,6 +119,14 @@ export function buildStandaloneSebPlist({
 ${buildDictionariesXml(dictionaries)}
   <key>allowDownUploads</key>
   <true/>
+  <key>allowDownloads</key>
+  <true/>
+  <key>allowUploads</key>
+  <true/>
+  <key>allowCustomDownUploadLocation</key>
+  <false/>
+  <key>useTemporaryDownUploadDirectory</key>
+  <false/>
   <key>allowPDFPlugIn</key>
   <false/>
   <key>downloadPDFFiles</key>

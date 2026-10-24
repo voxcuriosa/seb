@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "test": "vitest run",
+    "test": "eslint . && vitest run",
     "test:watch": "vitest",
     "test:rules": "firebase emulators:exec --only firestore,storage --project demo-voxcuriosa-seb \"vitest run --config vitest.rules.config.js\"",
     "deploy:ftp": "npm run build && python3 scripts/deploy_ftp.py",

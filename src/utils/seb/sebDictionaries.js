@@ -62,7 +62,7 @@ export function buildDictionariesXml(dictionaries = []) {
 
   const dicts = dictionaries.map((d) => `    <dict>
       <key>dictionaryData</key>
-      <string>${d.base64}</string>
+      <data>${d.base64}</data>
       <key>dictionaryFormat</key>
       <integer>0</integer>
       <key>localeName</key>

@@ -53,15 +53,15 @@ function processDict({ autostart, iconInTaskbar, allowUserToChooseApp, title, ex
 /** os: 1 = Windows, 0 = macOS (SEB-konvensjon). */
 const APP_PROCESSES = {
   ordnett: [
-    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: true, title: 'Ordnett Pluss', executable: 'OrdnettPluss.exe', originalName: 'OrdnettPluss.exe', path: '', os: 1 },
+    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: true, title: 'Ordnett Pluss', executable: 'OrdnettPluss.exe', originalName: '', path: '', os: 1 },
     { autostart: false, iconInTaskbar: true, allowUserToChooseApp: true, title: 'Ordnett Pluss', executable: 'Ordnett Pluss', originalName: 'Ordnett Pluss', identifier: 'no.kunnskapsforlaget.ordnettpluss', path: '/Applications/Ordnett Pluss.app', os: 0 }
   ],
   lingdys: [
-    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: true, title: 'Lingdys', executable: 'Lingdys.exe', originalName: 'Lingdys.exe', path: '', os: 1 },
+    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: true, title: 'Lingdys', executable: 'Lingdys.exe', originalName: '', path: '', os: 1 },
     { autostart: true, iconInTaskbar: true, allowUserToChooseApp: true, title: 'Lingdys', executable: 'Lingdys', originalName: 'Lingdys', identifier: 'no.lingit.lingdys', path: '/Applications/Lingdys.app', os: 0 }
   ],
   voxlex: [
-    { autostart: false, iconInTaskbar: false, allowUserToChooseApp: false, title: 'VoxLex', executable: 'voxlex.exe', originalName: 'voxlex.exe', os: 1 },
+    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: true, title: 'VoxLex', executable: 'voxlex.exe', originalName: '', path: '', os: 1 },
     { autostart: true, iconInTaskbar: true, allowUserToChooseApp: true, title: 'VoxLex', executable: 'voxlex', originalName: 'voxlex', identifier: 'no.voxlex.skole', path: '/Applications/VoxLex.app', os: 0 }
   ]
 };
@@ -138,14 +138,19 @@ export function collectAllowedExpressions(allowedWebsites = [], startURL = '') {
 
 export function buildUrlFilterXml(allowedWebsites = [], startURL = '') {
   const rules = collectAllowedExpressions(allowedWebsites, startURL).map(filterRule).join('\n');
-  return `  <key>urlFilterEnable</key>
+  // Dekk både SEB 3.x (URLFilter*) og eldre SEB 2.x (urlFilter*) slik at filteret alltid er aktivt.
+  return `  <key>URLFilterEnable</key>
   <true/>
-  <key>urlFilterEnableContentFilter</key>
+  <key>URLFilterEnableContentFilter</key>
   <false/>
-  <key>urlFilterRules</key>
+  <key>URLFilterRules</key>
   <array>
 ${rules}
-  </array>`;
+  </array>
+  <key>urlFilterEnable</key>
+  <true/>
+  <key>urlFilterEnableContentFilter</key>
+  <false/>`;
 }
 
 export function buildAdditionalResourcesXml(allowedWebsites = []) {
@@ -155,12 +160,16 @@ export function buildAdditionalResourcesXml(allowedWebsites = []) {
       <true/>
       <key>autoOpen</key>
       <false/>
+      <key>confirm</key>
+      <false/>
       <key>confirmResourceClose</key>
       <false/>
       <key>identifier</key>
       <string>resource_${idx + 1}</string>
       <key>policy</key>
       <integer>0</integer>
+      <key>resetSession</key>
+      <false/>
       <key>resetBrowsingSessionOnClose</key>
       <false/>
       <key>showButton</key>
@@ -168,6 +177,8 @@ export function buildAdditionalResourcesXml(allowedWebsites = []) {
       <key>title</key>
       <string>${escapeXml(site.title || site.domain || 'Kilde')}</string>
       <key>url</key>
+      <string>${escapeXml(site.url)}</string>
+      <key>URL</key>
       <string>${escapeXml(site.url)}</string>
     </dict>`);
 

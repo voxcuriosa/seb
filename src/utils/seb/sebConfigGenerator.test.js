@@ -53,7 +53,11 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toContain('no.voxlex.skole');
     expect(xml).toContain('no.lingit.lingdys');
     expect(xml).not.toContain('OrdnettPluss.exe');
+    expect(xml).toContain('<key>URLFilterEnable</key>');
+    expect(xml).toContain('<key>URLFilterRules</key>');
+    expect(xml).toContain('<key>allowDownloads</key>');
     expect(xml).toContain('<key>additionalDictionaries</key>');
+    expect(xml).toContain('<data>UEsDBA==</data>');
     expect(xml).toContain('<string>nn-NO</string>');
   });
 

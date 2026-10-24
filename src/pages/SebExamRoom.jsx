@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { AlertTriangle, ExternalLink, FileSpreadsheet } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { AlertTriangle, ExternalLink } from 'lucide-react';
 import { fetchSebExam } from '../firebase';
+import { EXAM_QUIT_URL } from '../config';
 import { markAsSebEnvironment } from '../utils/seb/sebEnvironment';
 import { loadDraft, clearDraft } from '../utils/exam/localStore';
 import { downloadBackupTxt } from '../utils/exam/backupTxt';
@@ -26,7 +27,6 @@ const LAYOUT_CLASSES = {
 
 export default function SebExamRoom() {
   const { examId } = useParams();
-  const navigate = useNavigate();
   const [exam, setExam] = useState(null);
   const [status, setStatus] = useState('loading');
   const [initialDraft, setInitialDraft] = useState(null);
@@ -123,7 +123,7 @@ export default function SebExamRoom() {
   const handleFormsExitConfirm = async () => {
     autosave.stop();
     await clearDraft(examId);
-    navigate('/quit', { replace: true });
+    window.location.href = EXAM_QUIT_URL;
   };
 
   if (status === 'loading') return <LoadingScreen label="Laster prøven..." />;

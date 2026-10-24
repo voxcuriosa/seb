@@ -1,3 +1,4 @@
 #!/bin/sh
-# Full testpakke (inkludert personvernvakten) før push.
+# ESLint og full testpakke (inkludert personvernvakten) før push.
+npx eslint . || exit 1
 npx vitest run || exit 1
