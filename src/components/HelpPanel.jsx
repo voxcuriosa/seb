@@ -1,4 +1,4 @@
-import { X, Code2 } from 'lucide-react';
+import { X, Code2, KeyRound } from 'lucide-react';
 
 /** Lærerhjelp. Hold oppdatert ved endringer i funksjonalitet (se AGENTS.md). */
 export default function HelpPanel({ onClose }) {
@@ -21,6 +21,22 @@ export default function HelpPanel({ onClose }) {
           <h3 className="font-black text-emerald-300 mb-1">3. Kontroller PDF-ene</h3>
           <p>Elevene leverer PDF-en i Teams. Last ned «Student Work»-mappen og slipp den i fane 2. Hver PDF kontrolleres med SHA-256, sammenligning av synlig tekst og serversignatur.</p>
         </section>
+      </div>
+
+      {/* Avslutningspassord forklaring */}
+      <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-1.5">
+        <div className="flex items-center gap-1.5 text-white font-bold">
+          <KeyRound size={15} className="text-emerald-400" />
+          <span>Slik fungerer Avslutningspassord (Manuell nød-override):</span>
+        </div>
+        <p className="leading-relaxed">
+          Avslutningspassordet er <strong>ikke en boks som står åpen</strong> under prøven. Det fungerer som en <em>skjult nødnøkkel</em> for læreren:
+        </p>
+        <ul className="space-y-1 list-disc pl-4 text-slate-300">
+          <li><strong>Normal avslutning:</strong> Elevene fullfører prøven ved å trykke «Fullfør», laste ned besvarelsen som PDF og bekrefte lagring. Da låser SEB seg opp automatisk uten at noe passord trengs.</li>
+          <li><strong>Manuell tvang-avslutning (nød-override):</strong> Hvis en elev opplever tekniske problemer (eller må avbryte prøven før tiden uten å restarte maskinen), trykker du <strong>Cmd+Q (Mac)</strong>, <strong>Ctrl+Q</strong> eller <strong>Alt+F4 (Windows)</strong>, eller klikker på det røde avslutningsikonet i SEBs oppgavelinje. Da spretter SEBs passordboks opp, og læreren taster koden for å låse opp maskinen umiddelbart.</li>
+          <li><strong>Hvis feltet står tomt:</strong> Er alle snarveier sperret, og SEB kan kun lukkes ved å fullføre og levere PDF-en.</li>
+        </ul>
       </div>
 
       <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-xs text-emerald-200 space-y-1">
