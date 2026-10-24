@@ -56,6 +56,11 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toContain('com.apple.WebKit.Networking');
     expect(xml).toContain('<key>prohibitedProcesses</key>');
     expect(xml).toContain('no.lingit.lingdys');
+    expect(xml).toMatch(/<key>clipboardPolicy<\/key>\s*<integer>0<\/integer>/);
+    expect(xml).toMatch(/<key>enablePrivateClipboard<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>enablePrivateClipboardMacEnforce<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>enableAltTab<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>showMenuBar<\/key>\s*<false\/>/);
     expect(xml).not.toContain('OrdnettPluss.exe');
     expect(xml).toContain('<key>URLFilterEnable</key>');
     expect(xml).toContain('<key>URLFilterRules</key>');
@@ -72,6 +77,9 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toMatch(/<key>showQuitButton<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>examSessionClearCookiesOnStart<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>examSessionClearCookiesOnEnd<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>clipboardPolicy<\/key>\s*<integer>2<\/integer>/);
+    expect(xml).toMatch(/<key>enablePrivateClipboard<\/key>\s*<true\/>/);
+    expect(xml).toMatch(/<key>enablePrivateClipboardMacEnforce<\/key>\s*<true\/>/);
     expect(xml).not.toContain('hashedQuitPassword');
     expect(xml).toContain('<array/>');
   });

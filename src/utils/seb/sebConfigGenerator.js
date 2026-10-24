@@ -37,14 +37,15 @@ export function buildStandaloneSebPlist({
 }) {
   if (!examId) throw new Error('examId mangler');
   const hasQuitPassword = /^[a-f0-9]{64}$/i.test(String(quitPasswordHash || ''));
-  const hasReadingApp = Boolean(allowedApps?.lingdys || allowedApps?.voxlex);
-  const clipboardPolicy = hasReadingApp ? 2 : 0;
+  const hasAllowedApps = Boolean(allowedApps?.voxlex || allowedApps?.ordnett || allowedApps?.lingdys);
+  // SEB clipboardPolicy: 0 = Allow (delt utklippstavle slik at Lingdys/hjelpeapper kan lese Cmd+C),
+  // 2 = Isolated (privat utklippstavle kun internt i SEB når ingen hjelpeapper er valgt).
+  const clipboardPolicy = hasAllowedApps ? 0 : 2;
   const websites = Array.isArray(allowedWebsites) ? allowedWebsites : [];
   const resourcesXml = buildAdditionalResourcesXml(websites);
   const effectiveStartUrl = startURL || examRoomUrl(examId);
   const isFormsStart = /forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(effectiveStartUrl);
   const hasClarify = websites.some((w) => /clarify\.no/i.test(`${w?.domain || ''} ${w?.url || ''}`));
-  const hasAllowedApps = Boolean(allowedApps?.voxlex || allowedApps?.ordnett || allowedApps?.lingdys);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -88,6 +89,10 @@ export function buildStandaloneSebPlist({
   <true/>
   <key>clipboardPolicy</key>
   <integer>${clipboardPolicy}</integer>
+  <key>enablePrivateClipboard</key>
+  ${hasAllowedApps ? '<false/>' : '<true/>'}
+  <key>enablePrivateClipboardMacEnforce</key>
+  ${hasAllowedApps ? '<false/>' : '<true/>'}
   <key>mainBrowserWindowWidth</key>
   <string>100%</string>
   <key>mainBrowserWindowHeight</key>
@@ -113,7 +118,7 @@ export function buildStandaloneSebPlist({
   <key>newBrowserWindowShowURL</key>
   <integer>1</integer>
   <key>showMenuBar</key>
-  ${hasAllowedApps ? '<true/>' : '<false/>'}
+  <false/>
   <key>showTaskBar</key>
   <true/>
   <key>showQuitButton</key>
@@ -176,7 +181,7 @@ ${buildDictionariesXml(dictionaries)}
   <key>removeLocalStorage</key>
   <false/>
   <key>enableAltTab</key>
-  ${hasAllowedApps ? '<true/>' : '<false/>'}
+  <false/>
   <key>enablePrintScreen</key>
   <false/>
   <key>blockScreenSharing</key>
