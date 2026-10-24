@@ -80,7 +80,7 @@ export default function PromptSourcePicker({
               type="url"
               value={formsUrl || ''}
               onChange={(e) => setFormsUrl?.(e.target.value)}
-              placeholder="https://forms.office.com/r/... eller https://forms.office.com/Pages/ResponsePage.aspx?..."
+              placeholder="https://forms.cloud.microsoft/e/... eller https://forms.office.com/r/..."
               className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 font-mono"
             />
           </label>

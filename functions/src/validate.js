@@ -104,7 +104,14 @@ export function validateExamInput(data) {
     if (pdfBuffer.subarray(0, 5).toString('latin1') !== '%PDF-') fail('Filen er ikke en gyldig PDF.');
   } else if (sourceType === 'forms') {
     const formsUrl = String(data.formsUrl || '').trim();
-    if (!formsUrl || (!formsUrl.startsWith('https://forms.office.com') && !formsUrl.startsWith('https://forms.microsoft.com'))) {
+    if (
+      !formsUrl ||
+      (
+        !formsUrl.startsWith('https://forms.office.com') &&
+        !formsUrl.startsWith('https://forms.microsoft.com') &&
+        !formsUrl.startsWith('https://forms.cloud.microsoft')
+      )
+    ) {
       fail('Ugyldig Microsoft Forms-lenke.');
     }
   } else if (!promptHtml.replace(/<[^>]*>/g, '').trim()) {

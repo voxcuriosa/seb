@@ -53,15 +53,15 @@ function processDict({ autostart, iconInTaskbar, allowUserToChooseApp, title, ex
 /** os: 1 = Windows, 0 = macOS (SEB-konvensjon). */
 const APP_PROCESSES = {
   ordnett: [
-    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: false, title: 'Ordnett Pluss', executable: 'OrdnettPluss.exe', originalName: 'OrdnettPluss.exe', path: '', os: 1 },
+    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: true, title: 'Ordnett Pluss', executable: 'OrdnettPluss.exe', originalName: '', path: '', os: 1 },
     { autostart: false, iconInTaskbar: true, allowUserToChooseApp: false, title: 'Ordnett Pluss', executable: 'Ordnett Pluss', originalName: 'Ordnett Pluss', identifier: 'no.kunnskapsforlaget.ordnettpluss', path: '/Applications/Ordnett Pluss.app', os: 0 }
   ],
   lingdys: [
-    { autostart: true, iconInTaskbar: true, allowUserToChooseApp: false, title: 'Lingdys', executable: 'Lingdys.exe', originalName: 'Lingdys.exe', path: '', os: 1 },
+    { autostart: true, iconInTaskbar: true, allowUserToChooseApp: true, title: 'Lingdys', executable: 'Lingdys.exe', originalName: '', path: '', os: 1 },
     { autostart: true, iconInTaskbar: true, allowUserToChooseApp: false, title: 'Lingdys', executable: 'Lingdys', originalName: 'Lingdys', identifier: 'no.lingit.lingdys', path: '/Applications/Lingdys.app', os: 0 }
   ],
   voxlex: [
-    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: false, title: 'VoxLex', executable: 'VoxLex.exe', originalName: 'VoxLex.exe', path: '', os: 1 },
+    { autostart: true, iconInTaskbar: true, allowUserToChooseApp: true, title: 'VoxLex', executable: 'voxlex.exe', originalName: '', path: '%LOCALAPPDATA%\\VoxLex', os: 1 },
     { autostart: true, iconInTaskbar: true, allowUserToChooseApp: false, title: 'VoxLex', executable: 'voxlex', originalName: 'voxlex', identifier: 'no.voxlex.skole', path: '/Applications/VoxLex.app', os: 0 }
   ]
 };
@@ -119,7 +119,12 @@ function filterRule(expression) {
 }
 
 function needsSsoExpressions(dom = '') {
-  return dom.includes('forms.office.com') || dom.includes('forms.microsoft.com') || dom.includes('clarify.no');
+  return (
+    dom.includes('forms.office.com') ||
+    dom.includes('forms.microsoft.com') ||
+    dom.includes('forms.cloud.microsoft') ||
+    dom.includes('clarify.no')
+  );
 }
 
 export function collectAllowedExpressions(allowedWebsites = [], startURL = '') {

@@ -45,8 +45,9 @@ export default function CreateExamTab() {
     if (form.sourceType === 'pdf' && !form.pdfFile) return 'Velg en oppgave-PDF.';
     if (form.sourceType === 'forms') {
       const trimmed = form.formsUrl.trim();
-      if (!trimmed || (!trimmed.startsWith('https://forms.office.com') && !trimmed.startsWith('https://forms.microsoft.com'))) {
-        return 'Lim inn en gyldig Microsoft Forms-lenke (f.eks. https://forms.office.com/r/...).';
+      const isValidForms = /^https:\/\/(forms\.office\.com|forms\.microsoft\.com|forms\.cloud\.microsoft)\//i.test(trimmed);
+      if (!isValidForms) {
+        return 'Lim inn en gyldig Microsoft Forms-lenke (f.eks. https://forms.office.com/... eller https://forms.cloud.microsoft/...).';
       }
       if (!form.quitPassword || form.quitPassword.trim().length < 6) {
         return 'Avslutningspassord / kodeord (minst 6 tegn, f.eks. «sol-482») er påkrevd for Microsoft Forms-prøver, slik at du kan låse opp og avslutte SEB etter innlevering.';

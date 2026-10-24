@@ -72,15 +72,15 @@ describe('validateExamInput', () => {
       })
     ).toThrow(/Ugyldig Microsoft Forms-lenke/);
 
-    // Gyldig forms
+    // Gyldig forms (både forms.office.com og forms.cloud.microsoft)
     const res = validateExamInput({
       ...base,
       sourceType: 'forms',
-      formsUrl: 'https://forms.office.com/r/abc1234',
+      formsUrl: 'https://forms.cloud.microsoft/e/TG1cnrA5Vt',
       sebConfig: { quitPasswordHash: validHash }
     });
     expect(res.sourceType).toBe('forms');
-    expect(res.formsUrl).toBe('https://forms.office.com/r/abc1234');
+    expect(res.formsUrl).toBe('https://forms.cloud.microsoft/e/TG1cnrA5Vt');
     expect(res.sebConfig.allowedWebsites.some((w) => w.domain === 'forms.office.com')).toBe(true);
   });
 

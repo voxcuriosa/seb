@@ -42,7 +42,7 @@ export function buildStandaloneSebPlist({
   const websites = Array.isArray(allowedWebsites) ? allowedWebsites : [];
   const resourcesXml = buildAdditionalResourcesXml(websites);
   const effectiveStartUrl = startURL || examRoomUrl(examId);
-  const isFormsStart = /forms\.(office|microsoft)\.com/i.test(effectiveStartUrl);
+  const isFormsStart = /forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(effectiveStartUrl);
   const hasClarify = websites.some((w) => /clarify\.no/i.test(`${w?.domain || ''} ${w?.url || ''}`));
   const hasAllowedApps = Boolean(allowedApps?.voxlex || allowedApps?.ordnett || allowedApps?.lingdys);
 
@@ -100,6 +100,18 @@ export function buildStandaloneSebPlist({
   <false/>
   <key>newBrowserWindowAllowAddressBar</key>
   <false/>
+  <key>browserWindowAllowReload</key>
+  <true/>
+  <key>newBrowserWindowAllowReload</key>
+  <true/>
+  <key>allowBrowsingBackForward</key>
+  <false/>
+  <key>newBrowserWindowNavigation</key>
+  <true/>
+  <key>browserWindowShowURL</key>
+  <integer>1</integer>
+  <key>newBrowserWindowShowURL</key>
+  <integer>1</integer>
   <key>showMenuBar</key>
   ${hasAllowedApps ? '<true/>' : '<false/>'}
   <key>showTaskBar</key>
@@ -146,7 +158,7 @@ ${buildDictionariesXml(dictionaries)}
   <key>newBrowserWindowByLinkPolicy</key>
   <integer>2</integer>
   <key>newBrowserWindowByScriptPolicy</key>
-  <integer>2</integer>
+  <integer>1</integer>
   <key>newBrowserWindowByLinkBlockForeign</key>
   <false/>
   <key>newBrowserWindowByScriptBlockForeign</key>
