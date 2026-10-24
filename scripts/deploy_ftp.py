@@ -12,7 +12,7 @@ import sys
 import subprocess
 from ftplib import FTP_TLS
 
-FTP_HOST = "cpanel46.proisp.no"
+FTP_HOST = "voxcuriosa.no"
 FTP_USER = "cpjvfkip"
 FTP_REMOTE_ROOT = "public_html/seb"
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
