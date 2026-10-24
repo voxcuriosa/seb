@@ -41,7 +41,7 @@ export default function ExamTopBar({
       {websites?.length > 0 && (
         <nav className="flex items-center gap-1 flex-wrap" aria-label="Tillatte nettsider">
           {websites.map((w) => (
-            <a key={w.id || w.url} href={w.url} target="_blank" rel="noopener noreferrer"
+            <a key={w.id || w.url} href={w.url} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer"
               className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-600 text-[11px] text-slate-200">
               {w.title}<ExternalLink size={11} aria-hidden="true" />
             </a>

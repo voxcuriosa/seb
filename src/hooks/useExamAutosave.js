@@ -12,25 +12,35 @@ export function useExamAutosave(examId, getDraft) {
   const [savedAt, setSavedAt] = useState(null);
   const [saveError, setSaveError] = useState(false);
   const timer = useRef(null);
+  const stoppedRef = useRef(false);
   const getDraftRef = useRef(getDraft);
   getDraftRef.current = getDraft;
 
+  const stop = useCallback(() => {
+    stoppedRef.current = true;
+    clearTimeout(timer.current);
+  }, []);
+
   const flush = useCallback(async () => {
     clearTimeout(timer.current);
+    if (stoppedRef.current) return;
     const draft = getDraftRef.current();
     if (!draft) return;
     const at = await saveDraft(examId, draft);
+    if (stoppedRef.current) return;
     setSaveError(!at);
     if (at) setSavedAt(at);
   }, [examId]);
 
   const schedule = useCallback(() => {
+    if (stoppedRef.current) return;
     clearTimeout(timer.current);
     timer.current = setTimeout(flush, DEBOUNCE_MS);
   }, [flush]);
 
   useEffect(() => {
     const syncSave = () => {
+      if (stoppedRef.current) return;
       const draft = getDraftRef.current();
       if (draft) saveDraftSync(examId, draft);
     };
@@ -49,5 +59,5 @@ export function useExamAutosave(examId, getDraft) {
     };
   }, [examId, flush]);
 
-  return { savedAt, saveError, schedule, flush };
+  return { savedAt, saveError, schedule, flush, stop };
 }

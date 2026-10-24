@@ -22,11 +22,12 @@ describe('validateExamInput', () => {
     expect(html).toContain('Hei');
   });
 
-  it('beholder tabeller, lister og overskrifter fra Word', () => {
-    const html = sanitizePromptHtml('<h1>T</h1><table><tr><td colspan="2">A</td></tr></table><ol start="3"><li>x</li></ol>');
+  it('beholder tabeller, lister og overskrifter fra Word og legger på referrerpolicy="no-referrer"', () => {
+    const html = sanitizePromptHtml('<h1>T</h1><table><tr><td colspan="2">A</td></tr></table><ol start="3"><li><a href="https://snl.no">x</a><img src="https://snl.no/b.png"></li></ol>');
     expect(html).toContain('<table>');
     expect(html).toContain('colspan="2"');
     expect(html).toContain('<ol start="3">');
+    expect(html).toContain('referrerpolicy="no-referrer"');
   });
 
   it('avviser for lang tittel, tom tekst og ugyldig hash', () => {

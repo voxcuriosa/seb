@@ -101,7 +101,8 @@ export default function SebExamRoom() {
     getActiveSeconds: log.getActiveSeconds,
     getIncidents: () => incidentsRef.current,
     startedAt: startedAtRef.current,
-    onFinished: async () => autosave.flush()
+    onFinished: async () => autosave.flush(),
+    onBeforeExit: () => autosave.stop()
   });
 
   const onEditorReady = useCallback((ed) => {
@@ -109,6 +110,7 @@ export default function SebExamRoom() {
   }, []);
 
   const handleFormsExitConfirm = async () => {
+    autosave.stop();
     await clearDraft(examId);
     navigate('/quit', { replace: true });
   };

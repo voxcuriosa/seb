@@ -11,7 +11,7 @@ const CONFIG = {
     'h1', 'h2', 'h3', 'h4', 'ul', 'ol', 'li', 'blockquote', 'hr', 'code', 'pre',
     'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'a', 'img'
   ],
-  ALLOWED_ATTR: ['href', 'title', 'src', 'alt', 'width', 'height', 'colspan', 'rowspan', 'start', 'target', 'rel'],
+  ALLOWED_ATTR: ['href', 'title', 'src', 'alt', 'width', 'height', 'colspan', 'rowspan', 'start', 'target', 'rel', 'referrerpolicy'],
   ALLOWED_URI_REGEXP: /^(?:https:|mailto:|data:image\/(?:png|jpe?g|gif|webp);base64,)/i,
   FORBID_ATTR: ['style', 'class', 'id']
 };
@@ -23,6 +23,10 @@ function ensureHooks() {
     if (node.tagName === 'A') {
       node.setAttribute('target', '_blank');
       node.setAttribute('rel', 'noopener noreferrer');
+      node.setAttribute('referrerpolicy', 'no-referrer');
+    }
+    if (node.tagName === 'IMG') {
+      node.setAttribute('referrerpolicy', 'no-referrer');
     }
   });
   hooked = true;

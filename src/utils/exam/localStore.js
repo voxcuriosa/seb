@@ -123,3 +123,32 @@ export async function clearDraft(examId) {
   }
   await idbDelete(key);
 }
+
+/**
+ * Sletter ALLE lokale prøveutkast fra både localStorage og IndexedDB på maskinen.
+ * Kalles på avslutningssiden (/quit) for å garantere at ingen elevtekst kan ligge igjen.
+ */
+export async function clearAllDrafts() {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('seb_standalone_exam_')) {
+        localStorage.removeItem(k);
+      }
+    }
+  } catch {
+    /* ignorer */
+  }
+  try {
+    const db = await openDb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).clear();
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  } catch {
+    /* ignorer */
+  }
+}

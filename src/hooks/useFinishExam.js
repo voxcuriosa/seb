@@ -18,7 +18,7 @@ async function requestSignature(examId, sha256) {
   return res?.data || null;
 }
 
-export function useFinishExam({ exam, getEssayDoc, getActiveSeconds, getIncidents, startedAt, onFinished }) {
+export function useFinishExam({ exam, getEssayDoc, getActiveSeconds, getIncidents, startedAt, onFinished, onBeforeExit }) {
   const navigate = useNavigate();
   const [phase, setPhase] = useState('idle'); // idle | signing | rendering | done | error
   const [result, setResult] = useState(null);
@@ -58,12 +58,14 @@ export function useFinishExam({ exam, getEssayDoc, getActiveSeconds, getIncident
   }, [result]);
 
   const exitSeb = useCallback(async () => {
+    // Stopp autolagring før vi sletter, slik at pagehide/beforeunload ikke skriver utkastet tilbake
+    onBeforeExit?.();
     if (exam?.id) {
       // Slett lokalt utkast umiddelbart fra disk/cache
       await clearDraft(exam.id);
     }
     navigate('/quit', { replace: true });
-  }, [exam?.id, navigate]);
+  }, [exam?.id, navigate, onBeforeExit]);
 
   return { finish, phase, result, downloadAgain, exitSeb };
 }

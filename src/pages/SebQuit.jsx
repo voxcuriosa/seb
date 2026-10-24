@@ -1,8 +1,15 @@
+import { useEffect } from 'react';
 import { CheckCircle2, ShieldCheck, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { clearAllDrafts } from '../utils/exam/localStore';
 
 /** Avslutningsside. SEB sitt quitURL peker hit og låser opp maskinen. */
 export default function SebQuit() {
+  useEffect(() => {
+    // Sikkerhetsgaranti: tøm alle lokale prøveutkast fra disk/minne når avslutningssiden åpnes
+    clearAllDrafts();
+  }, []);
+
   return (
     <main className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center text-white">
       <div className="w-16 h-16 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-2xl flex items-center justify-center mb-6">

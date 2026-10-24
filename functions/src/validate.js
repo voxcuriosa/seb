@@ -31,8 +31,8 @@ export function sanitizePromptHtml(html) {
       'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'a', 'img'
     ],
     allowedAttributes: {
-      a: ['href', 'title'],
-      img: ['src', 'alt', 'width', 'height'],
+      a: ['href', 'title', 'rel', 'target', 'referrerpolicy'],
+      img: ['src', 'alt', 'width', 'height', 'referrerpolicy'],
       th: ['colspan', 'rowspan'],
       td: ['colspan', 'rowspan'],
       ol: ['start']
@@ -41,7 +41,8 @@ export function sanitizePromptHtml(html) {
     allowedSchemesByTag: { img: ['https', 'data'] },
     allowProtocolRelative: false,
     transformTags: {
-      a: sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer', target: '_blank' })
+      a: sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer', target: '_blank', referrerpolicy: 'no-referrer' }),
+      img: sanitizeHtml.simpleTransform('img', { referrerpolicy: 'no-referrer' })
     }
   }).replace(/<img[^>]+src="data:(?!image\/(png|jpe?g|gif|webp);base64,)[^"]*"[^>]*>/gi, '');
 }
