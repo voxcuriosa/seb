@@ -1,4 +1,4 @@
-import { X, Code2, KeyRound } from 'lucide-react';
+import { X, Code2, KeyRound, Monitor, FileSpreadsheet } from 'lucide-react';
 
 /** Lærerhjelp. Hold oppdatert ved endringer i funksjonalitet (se AGENTS.md). */
 export default function HelpPanel({ onClose }) {
@@ -23,6 +23,37 @@ export default function HelpPanel({ onClose }) {
         </section>
       </div>
 
+      {/* Forms-prøver forklaring */}
+      <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-1.5">
+        <div className="flex items-center gap-1.5 text-white font-bold">
+          <FileSpreadsheet size={15} className="text-emerald-400" />
+          <span>Prøver som gjennomføres i Microsoft Forms:</span>
+        </div>
+        <p className="leading-relaxed">
+          Dersom prøven gjennomføres som et skjema i Microsoft Forms (flervalg/MCQ), skal det <strong>ikke lages eller leveres noen PDF</strong>:
+        </p>
+        <ul className="space-y-1 list-disc pl-4 text-slate-300">
+          <li>Legg til Forms-lenken (eller tillat <code className="text-emerald-300">forms.office.com</code>) under tillatte nettsider.</li>
+          <li>Elevene svarer på og sender inn prøven direkte inne i Microsoft Forms i SEB.</li>
+          <li>Alt lagres direkte i Microsoft Forms hos læreren. Elevene avslutter deretter SEB på vanlig måte.</li>
+        </ul>
+      </div>
+
+      {/* Hjelpeprogrammer Mac vs Windows */}
+      <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-1.5">
+        <div className="flex items-center gap-1.5 text-white font-bold">
+          <Monitor size={15} className="text-emerald-400" />
+          <span>Fungerer Lingdys, VoxLex og Ordnett på Mac?</span>
+        </div>
+        <p className="leading-relaxed">
+          <strong>Ja, de fungerer fullt ut på både Mac og Windows!</strong>
+        </p>
+        <ul className="space-y-1 list-disc pl-4 text-slate-300">
+          <li><strong>På Mac:</strong> SEB-konfigurasjonen vår er ferdig satt opp med offisielle macOS Bundle Identifiers (<code className="text-emerald-300">no.lingit.lingdys</code>, <code className="text-emerald-300">no.voxlex.skole</code>, <code className="text-emerald-300">no.kunnskapsforlaget.ordnettpluss</code>) og tillater tilgjengelighet (<code className="text-slate-400">allowAccessibility = true</code>).</li>
+          <li><strong>Huskeregel for eleven:</strong> Programmene må startes på maskinen <em>før</em> eleven klikker på SEB-lenken eller åpner .seb-filen, uansett om eleven bruker Mac eller PC.</li>
+        </ul>
+      </div>
+
       {/* Avslutningspassord forklaring */}
       <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-1.5">
         <div className="flex items-center gap-1.5 text-white font-bold">
@@ -39,8 +70,7 @@ export default function HelpPanel({ onClose }) {
               • Mac: <strong>Cmd + Q</strong><br />
               • Windows: <strong>Ctrl + Q</strong> (eller <strong>Alt + F4</strong>, eller det lille røde ikonet nederst til høyre i SEBs oppgavelinje)
             </div>
-            Da spretter SEBs passordboks opp, og læreren taster koden for å låse opp maskinen umiddelbart.
-          </li>
+            Da spretter SEBs passordboks opp, og læreren taster koden for å låse opp maskinen umiddelbart.</li>
           <li><strong>Hvis feltet står tomt:</strong> Er alle snarveier sperret, og SEB kan kun lukkes ved å fullføre og levere PDF-en.</li>
         </ul>
       </div>
@@ -50,7 +80,7 @@ export default function HelpPanel({ onClose }) {
           Elevarbeid forlater ALDRI nettleseren:
         </p>
         <p className="text-slate-300 leading-relaxed">
-          Alt eleven skriver lagres utelukkende lokalt i nettleseren på elevens egen datamaskin. Ved innlevering pakkes teksten som en ferdig PDF direkte i nettleserminnet og lastes ned til maskinen. Ingen elevtekst sendes til noen server eller skytjeneste, og dataene forsvinner fra nettleserminnet når økten lukkes.
+          Alt eleven skriver i skriveeditoren lagres utelukkende lokalt i nettleseren på elevens egen datamaskin. Ved innlevering pakkes teksten som en ferdig PDF direkte i nettleserminnet og lastes ned til maskinen. Ingen elevtekst sendes til noen server eller skytjeneste, og dataene forsvinner fra nettleserminnet når økten lukkes.
         </p>
       </div>
 
