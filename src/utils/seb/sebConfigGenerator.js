@@ -8,7 +8,7 @@
  *  - URL-filter med voxcuriosa.no, Firebase-domener og valgte nettsider
  *  - valgfritt avslutningspassord (hashedQuitPassword, SHA-256)
  */
-import { examRoomUrl, EXAM_QUIT_URL } from '../../config';
+import { examRoomUrl, EXAM_QUIT_URL } from '../../config.js';
 import {
   escapeXml,
   buildPermittedProcessesXml,
