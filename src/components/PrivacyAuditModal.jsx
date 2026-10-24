@@ -43,7 +43,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               1. Hovedprinsipp: Elevarbeid forlater ALDRI nettleseren
             </h3>
             <p className="text-xs text-emerald-100 leading-relaxed">
-              Verken elevens tekst, navn, besvarelser eller innleverte PDF-filer overføres over nettverket til noen ekstern server eller skytjeneste. Alt arbeid og all verifisering skjer 100 % lokalt i nettleserens minne på den aktuelle datamaskinen.
+              Verken det eleven skriver, elevens navn, besvarelser eller innleverte PDF-filer overføres over nettverket til noen ekstern server eller skytjeneste. Alt elevtekstarbeid pakkes og formateres som en PDF direkte i elevens nettleserminne, lastes ned til elevens disk, og forsvinner helt fra nettleseren når økten lukkes.
             </p>
           </div>
 
@@ -128,6 +128,10 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               <div className="flex items-start gap-2">
                 <span className="text-emerald-400 font-bold">✓</span>
                 <span><strong>Dataminimering (GDPR art. 5):</strong> Systemet behandler kun et absolutt minimum av data for å kunne generere SEB-konfigurasjonen.</span>
+              </div>
+              <div className="flex items-start gap-2 sm:col-span-2">
+                <span className="text-emerald-400 font-bold">✓</span>
+                <span><strong>100 % Open Source (MIT-lisens):</strong> Kildekoden er offentlig tilgjengelig på GitHub (<a href="https://github.com/voxcuriosa/seb" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline font-mono">github.com/voxcuriosa/seb</a>). Skoler og IT-avdelinger kan fritt revidere, laste ned og kjøre løsningen på egne lokale servere hvis de foretrekker lokal drift.</span>
               </div>
             </div>
           </div>

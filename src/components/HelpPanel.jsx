@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import { X, Code2 } from 'lucide-react';
 
 /** Lærerhjelp. Hold oppdatert ved endringer i funksjonalitet (se AGENTS.md). */
 export default function HelpPanel({ onClose }) {
@@ -22,11 +22,39 @@ export default function HelpPanel({ onClose }) {
           <p>Elevene leverer PDF-en i Teams. Last ned «Student Work»-mappen og slipp den i fane 2. Hver PDF kontrolleres med SHA-256, sammenligning av synlig tekst og serversignatur.</p>
         </section>
       </div>
+
+      <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-xs text-emerald-200 space-y-1">
+        <p className="font-bold text-emerald-300">
+          Elevarbeid forlater ALDRI nettleseren:
+        </p>
+        <p className="text-slate-300 leading-relaxed">
+          Alt eleven skriver lagres utelukkende lokalt i nettleseren på elevens egen datamaskin. Ved innlevering pakkes teksten som en ferdig PDF direkte i nettleserminnet og lastes ned til maskinen. Ingen elevtekst sendes til noen server eller skytjeneste, og dataene forsvinner fra nettleserminnet når økten lukkes.
+        </p>
+      </div>
+
+      <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-1">
+        <div className="flex items-center gap-1.5 text-white font-bold">
+          <Code2 size={14} className="text-emerald-400" />
+          <span>100 % Open Source (MIT-lisens):</span>
+        </div>
+        <p className="leading-relaxed">
+          Kildekoden er helt åpen og kan fritt brukes, modifiseres og integreres av alle skoler, kommuner og IT-avdelinger til akkurat det man vil. IT-avdelinger som ønsker full suverenitet kan laste ned og kjøre hele løsningen på egne lokale servere:
+        </p>
+        <a
+          href="https://github.com/voxcuriosa/seb"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block text-emerald-400 hover:text-emerald-300 font-mono underline mt-0.5"
+        >
+          https://github.com/voxcuriosa/seb
+        </a>
+      </div>
+
       <ul className="text-xs text-slate-300 space-y-1 border-t border-slate-800 pt-3">
-        <li><strong className="text-white">Personvern:</strong> Elevens tekst, navn og PDF-er forlater aldri nettleseren. Ved levering sendes bare en kontrollsum (hash) til signering.</li>
-        <li><strong className="text-white">Lagring:</strong> Bare prøveoppsettet (tittel, oppgavetekst, innstillinger) lagres i EU, og det slettes automatisk etter 90 dager.</li>
-        <li><strong className="text-white">Stavekontroll:</strong> Norsk bokmål og nynorsk følger med prøvefilen. Høyreklikk på ord med rød strek for å få forslag. Andre språk krever at språket er installert på maskinen.</li>
-        <li><strong className="text-white">Statusmerker:</strong> «Verifisert» betyr at alt stemmer. «Verifisert, ikke signert» betyr at eleven var uten nett ved levering. «Ugyldig» betyr at PDF-en er endret etter eksport.</li>
+        <li><strong className="text-white">Lagring:</strong> Bare lærerens prøveoppsett (tittel, oppgavetekst, innstillinger) lagres i EU, og slettes automatisk etter 90 dager.</li>
+        <li><strong className="text-white">Fane 2 (Kontroll):</strong> Har fysisk null nettverkskall – PDF-er fra Teams leses kun lokalt i din nettleser.</li>
+        <li><strong className="text-white">Stavekontroll:</strong> Norsk bokmål og nynorsk følger med prøvefilen. Høyreklikk på ord med rød strek for å få forslag.</li>
+        <li><strong className="text-white">Statusmerker:</strong> «Verifisert» betyr at alt stemmer. «Verifisert, ikke signert» betyr at eleven var offline ved innlevering. «Ugyldig» betyr at filen er endret etter eksport.</li>
       </ul>
     </aside>
   );

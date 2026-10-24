@@ -1,6 +1,54 @@
-# SEB – Safe Exam Browser-prøver på voxcuriosa.no/seb
+# VoxCuriosa SEB – Safe Exam Browser Prøvemodul
 
-Åpen, frittstående modul for å opprette SEB-prøver, gjennomføre dem i Safe Exam Browser og kontrollere innleverte PDF-er lokalt med SHA-256.
+**100 % Open Source (MIT-lisens) • Zero-Knowledge Elevpersonvern • Fysisk offline-først**
 
-- Ingen elevdata sendes til server eller KI (zero-knowledge for elevdata).
-- Ingen passord, nøkler eller FTP-pålogginger skal noen gang ligge i dette repoet. Hemmeligheter ligger i Google Secret Manager (Firebase) og macOS-nøkkelringen (FTP).
+Dette er en åpen kildekode-modul for å opprette, gjennomføre og kontrollere heldagsprøver og tentamener i **Safe Exam Browser (SEB)**. 
+
+Modulen kan **brukes helt fritt av alle skoler, kommuner, fylkeskommuner og IT-avdelinger** til akkurat det man vil. IT-avdelinger som ønsker full suverenitet kan også drifte og bygge hele løsningen på sine egne lokale servere eller i eget skymiljø.
+
+GitHub Repository: [https://github.com/voxcuriosa/seb](https://github.com/voxcuriosa/seb)
+
+---
+
+## Nøkkelfunksjoner & Garantier for IT og Personvern
+
+1. **Elevarbeid forlater ALDRI nettleseren:**
+   - Det eleven skriver under prøven overføres **aldri** over internett til noen server eller skytjeneste.
+   - All tekst pakkes og formateres som en PDF lokalt i elevens nettleserminne (`pdf-lib`) ved levering.
+   - Når PDF-en er lastet ned til elevens maskin og nettleserøkten lukkes, forsvinner dataene fra nettleseren.
+2. **Fane 2 (Kontroll av PDF-er) har 0 nettverkskall:**
+   - Når læreren slipper inn elevenes PDF-er eller hele «Student Work»-mappen fra Teams/SharePoint, foretas det **ingen nettverkskall**.
+   - Verifisering av manipulasjon (SHA-256 og fulltekst-rekonstruksjon) foregår 100 % lokalt i nettleserens RAM.
+   - Håndheves automatisk i kildekoden av en statisk personvernvakt (`scripts/privacy-guard.mjs`).
+3. **Ingen innlogging & ingen elevkontoer:**
+   - Elevene trenger ingen brukerkonto, e-post eller passord for å ta prøven.
+4. **Ingen Kunstig Intelligens (KI):**
+   - Ingen elevbesvarelser sendes til noen eksterne språkmodeller eller KI-leverandører.
+5. **Auto-sletting etter 90 dager:**
+   - Kun lærerens oppgavedefinisjon (oppgavetekst og tillatte nettsider) lagres i skyen (europe-west1), og slettes deterministisk etter 90 dager via Firestore TTL.
+
+---
+
+## Lokal kjøring og egen hosting for IT-avdelinger
+
+Hvis en kommune eller fylkeskommune ønsker å kjøre løsningen på eget intranett eller egen server:
+
+```bash
+# 1. Klon kildekoden
+git clone https://github.com/voxcuriosa/seb.git
+cd seb
+
+# 2. Installer avhengigheter
+npm install
+
+# 3. Bygg produksjonsversjon
+npm run build
+
+# Innholdet i dist/ kan serveres fra enhver standard webserver (Apache, Nginx, Caddy, Node.js).
+```
+
+---
+
+## Lisens
+
+Løsningen er lisensiert under [MIT License](LICENSE) – kan fritt brukes, modifiseres og distribueres til både privat, offentlig og kommersiell bruk uten vederlag.
