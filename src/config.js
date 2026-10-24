@@ -17,7 +17,7 @@ export const firebaseConfig = {
   apiKey: 'AIzaSyAYaKM5fL__qbV9_FkIYpqdTonYOYi3s1c',
   authDomain: `${FIREBASE_PROJECT_ID}.firebaseapp.com`,
   projectId: FIREBASE_PROJECT_ID,
-  storageBucket: `${FIREBASE_PROJECT_ID}.firebasestorage.app`,
+  storageBucket: `${FIREBASE_PROJECT_ID}-storage`,
   messagingSenderId: '611230089978',
   appId: '1:611230089978:web:b53600273384beb189bf43'
 };

@@ -13,6 +13,7 @@ export function toWinAnsiSafe(str = '') {
     .replace(/\u2026/g, '...')
     .replace(/[\u2022\u25CF\u25E6]/g, '-')
     .replace(/\t/g, ' ')
+    // eslint-disable-next-line no-control-regex
     .replace(/[^\x0A\x0D\x20-\x7E\xA0-\xFF]/g, '');
 }
 

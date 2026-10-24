@@ -21,7 +21,7 @@ function lint(xml) {
     return execFileSync('plutil', ['-lint', file]).toString();
   } catch (err) {
     if (err.code === 'ENOENT') return 'OK (plutil mangler)';
-    throw new Error(err.stdout?.toString() || err.message);
+    throw new Error(err.stdout?.toString() || err.message, { cause: err });
   }
 }
 

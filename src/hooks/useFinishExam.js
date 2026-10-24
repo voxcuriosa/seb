@@ -18,7 +18,7 @@ async function requestSignature(examId, sha256) {
   return res?.data || null;
 }
 
-export function useFinishExam({ exam, getEssayDoc, getActiveSeconds, getIncidents, startedAt, onFinished, onBeforeExit }) {
+export function useFinishExam({ exam, getEssayDoc, getActiveSeconds, getIncidents, getStartedAt, onFinished, onBeforeExit }) {
   const navigate = useNavigate();
   const [phase, setPhase] = useState('idle'); // idle | signing | rendering | done | error
   const [result, setResult] = useState(null);
@@ -29,7 +29,7 @@ export function useFinishExam({ exam, getEssayDoc, getActiveSeconds, getIncident
       const payload = await buildEssayPayload({
         exam,
         essayDoc: getEssayDoc(),
-        startedAt,
+        startedAt: typeof getStartedAt === 'function' ? getStartedAt() : getStartedAt,
         activeSeconds: getActiveSeconds(),
         incidents: getIncidents()
       });
@@ -51,7 +51,7 @@ export function useFinishExam({ exam, getEssayDoc, getActiveSeconds, getIncident
       console.error('[SEB] Kunne ikke lage PDF:', err?.message);
       setPhase('error');
     }
-  }, [exam, getEssayDoc, getActiveSeconds, getIncidents, startedAt, onFinished]);
+  }, [exam, getEssayDoc, getActiveSeconds, getIncidents, getStartedAt, onFinished]);
 
   const downloadAgain = useCallback(() => {
     if (result?.bytes) downloadBytes(result.bytes, result.fileName);
@@ -65,7 +65,7 @@ export function useFinishExam({ exam, getEssayDoc, getActiveSeconds, getIncident
       await clearDraft(exam.id);
     }
     navigate('/quit', { replace: true });
-  }, [exam?.id, navigate, onBeforeExit]);
+  }, [exam, navigate, onBeforeExit]);
 
   return { finish, phase, result, downloadAgain, exitSeb };
 }

@@ -31,7 +31,7 @@ export default function SebResourcesPicker({ allowedApps, setAllowedApps, websit
   const [customUrl, setCustomUrl] = useState('');
   const [customError, setCustomError] = useState('');
 
-  const toggleApp = (id) => setAllowedApps((prev) => ({ ...prev, [id]: !Boolean(prev[id]) }));
+  const toggleApp = (id) => setAllowedApps((prev) => ({ ...prev, [id]: !prev[id] }));
   const isPresetSelected = (p) => websites.some((w) => w.id === p.id || cleanDomainFromUrl(w.url) === p.domain);
   const togglePreset = (p) => {
     if (isPresetSelected(p)) {

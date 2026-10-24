@@ -5,6 +5,7 @@
     "location": "europe-west1"
   },
   "storage": {
+    "target": "main",
     "rules": "storage.rules"
   },
   "functions": [

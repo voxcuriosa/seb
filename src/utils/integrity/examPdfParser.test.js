@@ -1,7 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, beforeAll } from 'vitest';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
-import * as ed from '@noble/ed25519';
 import { buildEssayPayload, renderEssayPdf } from '../exam/essayPdfGenerator';
 import { parseExamPdfFile, folderNameFromPath } from './examPdfParser';
 import { computeExamPayloadSha256 } from './payloadHash';

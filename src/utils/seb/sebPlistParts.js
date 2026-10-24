@@ -69,7 +69,7 @@ const APP_PROCESSES = {
 export function buildPermittedProcessesXml(allowedApps = {}) {
   const parts = [];
   for (const appId of ['ordnett', 'lingdys', 'voxlex']) {
-    if (Boolean(allowedApps?.[appId])) {
+    if (allowedApps?.[appId]) {
       parts.push(...APP_PROCESSES[appId].map(processDict));
     }
   }

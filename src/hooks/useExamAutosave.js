@@ -14,7 +14,9 @@ export function useExamAutosave(examId, getDraft) {
   const timer = useRef(null);
   const stoppedRef = useRef(false);
   const getDraftRef = useRef(getDraft);
-  getDraftRef.current = getDraft;
+  useEffect(() => {
+    getDraftRef.current = getDraft;
+  }, [getDraft]);
 
   const stop = useCallback(() => {
     stoppedRef.current = true;

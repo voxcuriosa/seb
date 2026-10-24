@@ -110,7 +110,7 @@ export async function parseExamPdfFile(file) {
   const layer1 = Boolean(payload.sha256) && expected === payload.sha256;
   if (!layer1) reasons.push('SHA-256 stemmer ikke: innholdet er endret etter eksport.');
 
-  let layer2 = { ok: false, detail: 'Kunne ikke lese synlig tekst.' };
+  let layer2;
   try {
     const visible = await extractVisibleText(bytes.slice());
     layer2 = payload.type === SEB_ESSAY_TYPE

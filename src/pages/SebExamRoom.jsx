@@ -35,6 +35,7 @@ export default function SebExamRoom() {
   const [restored, setRestored] = useState(null);
   const [finishOpen, setFinishOpen] = useState(false);
   const [formsExitOpen, setFormsExitOpen] = useState(false);
+  const [wordCount, setWordCount] = useState(0);
   const editorRef = useRef(null);
   const startedAtRef = useRef(null);
 
@@ -50,7 +51,9 @@ export default function SebExamRoom() {
       if (draft?.lang) setLang(draft.lang);
       if (draft?.layout) setLayout(draft.layout);
       if (draft?.doc && countWords(docToPlainText(draft.doc)) > 0) {
-        setRestored({ savedAt: draft.savedAt, wordCount: countWords(docToPlainText(draft.doc)) });
+        const wc = countWords(docToPlainText(draft.doc));
+        setRestored({ savedAt: draft.savedAt, wordCount: wc });
+        setWordCount(wc);
       }
       setStatus('ready');
     });
@@ -75,7 +78,9 @@ export default function SebExamRoom() {
   }, [status, initialDraft, resetLog, isFormsExam]);
 
   const incidentsRef = useRef(log.incidents);
-  incidentsRef.current = log.incidents;
+  useEffect(() => {
+    incidentsRef.current = log.incidents;
+  }, [log.incidents]);
 
   const getDraft = useCallback(() => {
     if (status !== 'ready') return null;
@@ -100,14 +105,20 @@ export default function SebExamRoom() {
     getEssayDoc: () => editorRef.current?.getJSON(),
     getActiveSeconds: log.getActiveSeconds,
     getIncidents: () => incidentsRef.current,
-    startedAt: startedAtRef.current,
+    getStartedAt: () => startedAtRef.current,
     onFinished: async () => autosave.flush(),
     onBeforeExit: () => autosave.stop()
   });
 
   const onEditorReady = useCallback((ed) => {
     editorRef.current = ed;
+    setWordCount(countWords(ed?.getText({ blockSeparator: '\n' }) || ''));
   }, []);
+
+  const handleEditorChange = useCallback(() => {
+    setWordCount(countWords(editorRef.current?.getText({ blockSeparator: '\n' }) || ''));
+    schedule();
+  }, [schedule]);
 
   const handleFormsExitConfirm = async () => {
     autosave.stop();
@@ -126,8 +137,6 @@ export default function SebExamRoom() {
       </main>
     );
   }
-
-  const wordCount = countWords(editorRef.current?.getText({ blockSeparator: '\n' }) || '');
 
   return (
     <div className="h-screen flex flex-col bg-slate-950 overflow-hidden">
@@ -179,7 +188,7 @@ export default function SebExamRoom() {
               initialDoc={initialDraft?.doc}
               lang={lang}
               onLangChange={setLang}
-              onChange={schedule}
+              onChange={handleEditorChange}
               onLargePaste={(len) => addIncident('PASTE', `${len} tegn limt inn`)}
               onReady={onEditorReady}
             />

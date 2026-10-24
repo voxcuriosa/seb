@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "voxcuriosa-seb"
+  },
+  "targets": {
+    "voxcuriosa-seb": {
+      "storage": {
+        "main": [
+          "voxcuriosa-seb-storage"
+        ]
+      }
+    }
   }
 }

@@ -84,7 +84,7 @@ export function saveDraftSync(examId, draft) {
 export async function loadDraft(examId) {
   const key = storageKey(examId);
   const local = readLocal(key);
-  let idb = null;
+  let idb;
   try {
     idb = await idbGet(key);
   } catch {
