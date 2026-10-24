@@ -34,7 +34,13 @@ export default function HelpPanel({ onClose }) {
         </p>
         <ul className="space-y-1 list-disc pl-4 text-slate-300">
           <li><strong>Normal avslutning:</strong> Elevene fullfører prøven ved å trykke «Fullfør», laste ned besvarelsen som PDF og bekrefte lagring. Da låser SEB seg opp automatisk uten at noe passord trengs.</li>
-          <li><strong>Manuell tvang-avslutning (nød-override):</strong> Hvis en elev opplever tekniske problemer (eller må avbryte prøven før tiden uten å restarte maskinen), trykker du <strong>Cmd+Q (Mac)</strong>, <strong>Ctrl+Q</strong> eller <strong>Alt+F4 (Windows)</strong>, eller klikker på det røde avslutningsikonet i SEBs oppgavelinje. Da spretter SEBs passordboks opp, og læreren taster koden for å låse opp maskinen umiddelbart.</li>
+          <li><strong>Manuell tvang-avslutning (nød-override):</strong> Hvis en elev opplever tekniske problemer (eller må avbryte prøven før tiden uten å restarte maskinen), trykker læreren på tastatursnarveien:
+            <div className="my-1 pl-2 font-mono text-[11px] text-emerald-300">
+              • Mac: <strong>Cmd + Q</strong><br />
+              • Windows: <strong>Ctrl + Q</strong> (eller <strong>Alt + F4</strong>, eller det lille røde ikonet nederst til høyre i SEBs oppgavelinje)
+            </div>
+            Da spretter SEBs passordboks opp, og læreren taster koden for å låse opp maskinen umiddelbart.
+          </li>
           <li><strong>Hvis feltet står tomt:</strong> Er alle snarveier sperret, og SEB kan kun lukkes ved å fullføre og levere PDF-en.</li>
         </ul>
       </div>
