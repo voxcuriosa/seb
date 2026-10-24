@@ -1,15 +1,15 @@
 /**
  * useFinishExam.js
  * «Fullfør og last ned PDF»: bygger payload lokalt, ber om serversignatur av KUN hashen,
- * genererer PDF lokalt, laster den ned og sender eleven til /quit (SEB låses opp).
+ * genererer PDF lokalt, laster den ned og lar eleven bekrefte før SEB avsluttes og utkastet slettes.
  */
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { callSignSebSubmission } from '../firebase';
 import { buildEssayPayload, renderEssayPdf, essayPdfFileName, downloadBytes } from '../utils/exam/essayPdfGenerator';
+import { clearDraft } from '../utils/exam/localStore';
 
 const SIGN_TIMEOUT_MS = 8000;
-const QUIT_DELAY_MS = 3000;
 
 async function requestSignature(examId, sha256) {
   const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), SIGN_TIMEOUT_MS));
@@ -47,16 +47,23 @@ export function useFinishExam({ exam, getEssayDoc, getActiveSeconds, getIncident
       setResult(info);
       setPhase('done');
       await onFinished?.(payload);
-      setTimeout(() => navigate('/quit', { replace: true }), QUIT_DELAY_MS);
     } catch (err) {
       console.error('[SEB] Kunne ikke lage PDF:', err?.message);
       setPhase('error');
     }
-  }, [exam, getEssayDoc, getActiveSeconds, getIncidents, startedAt, onFinished, navigate]);
+  }, [exam, getEssayDoc, getActiveSeconds, getIncidents, startedAt, onFinished]);
 
   const downloadAgain = useCallback(() => {
     if (result?.bytes) downloadBytes(result.bytes, result.fileName);
   }, [result]);
 
-  return { finish, phase, result, downloadAgain };
+  const exitSeb = useCallback(async () => {
+    if (exam?.id) {
+      // Slett lokalt utkast umiddelbart fra disk/cache
+      await clearDraft(exam.id);
+    }
+    navigate('/quit', { replace: true });
+  }, [exam?.id, navigate]);
+
+  return { finish, phase, result, downloadAgain, exitSeb };
 }

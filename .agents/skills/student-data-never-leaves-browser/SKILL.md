@@ -13,6 +13,12 @@ Dette er den viktigste regelen i prosjektet og går foran alle andre hensyn.
 - Elevnavn og mappenavn fra Teams/SharePoint («Student Work/Ola Nordmann/...»)
 - Fokus- og innlimingslogg, aktiv tid og ordtelling knyttet til en elev
 
+## Lokal lagring og umiddelbar sletting ved fullført nedlasting
+1. **Under eksamen:** Teksten autolagres i nettleserens lokale minne (`localStorage` og `IndexedDB`) på elevens datamaskin for å motstå krasj og strømbrudd. Ingen data forlater maskinen.
+2. **Ved fullføring:** Teksten pakkes og rendres som en sikret PDF utelukkende i nettleserens RAM (`pdf-lib`).
+3. **Tvungen nedlasting før SEB-avslutning:** Eleven **får ikke forlate SEB** før PDF-en faktisk er lastet ned. Det vises en stor rød boks med instruksjon om nedlasting, og en tydelig bekreftelsesknapp for å lukke SEB først *etter* at filen er sikret på disk.
+4. **Umiddelbar sletting fra lokal cache:** I samme sekund eleven har lastet ned PDF-en og bekrefter avslutning, slettes alle lokale utkast (`localStorage` og `IndexedDB`) fullstendig slik at ingen elevtekst blir liggende igjen på maskinen.
+
 ## Tillatte nettverkskall (uttømmende liste)
 | Hvor | Kall | Innhold |
 |---|---|---|
@@ -28,8 +34,9 @@ Alt annet er forbudt. Fane 2 (kontroll av PDF-er) har **null** nettverkskall.
 2. Sendes noe mer enn `{ examId, sha256 }` til `callSignSebSubmission`? Det skal ikke skje.
 3. Leser eller lagrer `functions/src/signSebSubmission.js` noe annet enn `examId` og `sha256`? Det skal ikke skje.
 4. Lagres elevnavn i `localStorage`? Fane 2 holder alt i minnet. Prøverommet lagrer bare elevens egen tekst lokalt på elevens maskin.
-5. Analyse, feillogging (Sentry o.l.), KI-kall eller tredjeparts skript? Forbudt i hele appen.
-6. Nye eksporter i `src/firebase.js` må legges til i `APPROVED_FIREBASE_EXPORTS` i `scripts/privacy-guard.mjs` med begrunnelse. Klienten skal aldri skrive til Firestore eller Storage.
+5. Slettes lokal lagring (`clearDraft`) umiddelbart når eleven laster ned PDF-en og avslutter? Ja.
+6. Analyse, feillogging (Sentry o.l.), KI-kall eller tredjeparts skript? Forbudt i hele appen.
+7. Nye eksporter i `src/firebase.js` må legges til i `APPROVED_FIREBASE_EXPORTS` i `scripts/privacy-guard.mjs` med begrunnelse. Klienten skal aldri skrive til Firestore eller Storage.
 
 ## Automatisk håndhevelse
 - `scripts/privacy-guard.mjs` analyserer importgrafen transitivt fra Fane 2 og prøverommet.

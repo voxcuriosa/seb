@@ -165,6 +165,7 @@ export default function SebExamRoom() {
         onConfirm={finisher.finish}
         onCancel={() => setFinishOpen(false)}
         onDownloadAgain={finisher.downloadAgain}
+        onExitSeb={finisher.exitSeb}
       />
     </div>
   );

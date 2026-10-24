@@ -94,3 +94,32 @@ export async function loadDraft(examId) {
   if (!idb) return local;
   return Date.parse(idb.savedAt || 0) > Date.parse(local.savedAt || 0) ? idb : local;
 }
+
+async function idbDelete(key) {
+  try {
+    const db = await openDb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).delete(key);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  } catch {
+    /* ignorer */
+  }
+}
+
+/**
+ * Sletter elevens utkast fullstendig fra både localStorage og IndexedDB.
+ * Kalles umiddelbart etter at PDF er lastet ned og eleven bekrefter avslutning.
+ */
+export async function clearDraft(examId) {
+  const key = storageKey(examId);
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    /* ignorer */
+  }
+  await idbDelete(key);
+}
