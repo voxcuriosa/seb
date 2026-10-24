@@ -99,7 +99,7 @@ export function buildStandaloneSebPlist({
   <key>newBrowserWindowAllowAddressBar</key>
   <false/>
   <key>showMenuBar</key>
-  <true/>
+  <false/>
   <key>showTaskBar</key>
   <true/>
   <key>showQuitButton</key>

@@ -5,9 +5,10 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-const MIN_FOCUS_LOSS_MS = 1500;
+const MIN_FOCUS_LOSS_MS_STRICT = 1500;
+const MIN_FOCUS_LOSS_MS_AIDS = 3000;
 
-export function useExamIntegrityLog({ initialActiveSeconds = 0, initialIncidents = [], enabled = true }) {
+export function useExamIntegrityLog({ initialActiveSeconds = 0, initialIncidents = [], enabled = true, hasAids = false }) {
   const activeRef = useRef(initialActiveSeconds);
   const [incidents, setIncidents] = useState(initialIncidents);
   const [activeSeconds, setActiveSeconds] = useState(initialActiveSeconds);
@@ -25,6 +26,7 @@ export function useExamIntegrityLog({ initialActiveSeconds = 0, initialIncidents
 
   useEffect(() => {
     if (!enabled) return undefined;
+    const minLoss = hasAids ? MIN_FOCUS_LOSS_MS_AIDS : MIN_FOCUS_LOSS_MS_STRICT;
     const tick = setInterval(() => {
       if (document.visibilityState === 'visible' && document.hasFocus()) {
         activeRef.current += 1;
@@ -38,7 +40,13 @@ export function useExamIntegrityLog({ initialActiveSeconds = 0, initialIncidents
     const onFocus = () => {
       if (blurAtRef.current) {
         const ms = Date.now() - blurAtRef.current;
-        if (ms >= MIN_FOCUS_LOSS_MS) addIncident('FOCUS_LOST', `${Math.round(ms / 1000)} s utenfor prøven`);
+        if (ms >= minLoss) {
+          const type = hasAids ? 'APP_SWITCH' : 'FOCUS_LOST';
+          const label = hasAids
+            ? `${Math.round(ms / 1000)} s i hjelpemiddel/annen app`
+            : `${Math.round(ms / 1000)} s utenfor prøven`;
+          addIncident(type, label);
+        }
         blurAtRef.current = null;
       }
     };
@@ -53,7 +61,7 @@ export function useExamIntegrityLog({ initialActiveSeconds = 0, initialIncidents
       window.removeEventListener('focus', onFocus);
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [enabled, addIncident]);
+  }, [enabled, hasAids, addIncident]);
 
   const getActiveSeconds = useCallback(() => activeRef.current, []);
   return { incidents, addIncident, activeSeconds, getActiveSeconds, reset };

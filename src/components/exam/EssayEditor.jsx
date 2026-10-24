@@ -21,7 +21,14 @@ export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, 
     extensions: buildExtensions({ placeholder: 'Skriv besvarelsen din her...', enableSpellcheck: true }),
     content: initialDoc || '',
     editorProps: {
-      attributes: { spellcheck: 'true', lang, 'aria-label': 'Besvarelse', autocapitalize: 'sentences' },
+      attributes: {
+        role: 'textbox',
+        'aria-multiline': 'true',
+        spellcheck: 'true',
+        lang,
+        'aria-label': 'Besvarelse',
+        autocapitalize: 'sentences'
+      },
       handlePaste: (view, event) => {
         const text = event.clipboardData?.getData('text/plain') ?? '';
         event.preventDefault();

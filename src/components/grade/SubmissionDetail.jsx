@@ -5,6 +5,7 @@ import EssayView from './EssayView';
 import { formatDateTime, formatDuration } from '../../utils/exam/formatTime';
 
 const INCIDENT_LABELS = {
+  APP_SWITCH: 'Brukt tillatt hjelpemiddel / annen app',
   FOCUS_LOST: 'Forlot prøvevinduet',
   FOCUS_RETURNED: 'Tilbake i prøvevinduet',
   PASTE: 'Stor innliming',
@@ -76,7 +77,11 @@ export default function SubmissionDetail({ submission }) {
         <Stat label="Levert" value={formatDateTime(p.completedAt)} title="Tidspunktet PDF-en ble generert" />
         <Stat label="Aktiv tid" value={formatDuration(p.activeSeconds)} title="Tid prøvevinduet var synlig og i fokus" />
         <Stat label="Ord" value={p.wordCount ?? '–'} title="Antall ord i besvarelsen" />
-        <Stat label="Varsler" value={p.incidentCount ?? 0} title="Antall registrerte hendelser (fokustap, innliminger, gjenoppretting)" />
+        {p.appSwitchIncidents > 0 ? (
+          <Stat label="App-bytte" value={p.appSwitchIncidents} title="Antall ganger eleven brukte tillatt hjelpemiddel eller ordbok" />
+        ) : (
+          <Stat label="Fokustap" value={p.focusLossIncidents ?? 0} title="Antall ganger eleven forlot prøvevinduet" />
+        )}
         <Stat label="Innliminger" value={p.pasteIncidents ?? 0} title="Innliminger over 200 tegn" />
       </div>
 

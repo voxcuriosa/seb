@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useEditorState } from '@tiptap/react';
-import { Bold, Italic, Underline, Heading1, Heading2, List, ListOrdered, Undo2, Redo2 } from 'lucide-react';
+import { Bold, Italic, Underline, Heading1, Heading2, List, ListOrdered, Undo2, Redo2, Volume2, VolumeX } from 'lucide-react';
 
 function ToolButton({ onClick, active, disabled, label, children }) {
   return (
@@ -38,8 +39,29 @@ export default function EditorToolbar({ editor, children }) {
       canRedo: e?.can().redo() ?? false
     })
   });
+  const [speaking, setSpeaking] = useState(false);
   if (!editor || !s) return null;
   const run = (fn) => () => fn(editor.chain().focus()).run();
+
+  const toggleSpeak = () => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+    const { from, to } = editor.state.selection;
+    let text = editor.state.doc.textBetween(from, to, ' ');
+    if (!text.trim()) text = editor.getText();
+    if (!text.trim()) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = document.documentElement.lang || 'nb-NO';
+    utter.onend = () => setSpeaking(false);
+    utter.onerror = () => setSpeaking(false);
+    setSpeaking(true);
+    window.speechSynthesis.speak(utter);
+  };
 
   return (
     <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 bg-slate-900 border-b border-slate-800" role="toolbar" aria-label="Formatering">
@@ -55,6 +77,14 @@ export default function EditorToolbar({ editor, children }) {
       <Divider />
       <ToolButton label="Angre (Ctrl+Z)" disabled={!s.canUndo} onClick={run((c) => c.undo())}><Undo2 size={16} /></ToolButton>
       <ToolButton label="Gjør om (Ctrl+Y)" disabled={!s.canRedo} onClick={run((c) => c.redo())}><Redo2 size={16} /></ToolButton>
+      <Divider />
+      <ToolButton
+        label={speaking ? 'Stopp opplesing' : 'Les opp markert tekst (syntetisk tale)'}
+        active={speaking}
+        onClick={toggleSpeak}
+      >
+        {speaking ? <VolumeX size={16} /> : <Volume2 size={16} />}
+      </ToolButton>
       {children}
     </div>
   );

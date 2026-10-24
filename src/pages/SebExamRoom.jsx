@@ -64,11 +64,18 @@ export default function SebExamRoom() {
 
   const isFormsExam = exam?.sourceType === 'forms' || Boolean(exam?.formsUrl);
   const formsUrl = exam?.formsUrl || 'https://forms.office.com';
+  const hasAids = Boolean(
+    exam?.allowedApps?.voxlex ||
+    exam?.allowedApps?.lingdys ||
+    exam?.allowedApps?.ordnett ||
+    (Array.isArray(exam?.allowedWebsites) && exam.allowedWebsites.length > 0)
+  );
 
   const log = useExamIntegrityLog({
     initialActiveSeconds: 0,
     initialIncidents: [],
-    enabled: status === 'ready' && !isFormsExam
+    enabled: status === 'ready' && !isFormsExam,
+    hasAids
   });
   const { reset: resetLog, addIncident } = log;
 

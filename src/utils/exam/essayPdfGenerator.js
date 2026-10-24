@@ -30,6 +30,8 @@ const MUTED = rgb(0.35, 0.4, 0.48);
 export async function buildEssayPayload({ exam, essayDoc, startedAt, activeSeconds, incidents = [] }) {
   const essayText = blocksToPlainText(docToBlocks(essayDoc));
   const pasteIncidents = incidents.filter((i) => i?.type === 'PASTE').length;
+  const appSwitchIncidents = incidents.filter((i) => i?.type === 'APP_SWITCH').length;
+  const focusLossIncidents = incidents.filter((i) => i?.type === 'FOCUS_LOST').length;
   const payload = {
     type: SEB_ESSAY_TYPE,
     version: 3,
@@ -42,6 +44,8 @@ export async function buildEssayPayload({ exam, essayDoc, startedAt, activeSecon
     activeSeconds: Math.max(0, Math.round(Number(activeSeconds) || 0)),
     incidentCount: incidents.length,
     pasteIncidents,
+    appSwitchIncidents,
+    focusLossIncidents,
     incidents: incidents.slice(0, 200),
     essayText,
     essayDoc
@@ -74,8 +78,13 @@ export async function renderEssayPdf(payload) {
   L.text(`PRØVEBESVARELSE - KVITTERING #${payload.receiptCode}`, { size: 14, bold: true, color: GREEN, spacing: 20 });
   L.text(payload.examTitle, { size: 12, bold: true, spacing: 17 });
   L.text(`Start: ${formatDateTime(payload.startedAt)}   Levert: ${formatDateTime(payload.completedAt)}`, { size: 9.5, spacing: 14 });
+  const appSwitch = payload.appSwitchIncidents || 0;
+  const focusLoss = payload.focusLossIncidents || 0;
+  const switchLabel = appSwitch > 0
+    ? `App-bytte: ${appSwitch}`
+    : `Fokustap: ${focusLoss}`;
   L.text(
-    `Aktiv tid: ${formatDuration(payload.activeSeconds)}   Ord: ${payload.wordCount}   Varsler: ${payload.incidentCount}   Innliminger: ${payload.pasteIncidents}`,
+    `Aktiv tid: ${formatDuration(payload.activeSeconds)}   Ord: ${payload.wordCount}   ${switchLabel}   Innliminger: ${payload.pasteIncidents}`,
     { size: 9.5, spacing: 14, color: MUTED }
   );
   L.gap(10);
