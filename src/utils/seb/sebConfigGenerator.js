@@ -80,7 +80,7 @@ export function buildStandaloneSebPlist({
   <key>createNewDesktop</key>
   <false/>
   <key>killExplorerShell</key>
-  <true/>
+  <false/>
   <key>browserViewMode</key>
   <integer>0</integer>
   <key>enableAAC</key>
