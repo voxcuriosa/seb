@@ -83,7 +83,8 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toMatch(/<key>enablePrivateClipboard<\/key>\s*<true\/>/);
     expect(xml).toMatch(/<key>enablePrivateClipboardMacEnforce<\/key>\s*<true\/>/);
     expect(xml).not.toContain('hashedQuitPassword');
-    expect(xml).toContain('<array/>');
+    expect(xml).toContain('CredentialUIBroker.exe');
+    expect(xml).toContain('PickerHost.exe');
   });
 
   it('URL-koder examId i startURL', () => {

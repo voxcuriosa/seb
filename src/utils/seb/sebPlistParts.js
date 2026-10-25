@@ -66,6 +66,34 @@ const APP_PROCESSES = {
   ]
 };
 
+/** Systemprosesser i Windows for Feide/Microsoft passordløs pålogging (Windows Hello PIN/FIDO2). */
+const SYSTEM_AUTH_PROCESSES = [
+  {
+    autostart: false,
+    iconInTaskbar: false,
+    runInBackground: true,
+    strongKill: false,
+    allowUserToChooseApp: false,
+    title: 'Windows Sikkerhetsdialog (PIN/Passkey)',
+    executable: 'CredentialUIBroker.exe',
+    originalName: 'CredentialUIBroker.exe',
+    path: 'C:\\Windows\\System32',
+    os: 1
+  },
+  {
+    autostart: false,
+    iconInTaskbar: false,
+    runInBackground: true,
+    strongKill: false,
+    allowUserToChooseApp: false,
+    title: 'Windows Sikkerhetsvelger',
+    executable: 'PickerHost.exe',
+    originalName: 'PickerHost.exe',
+    path: 'C:\\Windows\\System32',
+    os: 1
+  }
+];
+
 export function buildPermittedProcessesXml(allowedApps = {}) {
   const parts = [];
   for (const appId of ['ordnett', 'lingdys', 'voxlex']) {
@@ -73,6 +101,9 @@ export function buildPermittedProcessesXml(allowedApps = {}) {
       parts.push(...APP_PROCESSES[appId].map(processDict));
     }
   }
+  // Tillat alltid Windows' innebygde PIN/sikkerhetsdialoger for passordløs pålogging i skolen
+  parts.push(...SYSTEM_AUTH_PROCESSES.map(processDict));
+
   const permittedXml = parts.length > 0
     ? `  <key>permittedProcesses</key>\n  <array>\n${parts.join('\n')}\n  </array>`
     : '  <key>permittedProcesses</key>\n  <array/>';
