@@ -57,6 +57,8 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toContain('<key>prohibitedProcesses</key>');
     expect(xml).toContain('no.lingit.lingdys');
     expect(xml).toContain('LingX.exe');
+    expect(xml).toMatch(/<key>createNewDesktop<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>killExplorerShell<\/key>\s*<true\/>/);
     expect(xml).toMatch(/<key>clipboardPolicy<\/key>\s*<integer>0<\/integer>/);
     expect(xml).toMatch(/<key>enablePrivateClipboard<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>enablePrivateClipboardMacEnforce<\/key>\s*<false\/>/);
