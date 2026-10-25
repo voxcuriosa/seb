@@ -57,16 +57,19 @@ const APP_PROCESSES = {
     { autostart: false, iconInTaskbar: true, allowUserToChooseApp: false, title: 'Ordnett Pluss', executable: 'Ordnett Pluss', originalName: 'Ordnett Pluss', identifier: 'no.kunnskapsforlaget.ordnettpluss', path: '/Applications/Ordnett Pluss.app', os: 0 }
   ],
   lingdys: [
-    { autostart: true, iconInTaskbar: true, runInBackground: true, strongKill: false, allowUserToChooseApp: true, title: 'Lingdys', executable: 'LingX.exe', originalName: 'LingX.exe', path: 'Lingdys4', os: 1 },
+    { autostart: true, iconInTaskbar: true, allowUserToChooseApp: true, title: 'Lingdys', executable: 'LingX.exe', originalName: '', path: 'Lingdys4', os: 1 },
     { autostart: true, iconInTaskbar: true, allowUserToChooseApp: false, title: 'Lingdys', executable: 'Lingdys', originalName: 'Lingdys', identifier: 'no.lingit.lingdys', path: '/Applications/Lingdys.app', os: 0 }
   ],
   voxlex: [
-    { autostart: true, iconInTaskbar: true, runInBackground: true, strongKill: false, allowUserToChooseApp: true, title: 'VoxLex', executable: 'voxlex.exe', originalName: 'voxlex.exe', path: '%LOCALAPPDATA%\\VoxLex', os: 1 },
+    { autostart: true, iconInTaskbar: true, allowUserToChooseApp: true, title: 'VoxLex', executable: 'voxlex.exe', originalName: '', path: '%LOCALAPPDATA%\\VoxLex', os: 1 },
     { autostart: true, iconInTaskbar: true, allowUserToChooseApp: false, title: 'VoxLex', executable: 'voxlex', originalName: 'voxlex', identifier: 'no.voxlex.skole', path: '/Applications/VoxLex.app', os: 0 }
   ]
 };
 
-/** Systemprosesser i Windows for Feide/Microsoft passordløs pålogging (Windows Hello PIN/FIDO2). */
+/** Systemprosesser i Windows for Feide/Microsoft passordløs pålogging (Windows Hello PIN/FIDO2).
+ * Merk: originalName og path må være tomme fordi Windows COM-aktiverer disse som systemtjenester,
+ * og SEB kan ikke lese originalName eller fast filsti på tvers av Windows 10/11-versjoner.
+ */
 const SYSTEM_AUTH_PROCESSES = [
   {
     autostart: false,
@@ -76,8 +79,8 @@ const SYSTEM_AUTH_PROCESSES = [
     allowUserToChooseApp: false,
     title: 'Windows Sikkerhetsdialog (PIN/Passkey)',
     executable: 'CredentialUIBroker.exe',
-    originalName: 'CredentialUIBroker.exe',
-    path: 'C:\\Windows\\System32',
+    originalName: '',
+    path: '',
     os: 1
   },
   {
@@ -88,8 +91,20 @@ const SYSTEM_AUTH_PROCESSES = [
     allowUserToChooseApp: false,
     title: 'Windows Sikkerhetsvelger',
     executable: 'PickerHost.exe',
-    originalName: 'PickerHost.exe',
-    path: 'C:\\Windows\\System32',
+    originalName: '',
+    path: '',
+    os: 1
+  },
+  {
+    autostart: false,
+    iconInTaskbar: false,
+    runInBackground: true,
+    strongKill: false,
+    allowUserToChooseApp: false,
+    title: 'Windows PIN-dialog',
+    executable: 'PinEnrollmentBroker.exe',
+    originalName: '',
+    path: '',
     os: 1
   }
 ];
