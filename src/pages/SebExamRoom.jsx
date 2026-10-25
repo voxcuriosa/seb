@@ -21,7 +21,7 @@ import FormsHubView from '../components/exam/FormsHubView';
 import LoadingScreen from '../components/common/LoadingScreen';
 import { useStudentUiLang } from '../hooks/useStudentUiLang';
 
-const clampPct = (v) => Math.min(82, Math.max(18, Number(v) || 48));
+const clampPct = (v) => Math.min(82, Math.max(18, Number(v) || 40));
 
 export default function SebExamRoom() {
   const { examId } = useParams();
@@ -29,7 +29,7 @@ export default function SebExamRoom() {
   const [status, setStatus] = useState('loading');
   const [initialDraft, setInitialDraft] = useState(null);
   const [layout, setLayout] = useState('split');
-  const [splitPct, setSplitPct] = useState(48);
+  const [splitPct, setSplitPct] = useState(40);
   const [draggingSplit, setDraggingSplit] = useState(false);
   const [lang, setLang] = useState('nb-NO');
   const [restored, setRestored] = useState(null);
@@ -224,12 +224,12 @@ export default function SebExamRoom() {
                 aria-valuenow={Math.round(splitPct)}
                 aria-valuemin={18}
                 aria-valuemax={82}
-                title="Dra for å endre bredde (dobbeltklikk for 50/50)"
+                title="Dra for å endre bredde (dobbeltklikk for 40/60)"
                 onPointerDown={(e) => {
                   e.preventDefault();
                   setDraggingSplit(true);
                 }}
-                onDoubleClick={() => setSplitPct(50)}
+                onDoubleClick={() => setSplitPct(40)}
                 onKeyDown={(e) => {
                   if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
                     e.preventDefault();

@@ -57,7 +57,7 @@ const APP_PROCESSES = {
     { autostart: false, iconInTaskbar: true, allowUserToChooseApp: false, title: 'Ordnett Pluss', executable: 'Ordnett Pluss', originalName: 'Ordnett Pluss', identifier: 'no.kunnskapsforlaget.ordnettpluss', path: '/Applications/Ordnett Pluss.app', os: 0 }
   ],
   lingdys: [
-    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: true, title: 'Lingdys', executable: 'LingX.exe', originalName: '', path: 'C:\\Program Files\\Lingdys4', os: 1 },
+    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: true, title: 'Lingdys', executable: 'LingX.exe', originalName: 'LingX.exe', path: 'C:\\Program Files\\Lingdys4', os: 1 },
     { autostart: true, iconInTaskbar: true, allowUserToChooseApp: false, title: 'Lingdys', executable: 'Lingdys', originalName: 'Lingdys', identifier: 'no.lingit.lingdys', path: '/Applications/Lingdys.app', os: 0 }
   ],
   voxlex: [
