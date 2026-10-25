@@ -48,9 +48,8 @@ export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, 
     content: initialDoc || '',
     editorProps: {
       attributes: {
-        ...(typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform || navigator.userAgent || '')
-          ? { role: 'textbox', 'aria-multiline': 'true' }
-          : {}),
+        role: 'textbox',
+        'aria-multiline': 'true',
         spellcheck: 'true',
         lang,
         'aria-label': 'Besvarelse',
