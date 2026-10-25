@@ -51,12 +51,9 @@ export default function QuickStepsGuide() {
       </ol>
 
       <div className="p-3.5 rounded-2xl bg-amber-950/40 border border-amber-500/50 space-y-1 text-xs text-amber-200">
-        <p className="font-bold text-amber-300">Viktig huskeregel for elevene:</p>
+        <p className="font-bold text-amber-300">Tips før heldagsprøver:</p>
         <p className="leading-relaxed">
-          Skal eleven bruke hjelpeprogrammer som <strong>Lingdys</strong>, <strong>VoxLex</strong> eller <strong>Ordnett Pluss</strong>, må disse startes <em>før</em> eleven klikker på SEB-lenken eller åpner .seb-filen.
-        </p>
-        <p className="leading-relaxed text-[11px] text-amber-300/80 pt-1 border-t border-amber-500/30">
-          <strong>Tips før heldagsprøver:</strong> Før store og viktige prøver anbefales det at elevene restarter PC-en først for å unngå bakgrunnskonflikter.
+          Før store og viktige prøver anbefales det at elevene restarter PC-en først for å unngå bakgrunnskonflikter.
         </p>
       </div>
     </div>

@@ -107,11 +107,6 @@ export default function SebStart() {
                 <p className={`text-xs text-slate-300 ${t.rtl ? 'pr-6' : 'pl-6'}`}>
                   {exam?.sourceType === 'forms' ? t.formsInfo : t.essayInfo}
                 </p>
-                {exam?.sebConfig?.allowedApps && Object.values(exam.sebConfig.allowedApps).some(Boolean) && (
-                  <div className={`mt-2 pt-2 border-t border-slate-800 text-xs text-amber-300 ${t.rtl ? 'pr-6' : 'pl-6'}`}>
-                    <strong>{t.appsWarningTitle}</strong> {t.appsWarningBody}
-                  </div>
-                )}
               </div>
 
               <button

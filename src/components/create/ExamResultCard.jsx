@@ -83,9 +83,6 @@ export default function ExamResultCard({ exam, onNew }) {
             ? 'Opprett en vanlig oppgave i Teams («Opprett -> Oppgave») og lim inn SEB-lenken over (eller legg ved .seb-filen).'
             : 'Lim lenken inn i en Teams-oppgave (eller legg ved .seb-filen). Sett «Elever kan angre innlevering: Nei» øverst i oppgaven (kan også settes som fast standard for klassen under tannhjulet «Oppgaveinnstillinger» i Teams).'}
         </li>
-        <li>
-          <strong className="text-amber-300 font-bold">Husk:</strong> Be elever som bruker <strong>Lingdys</strong>, <strong>VoxLex</strong> eller <strong>Ordnett Pluss</strong> om å starte disse <em>før</em> de åpner SEB-lenken.
-        </li>
         <li>Elevene åpner lenken, laster ned prøvefilen og starter SEB.</li>
         {exam.sourceType === 'forms' ? (
           <li>
