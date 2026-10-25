@@ -50,7 +50,7 @@ export default function TeacherPinGate({ onUnlock, busy, error }) {
         <span>Lås opp</span>
       </button>
       <p className="text-[11px] text-slate-500 leading-relaxed text-center">
-        Kontakt <AuthorMailLink label="Christian Borchgrevink-Vigeland" showEmail={true} subject="Forespørsel om lærer-PIN til SEB-prøver" /> for å få PIN-kode.
+        Kontakt <AuthorMailLink label="Christian Borchgrevink-Vigeland" subject="Forespørsel om lærer-PIN til SEB-prøver" /> for å få PIN-kode.
       </p>
       <p className="text-[11px] text-slate-500 text-center pt-1 border-t border-slate-800/80">
         Kildekode på GitHub:{' '}
