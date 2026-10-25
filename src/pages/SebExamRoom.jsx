@@ -19,6 +19,7 @@ import FinishDialog from '../components/exam/FinishDialog';
 import FormsExitDialog from '../components/exam/FormsExitDialog';
 import FormsHubView from '../components/exam/FormsHubView';
 import LoadingScreen from '../components/common/LoadingScreen';
+import { useStudentUiLang } from '../hooks/useStudentUiLang';
 
 const clampPct = (v) => Math.min(82, Math.max(18, Number(v) || 48));
 
@@ -36,6 +37,7 @@ export default function SebExamRoom() {
   const [formsExitOpen, setFormsExitOpen] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [startedAt, setStartedAt] = useState(null);
+  const { t } = useStudentUiLang();
   const editorRef = useRef(null);
   const startedAtRef = useRef(null);
   const splitContainerRef = useRef(null);
@@ -159,13 +161,13 @@ export default function SebExamRoom() {
     window.location.href = EXAM_QUIT_URL;
   };
 
-  if (status === 'loading') return <LoadingScreen label="Laster prøven..." />;
+  if (status === 'loading') return <LoadingScreen label={t.loadingExam} />;
   if (status === 'missing') {
     return (
       <main className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
-        <div className="max-w-md p-6 rounded-3xl bg-amber-950 border border-amber-600 text-amber-50 flex gap-3">
+        <div dir={t.rtl ? 'rtl' : 'ltr'} className="max-w-md p-6 rounded-3xl bg-amber-950 border border-amber-600 text-amber-50 flex gap-3">
           <AlertTriangle className="shrink-0 text-amber-300" aria-hidden="true" />
-          <p>Prøven ble ikke funnet. Den kan være slettet (prøver slettes etter 90 dager), eller lenken er feil. Si fra til læreren.</p>
+          <p>{t.examNotFoundRoom}</p>
         </div>
       </main>
     );

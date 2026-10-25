@@ -7,6 +7,7 @@ import { spellcheckPluginKey } from '../editor/norwegianSpellcheck';
 import { SPELLCHECK_LANGUAGES, loadBrowserSpellchecker } from '../../utils/seb/sebDictionaries';
 import { countWords } from '../../utils/integrity/textNormalize';
 import { LARGE_PASTE_THRESHOLD } from '../../config';
+import { useStudentUiLang } from '../../hooks/useStudentUiLang';
 
 function copyTextToSystemClipboard(text) {
   const clean = String(text || '').trim();
@@ -40,6 +41,7 @@ export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, 
   const checkerRef = useRef(null);
   const [spellMenu, setSpellMenu] = useState(null);
   const [copiedNotice, setCopiedNotice] = useState(false);
+  const { t } = useStudentUiLang();
 
   const editor = useEditor({
     extensions: buildExtensions({ placeholder: 'Skriv besvarelsen din her...', enableSpellcheck: true }),
@@ -185,12 +187,12 @@ export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, 
               }`}
             >
               <Volume2 size={14} aria-hidden="true" />
-              <span>{copiedNotice ? 'Sendt til Lingdys' : 'Les i Lingdys'}</span>
+              <span>{copiedNotice ? t.sentToLingdys : t.readInLingdys}</span>
             </button>
           </>
         )}
         <span className="ml-auto pr-2 text-xs text-slate-300 tabular-nums" aria-live="polite" title="Løpende antall ord og tegn (uten linjeskift)">
-          {counts?.words ?? 0} ord, {counts?.chars ?? 0} tegn
+          {counts?.words ?? 0} {t.wordsLabel}, {counts?.chars ?? 0} {t.charsLabel}
         </span>
       </EditorToolbar>
       <div
@@ -212,7 +214,7 @@ export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, 
           className="fixed z-50 w-52 rounded-xl bg-slate-900 border border-slate-700 shadow-xl py-1.5 text-xs text-slate-100"
         >
           <div className="px-3 py-1 text-[11px] text-slate-400 border-b border-slate-800 truncate">
-            Stavekontroll: <strong className="text-red-300">{spellMenu.word}</strong>
+            {t.spellcheckTitle} <strong className="text-red-300">{spellMenu.word}</strong>
           </div>
           {spellMenu.suggestions.length > 0 ? (
             spellMenu.suggestions.map((sug) => (
@@ -228,7 +230,7 @@ export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, 
               </button>
             ))
           ) : (
-            <div className="px-3 py-1.5 text-slate-400 italic">Ingen retteforslag funnet</div>
+            <div className="px-3 py-1.5 text-slate-400 italic">{t.noSuggestions}</div>
           )}
           <div className="border-t border-slate-800 mt-1 pt-1">
             <button
@@ -238,7 +240,7 @@ export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, 
               className="w-full px-3 py-1.5 text-left text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-1.5"
             >
               <EyeOff size={13} aria-hidden="true" />
-              <span>Ignorer i denne prøven</span>
+              <span>{t.ignoreInExam}</span>
             </button>
           </div>
         </div>
