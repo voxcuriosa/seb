@@ -60,7 +60,8 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toMatch(/<key>clipboardPolicy<\/key>\s*<integer>0<\/integer>/);
     expect(xml).toMatch(/<key>enablePrivateClipboard<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>enablePrivateClipboardMacEnforce<\/key>\s*<false\/>/);
-    expect(xml).toMatch(/<key>enableAltTab<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>enableAltTab<\/key>\s*<true\/>/);
+    expect(xml).toMatch(/<key>enableInjected<\/key>\s*<true\/>/);
     expect(xml).toMatch(/<key>showMenuBar<\/key>\s*<false\/>/);
     expect(xml).not.toContain('OrdnettPluss.exe');
     expect(xml).toContain('<key>URLFilterEnable</key>');

@@ -183,7 +183,9 @@ ${buildDictionariesXml(dictionaries)}
   <key>removeLocalStorage</key>
   <false/>
   <key>enableAltTab</key>
-  <false/>
+  ${hasAllowedApps ? '<true/>' : '<false/>'}
+  <key>enableInjected</key>
+  ${hasAllowedApps ? '<true/>' : '<false/>'}
   <key>enablePrintScreen</key>
   <false/>
   <key>blockScreenSharing</key>

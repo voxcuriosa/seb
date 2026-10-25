@@ -89,9 +89,10 @@ describe('Slutt-til-slutt simulering av hele prøveløpet', () => {
       allowedApps: { voxlex: true, ordnett: false, lingdys: true }
     });
 
-    // Sjekk at godkjente apper og utklippstavle for opplesing er tillatt, mens Alt-Tab og menylinje er sperret
+    // Sjekk at godkjente apper, utklippstavle og vindusbytte er tillatt, mens menylinje er sperret
     expect(plist).toContain('<key>allowSwitchToApplications</key>\n  <true/>');
-    expect(plist).toContain('<key>enableAltTab</key>\n  <false/>');
+    expect(plist).toContain('<key>enableAltTab</key>\n  <true/>');
+    expect(plist).toContain('<key>enableInjected</key>\n  <true/>');
     expect(plist).toContain('<key>showMenuBar</key>\n  <false/>');
     expect(plist).toContain('<key>clipboardPolicy</key>\n  <integer>0</integer>');
     expect(plist).toContain('<key>enablePrivateClipboard</key>\n  <false/>');
