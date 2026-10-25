@@ -19,7 +19,7 @@ export function escapeXml(str) {
 
 const bool = (v) => (v ? '<true/>' : '<false/>');
 
-function processDict({ autostart, iconInTaskbar, allowUserToChooseApp, title, executable, originalName, identifier, path, os }) {
+function processDict({ autostart, iconInTaskbar, runInBackground = true, strongKill = false, allowUserToChooseApp, title, executable, originalName, identifier, path, os }) {
   return `    <dict>
       <key>active</key>
       <true/>
@@ -28,13 +28,13 @@ function processDict({ autostart, iconInTaskbar, allowUserToChooseApp, title, ex
       <key>iconInTaskbar</key>
       ${bool(iconInTaskbar)}
       <key>runInBackground</key>
-      <true/>
+      ${bool(runInBackground)}
       <key>allowAccessibility</key>
       <true/>
       <key>allowUserToChooseApp</key>
       ${bool(allowUserToChooseApp)}
       <key>strongKill</key>
-      <false/>
+      ${bool(strongKill)}
       <key>title</key>
       <string>${escapeXml(title)}</string>
       <key>executable</key>
@@ -57,11 +57,11 @@ const APP_PROCESSES = {
     { autostart: false, iconInTaskbar: true, allowUserToChooseApp: false, title: 'Ordnett Pluss', executable: 'Ordnett Pluss', originalName: 'Ordnett Pluss', identifier: 'no.kunnskapsforlaget.ordnettpluss', path: '/Applications/Ordnett Pluss.app', os: 0 }
   ],
   lingdys: [
-    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: true, title: 'Lingdys', executable: 'LingX.exe', originalName: 'LingX.exe', path: 'C:\\Program Files\\Lingdys4', os: 1 },
+    { autostart: true, iconInTaskbar: true, runInBackground: false, strongKill: true, allowUserToChooseApp: true, title: 'Lingdys', executable: 'LingX.exe', originalName: '', path: 'Lingdys4', os: 1 },
     { autostart: true, iconInTaskbar: true, allowUserToChooseApp: false, title: 'Lingdys', executable: 'Lingdys', originalName: 'Lingdys', identifier: 'no.lingit.lingdys', path: '/Applications/Lingdys.app', os: 0 }
   ],
   voxlex: [
-    { autostart: true, iconInTaskbar: true, allowUserToChooseApp: true, title: 'VoxLex', executable: 'voxlex.exe', originalName: '', path: '%LOCALAPPDATA%\\VoxLex', os: 1 },
+    { autostart: true, iconInTaskbar: true, runInBackground: false, strongKill: true, allowUserToChooseApp: true, title: 'VoxLex', executable: 'voxlex.exe', originalName: '', path: '%LOCALAPPDATA%\\VoxLex', os: 1 },
     { autostart: true, iconInTaskbar: true, allowUserToChooseApp: false, title: 'VoxLex', executable: 'voxlex', originalName: 'voxlex', identifier: 'no.voxlex.skole', path: '/Applications/VoxLex.app', os: 0 }
   ]
 };
