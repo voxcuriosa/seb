@@ -17,8 +17,8 @@ export function useSebDownload() {
   return { downloading, download };
 }
 
-export function CopyLinkButton({ examId, compact = false }) {
-  const [copied, setCopied] = useState(false);
+export function CopyLinkButton({ examId, compact = false, initialCopied = false }) {
+  const [copied, setCopied] = useState(initialCopied);
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(examStartUrl(examId));
@@ -57,8 +57,15 @@ export default function ExamResultCard({ exam, onNew }) {
         {examStartUrl(exam.examId)}
       </div>
 
+      {exam.autoCopied && (
+        <div className="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2.5">
+          <CheckCircle2 size={16} className="text-emerald-400 shrink-0" aria-hidden="true" />
+          <span>SEB-lenken er automatisk kopiert til utklippstavlen – klar til å limes inn i Teams (Ctrl+V / Cmd+V).</span>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row gap-3">
-        <CopyLinkButton examId={exam.examId} />
+        <CopyLinkButton examId={exam.examId} initialCopied={Boolean(exam.autoCopied)} />
         <button type="button" onClick={() => download(exam.sebFileArgs)} disabled={downloading}
           className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white text-xs font-black uppercase tracking-wider disabled:opacity-60">
           {downloading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Download size={16} aria-hidden="true" />}

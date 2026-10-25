@@ -11,6 +11,33 @@ import { useCreateSebExam } from '../../hooks/useCreateSebExam';
 import { useMyExams } from '../../hooks/useMyExams';
 import { DEFAULT_SEB_APPS, cleanDomainFromUrl, normalizeWebsiteUrl, isValidDomain } from '../../utils/seb/sebPresets';
 import { htmlToPlainText } from '../../utils/sanitize';
+import { examStartUrl } from '../../config';
+
+async function copyToClipboard(text) {
+  try {
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // fallback
+  }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '-9999px';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return Boolean(ok);
+  } catch {
+    return false;
+  }
+}
 
 function Step({ n, title, children }) {
   return (
@@ -89,6 +116,13 @@ export default function CreateExamTab() {
 
     const res = await createExam({ ...form, allowedApps, allowedWebsites: finalWebsites });
     if (!res) return;
+    const url = examStartUrl(res.examId);
+    let autoCopied = false;
+    try {
+      autoCopied = await copyToClipboard(url);
+    } catch {
+      // Ignorer
+    }
     const isForms = form.sourceType === 'forms';
     const trimmedFormsUrl = isForms ? form.formsUrl.trim() : '';
     const sebWebsites = isForms
@@ -109,6 +143,7 @@ export default function CreateExamTab() {
       expiresAt: res.expiresAt,
       sourceType: form.sourceType,
       formsUrl: isForms ? trimmedFormsUrl : null,
+      autoCopied,
       sebFileArgs: {
         examId: res.examId,
         title: form.title.trim(),

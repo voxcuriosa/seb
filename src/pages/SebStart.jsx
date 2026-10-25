@@ -1,38 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Lock, ShieldCheck, Download, ArrowRight, ExternalLink, RefreshCw, ArrowUpRight, AlertTriangle, Copy, Check } from 'lucide-react';
+import { Lock, ShieldCheck, Download, ArrowRight, ExternalLink, RefreshCw, ArrowUpRight, AlertTriangle } from 'lucide-react';
 import { fetchSebExam } from '../firebase';
 import { isSebEnvironment, markAsSebEnvironment } from '../utils/seb/sebEnvironment';
 import { downloadStandaloneSebExamFile } from '../utils/seb/sebConfigGenerator';
 import { useStudentUiLang } from '../hooks/useStudentUiLang';
 import StudentLanguageSelect from '../components/common/StudentLanguageSelect';
 
-const LINGDYS_WIN_PATH = 'C:\\Program Files\\Lingdys4\\LingX.exe';
 const isFormsDomain = (val = '') => /forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(String(val));
 const hasHelperWebsites = (sites = []) =>
   Array.isArray(sites) && sites.some((w) => w?.id !== 'web_forms_main' && !isFormsDomain(`${w?.domain || ''} ${w?.url || ''}`));
-
-const isWindowsDevice = () => typeof navigator !== 'undefined' && /win/i.test(navigator.userAgent || '');
-
-function copyTextSafe(text) {
-  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(text).catch(() => {});
-  }
-  try {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.setAttribute('readonly', '');
-    ta.style.position = 'fixed';
-    ta.style.top = '-9999px';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-  } catch {
-    // Ignorer
-  }
-}
 
 /** Elevens startside: laster ned .seb-filen, eller går rett til prøverommet hvis vi allerede er i SEB. */
 export default function SebStart() {
@@ -42,7 +19,6 @@ export default function SebStart() {
   const [status, setStatus] = useState('loading'); // loading | ready | missing | error
   const [downloadStarted, setDownloadStarted] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [pathCopied, setPathCopied] = useState(false);
   const { uiLang, setUiLang, t } = useStudentUiLang();
   const dir = t.rtl ? 'rtl' : 'ltr';
 
@@ -72,18 +48,8 @@ export default function SebStart() {
     };
   }, [examId]);
 
-  const hasWindowsLingdys = Boolean(exam?.sebConfig?.allowedApps?.lingdys) && isWindowsDevice();
-
-  const handleCopyLingdysPath = () => {
-    copyTextSafe(LINGDYS_WIN_PATH);
-    setPathCopied(true);
-  };
-
   const handleStartInSeb = async () => {
     if (!exam || downloading) return;
-    if (hasWindowsLingdys) {
-      handleCopyLingdysPath();
-    }
     setDownloading(true);
     try {
       const isForms = exam.sourceType === 'forms' || Boolean(exam.formsUrl);
@@ -158,25 +124,6 @@ export default function SebStart() {
                 <span>{downloading ? t.creatingFileBtn : t.startInSebBtn}</span>
                 <ArrowRight size={16} aria-hidden="true" />
               </button>
-
-              {hasWindowsLingdys && (
-                <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-2">
-                  <p className="text-slate-200 font-medium">{t.lingdysPathCopied}</p>
-                  <div className="flex items-center justify-between gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2">
-                    <code className="text-[11px] text-emerald-300 font-mono select-all truncate" dir="ltr">
-                      {LINGDYS_WIN_PATH}
-                    </code>
-                    <button
-                      type="button"
-                      onClick={handleCopyLingdysPath}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold shrink-0 transition-colors"
-                    >
-                      {pathCopied ? <Check size={12} className="text-emerald-400" aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
-                      <span>{pathCopied ? 'Ctrl+V' : 'Kopier'}</span>
-                    </button>
-                  </div>
-                </div>
-              )}
 
               {downloadStarted && (
                 <div className="p-5 bg-red-950 border-2 border-red-500 rounded-2xl space-y-2.5">
