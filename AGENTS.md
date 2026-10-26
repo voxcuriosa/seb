@@ -3,7 +3,8 @@
 Åpen, frittstående modul for Safe Exam Browser-prøver. Ingen innlogging for elever, ingen KI.
 
 ## 1. Elevarbeid forlater ALDRI nettleseren (viktigst)
-- Følg `.agents/skills/student-data-never-leaves-browser/SKILL.md` ved all endring.
+- Følg `.agents/skills/student-data-never-leaves-browser/SKILL.md` og `.agents/skills/seb-zero-student-tracking/SKILL.md` ved all endring.
+- Elevsider (`/start/*`, `/exam/*`, `?seb=1`) skal ALDRI ha web-analyse, IP-oppslag, cookies eller besøkssporing. Sporing er strengt begrenset til lærersiden (`/seb/`).
 - Fane 2 (kontroll av PDF-er) har null nettverkskall. Prøverommet sender bare `{ examId, sha256 }` til signering.
 - `scripts/privacy-guard.mjs` håndhever dette i `npm test`, git-hooks og CI. Vakten skal aldri svekkes eller omgås.
 
