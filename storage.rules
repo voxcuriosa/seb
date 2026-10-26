@@ -8,7 +8,7 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /sebExams/{examId}/oppgave.pdf {
-      allow get: if true;
+      allow get: if firestore.get(/databases/(default)/documents/sebExams/$(examId)).data.expiresAt > request.time;
       allow list, write: if false;
     }
 

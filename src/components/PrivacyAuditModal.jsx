@@ -59,7 +59,8 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
                 <li><strong>Lærerens oppgavetekst</strong> (tittel og instrukser) lagret som statisk JSON.</li>
                 <li>Eventuell <strong>oppgave-PDF</strong> dersom læreren la ved et vedlegg til oppgaven.</li>
                 <li><strong>Tillatte hjelpemidler og URL-er</strong> for SEB-profilen.</li>
-                <li><strong>Auto-sletting etter 90 dager:</strong> Oppgaven slettes automatisk fra Firestore via TTL, og eventuelle oppgave-PDF-er slettes fra Cloud Storage via funksjonstriggeren <code className="text-slate-400">cleanupExamStorage</code> (i tillegg til bøttens livssyklusregel).</li>
+                <li><strong>Auto-sletting etter 90 dager:</strong> Tilgang til både oppgavetekst og oppgave-PDF sperres på sekundet ved utløp i <code className="text-slate-400">firestore.rules</code> og <code className="text-slate-400">storage.rules</code>, og slettes fysisk via Firestore TTL og funksjonstriggeren <code className="text-slate-400">cleanupExamStorage</code>.</li>
+                <li><strong>DoS-vern og infrastruktur:</strong> En midlertidig, enveis HMAC-hashet teller (<code className="text-slate-400">rateLimits</code>, TTL 2 timer) beskytter mot misbruk uten å lagre IP i klartekst. Underliggende Google Cloud-infrastruktur i EU har standard tekniske driftslogger (30 dager) ved nedlasting av oppgave og signering.</li>
                 <li><strong className="text-red-400">Ingen elevdata eller elevsvar</strong> lagres noensinne i databasen eller skylagringen.</li>
               </ul>
             </div>
@@ -103,7 +104,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               Ved ferdigstillelse sender elevens nettleser <em>kun</em> to verdier: <code className="text-emerald-400">&#123; examId, sha256 &#125;</code> til Cloud Function <code className="text-slate-300">signSebSubmission</code>.
             </p>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Serveren mottar <strong>ingen tekst, ingen ord og intet elevnavn</strong>, men utelukkende den matematiske kontrollsummen som brukes til integritetskontroll. Serveren signerer SHA-256-hashen med Ed25519 og returnerer signaturen. Hvis eleven er offline, fullføres innleveringen likevel lokalt uten signatur (merkes som «Verifisert, ikke signert»).
+              Serveren mottar <strong>ingen tekst, ingen ord og intet elevnavn</strong>, men utelukkende den matematiske kontrollsummen som brukes til integritetskontroll. Serveren signerer SHA-256-hashen med Ed25519 og returnerer signaturen uten å lagre besvarelsen (kun en midlertidig, HMAC-hashet DoS-teller i <code className="text-slate-300">rateLimits</code> med 2 timers levetid oppdateres). Hvis eleven er offline, fullføres innleveringen likevel lokalt uten signatur (merkes som «Verifisert, ikke signert»).
             </p>
           </div>
 
@@ -124,7 +125,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-emerald-400 font-bold">✓</span>
-                <span><strong>Ingen sporing eller annonser:</strong> Ingen tredjeparts sporingsskript, informasjonskapsler for sporing eller Google Analytics.</span>
+                <span><strong>Null elevsporing:</strong> Elevsidene (<code className="text-slate-400">/start/*</code>, <code className="text-slate-400">/exam/*</code>, <code className="text-slate-400">/quit</code>) har 0 % sporing, ingen informasjonskapsler for sporing og ingen besøksstatistikk. Kun lærersiden (<code className="text-slate-400">/seb/</code>) benytter enkel besøksstatistikk for å kunne tilby bedre tjenester til lærere.</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-emerald-400 font-bold">✓</span>
