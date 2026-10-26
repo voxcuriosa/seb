@@ -14,20 +14,24 @@ GitHub Repository: [https://github.com/voxcuriosa/seb](https://github.com/voxcur
 
 Modulen leveres som åpen kildekode under MIT-lisens («as is», uten garantier). Løsningen kan brukes som den er, revideres eller modifiseres fritt av skoler, kommuner og IT-avdelinger etter egne behov. Følgende tekniske prinsipper og mekanismer er bygget inn i arkitekturen:
 
-1. **Elevarbeid forlater ALDRI nettleseren:**
+1. **Elevarbeid forlater ALDRI nettleseren (Ordinær skriveprøve):**
    - Det eleven skriver under prøven overføres **aldri** over internett til noen server eller skytjeneste.
    - All tekst pakkes og formateres som en PDF lokalt i elevens nettleserminne (`pdf-lib`) ved levering.
    - Når PDF-en er lastet ned til elevens maskin og nettleserøkten lukkes, forsvinner dataene fra nettleseren.
-2. **Fane 2 (Kontroll av PDF-er) har 0 nettverkskall:**
+   - **Kryptografisk signering:** Ved innlevering overføres kun to tekniske verdier til Cloud Function `signSebSubmission` (dersom eleven har nett): `{ examId, sha256 }`. Dette er en enveis matematisk kontrollsum (SHA-256) som signeres med Ed25519. Det overføres ingen elevtekst, ord eller elevnavn. Dersom eleven er offline, fullføres innleveringen likevel lokalt uten signatur.
+2. **Skille mellom skriveprøve og Microsoft Forms:**
+   - **Skriveprøve (Curiosa editor):** Elevarbeidet forblir lokalt, og ingen data lagres eksternt.
+   - **Microsoft Forms-prøver:** Når læreren velger Forms-modus, fungerer Safe Exam Browser som en sikker, nedlåst nettleser mot skolens egen Microsoft 365- og Feide-leietaker. Besvarelsen leveres direkte til Microsoft Forms i henhold til skoleeiers eksisterende databehandleravtale (DPA) med Microsoft.
+3. **Fane 2 (Kontroll av PDF-er) har 0 nettverkskall:**
    - Når læreren slipper inn elevenes PDF-er eller hele «Student Work»-mappen fra Teams/SharePoint, foretas det **ingen nettverkskall**.
    - Verifisering av manipulasjon (SHA-256 og fulltekst-rekonstruksjon) foregår 100 % lokalt i nettleserens RAM.
    - Håndheves automatisk i kildekoden av en statisk personvernvakt (`scripts/privacy-guard.mjs`).
-3. **Ingen innlogging og ingen elevkontoer:**
+4. **Ingen innlogging og ingen elevkontoer:**
    - Elevene trenger ingen brukerkonto, e-post eller passord for å ta prøven.
-4. **Ingen Kunstig Intelligens (KI):**
+5. **Ingen Kunstig Intelligens (KI):**
    - Ingen elevbesvarelser sendes til noen eksterne språkmodeller eller KI-leverandører.
-5. **Auto-sletting etter 90 dager:**
-   - Kun lærerens oppgavedefinisjon (oppgavetekst og tillatte nettsider) lagres i skyen (europe-west1), og slettes deterministisk etter 90 dager via Firestore TTL.
+6. **Auto-sletting etter 90 dager:**
+   - Kun lærerens oppgavedefinisjon (oppgavetekst og tillatte nettsider) lagres i skyen (europe-west1), og slettes automatisk etter 90 dager via Firestore TTL (Time-to-Live er aktivert på `expiresAt` i samlingen `sebExams`).
 
 ---
 
