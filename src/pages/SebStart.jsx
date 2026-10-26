@@ -142,7 +142,7 @@ export default function SebStart() {
 
           {downloadStarted && (
             <div
-              className="fixed top-20 sm:top-24 left-1/2 -translate-x-1/2 z-[1000] flex items-start gap-3.5 bg-red-600 text-white p-4 sm:p-5 rounded-3xl shadow-2xl border-4 border-white w-[92%] max-w-md animate-bounce"
+              className="fixed top-1/2 -translate-y-1/2 right-4 sm:right-8 z-[1000] flex items-start gap-3.5 bg-red-600 text-white p-4 sm:p-5 rounded-3xl shadow-2xl border-4 border-white max-w-sm animate-bounce"
               role="alert"
             >
               <div className="w-12 h-12 rounded-2xl bg-white text-red-600 flex items-center justify-center shrink-0">
