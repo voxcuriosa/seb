@@ -11,5 +11,84 @@
   <body class="bg-slate-950 text-slate-100">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- Besøkssporing KUN for lærersiden (TeacherHub på /seb/) - ELEVER SPORES ALDRI -->
+    <script>
+      (function() {
+        try {
+          // 1. STRENG SJEKK: Sporing er KUN tillatt på lærerforsiden (/seb eller /seb/ eller /seb/index.html)
+          var pathname = window.location.pathname.replace(/\/+$/, '') || '/';
+          var isTeacherPage = (pathname === '/seb' || pathname === '/seb/index.html');
+
+          // 2. ELEVBLOKKERING: Hvis URL-en inneholder /start/, /exam/, /quit eller ?seb=1, er dette en elevlenke.
+          // Da avbryter vi umiddelbart. 0% sporing, null nettverkskall, fullstendig taushet.
+          var isStudentLink = window.location.pathname.indexOf('/start/') !== -1 ||
+                              window.location.pathname.indexOf('/exam/') !== -1 ||
+                              window.location.pathname.indexOf('/quit') !== -1 ||
+                              window.location.search.indexOf('seb=1') !== -1;
+
+          if (!isTeacherPage || isStudentLink) {
+            return;
+          }
+
+          // 3. Forhindre duplikatlogging hvis læreren klikker rundt i appen
+          if (sessionStorage.getItem('seb_teacher_visit_logged')) {
+            return;
+          }
+          sessionStorage.setItem('seb_teacher_visit_logged', '1');
+
+          function getVisitorId() {
+            var id = localStorage.getItem('vox_visitor_id');
+            if (!id) {
+              id = 'v-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+              localStorage.setItem('vox_visitor_id', id);
+            }
+            return id;
+          }
+
+          async function logTeacherVisit() {
+            var currentCountry = 'Unknown';
+            try {
+              var geoRes = await fetch('https://get.geojs.io/v1/ip/country.json', { cache: 'force-cache' });
+              if (geoRes.ok) {
+                var geoData = await geoRes.json();
+                if (geoData && geoData.country) currentCountry = geoData.country;
+              }
+            } catch (e) {
+              try {
+                var fbRes = await fetch('https://api.country.is/', { cache: 'force-cache' });
+                if (fbRes.ok) {
+                  var fbData = await fbRes.json();
+                  if (fbData && fbData.country) currentCountry = fbData.country;
+                }
+              } catch (fbErr) {}
+            }
+
+            var payload = {
+              action: 'log_visit',
+              app: 'seb',
+              visitor_id: getVisitorId(),
+              country: currentCountry,
+              device: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'PC',
+              screen_resolution: window.screen.width + 'x' + window.screen.height,
+              referrer: document.referrer || 'Direct',
+              language: navigator.language || 'no'
+            };
+
+            fetch('/history/auth_v2.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            }).catch(function() {});
+          }
+
+          if (document.readyState === 'complete') {
+            logTeacherVisit();
+          } else {
+            window.addEventListener('load', logTeacherVisit);
+          }
+        } catch (err) {}
+      })();
+    </script>
   </body>
 </html>
