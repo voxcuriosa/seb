@@ -63,19 +63,31 @@ export const createSebExam = onCall(
     }
 
     const expiresAt = Timestamp.fromMillis(Date.now() + TTL_MS);
-    await ref.set({
-      id: ref.id,
-      title: clean.title,
-      createdAt: FieldValue.serverTimestamp(),
-      expiresAt,
-      sourceType: clean.sourceType,
-      formsUrl: clean.formsUrl || null,
-      promptHtml: clean.promptHtml,
-      pdfPath,
-      sebConfig: clean.sebConfig,
-      blocks: [{ id: 'essay_1', type: 'essay', title: 'Besvarelse' }],
-      schemaVersion: 1
-    });
+    try {
+      await ref.set({
+        id: ref.id,
+        title: clean.title,
+        createdAt: FieldValue.serverTimestamp(),
+        expiresAt,
+        sourceType: clean.sourceType,
+        formsUrl: clean.formsUrl || null,
+        promptHtml: clean.promptHtml,
+        pdfPath,
+        sebConfig: clean.sebConfig,
+        blocks: [{ id: 'essay_1', type: 'essay', title: 'Besvarelse' }],
+        schemaVersion: 1
+      });
+    } catch (dbErr) {
+      if (pdfPath) {
+        try {
+          const bucket = getStorage().bucket('voxcuriosa-seb-storage');
+          await bucket.file(pdfPath).delete();
+        } catch (cleanupErr) {
+          console.error(`Kunne ikke rydde opp forlatt PDF ${pdfPath}:`, cleanupErr);
+        }
+      }
+      throw dbErr;
+    }
 
     return { examId: ref.id, expiresAt: expiresAt.toDate().toISOString() };
   }

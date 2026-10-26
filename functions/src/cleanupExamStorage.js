@@ -11,7 +11,8 @@ export const cleanupExamStorage = onDocumentDeleted(
   {
     document: 'sebExams/{examId}',
     region: 'europe-west1',
-    maxInstances: 5
+    maxInstances: 5,
+    retry: true
   },
   async (event) => {
     const examId = event.params.examId;
@@ -30,7 +31,12 @@ export const cleanupExamStorage = onDocumentDeleted(
       // Sletter eventuelle andre restfiler i samme prøvemappe i Storage
       await bucket.deleteFiles({ prefix: `sebExams/${examId}/`, force: true });
     } catch (err) {
-      console.warn(`Opprydding av storage for ${examId} fullforte med merknad:`, err?.message);
+      // 404 (filen finnes ikke lenger / allerede slettet) er idempotent og ufarlig
+      if (err?.code === 404) return;
+
+      console.error(`Kritisk feil under opprydding av storage for ${examId}:`, err);
+      // Kaster feilen videre slik at Eventarc / Cloud Functions foretar automatisk retry
+      throw err;
     }
   }
 );

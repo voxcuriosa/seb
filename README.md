@@ -22,10 +22,10 @@ Modulen leveres som åpen kildekode under MIT-lisens («as is», uten garantier)
 2. **Skille mellom skriveprøve og Microsoft Forms:**
    - **Skriveprøve (Curiosa editor):** Elevarbeidet forblir lokalt, og ingen data lagres eksternt.
    - **Microsoft Forms-prøver:** Når læreren velger Forms-modus, fungerer Safe Exam Browser som en sikker, nedlåst nettleser mot skolens egen Microsoft 365- og Feide-leietaker. Besvarelsen leveres direkte til Microsoft Forms i henhold til skoleeiers eksisterende databehandleravtale (DPA) med Microsoft.
-3. **Fane 2 (Kontroll av PDF-er) har 0 nettverkskall:**
-   - Når læreren slipper inn elevenes PDF-er eller hele «Student Work»-mappen fra Teams/SharePoint, foretas det **ingen nettverkskall**.
-   - Verifisering av manipulasjon (SHA-256 og fulltekst-rekonstruksjon) foregår 100 % lokalt i nettleserens RAM.
-   - Håndheves automatisk i kildekoden av en statisk personvernvakt (`scripts/privacy-guard.mjs`).
+3. **Fane 2 (Kontroll av PDF-er) er utformet for lokal behandling:**
+   - Når læreren slipper inn elevenes PDF-er eller «Student Work»-mappen fra Teams/SharePoint, behandles filene utelukkende lokalt i nettleseren.
+   - Verifisering av manipulasjon (SHA-256 og fulltekst-rekonstruksjon) foregår lokalt i nettleserens RAM.
+   - Kildekoden inneholder ingen nettverkskall mot eksterne servere, og dette kontrolleres automatisk før hver produksjonsbygging av en statisk personvernvakt (`scripts/privacy-guard.mjs`).
 4. **Ingen innlogging og ingen elevkontoer:**
    - Elevene trenger ingen brukerkonto, e-post eller passord for å ta prøven.
 5. **Ingen Kunstig Intelligens (KI):**

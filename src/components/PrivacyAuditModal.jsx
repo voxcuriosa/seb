@@ -81,15 +81,15 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
           <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
             <h4 className="font-bold text-white flex items-center gap-2 text-xs uppercase tracking-wider">
               <FileCheck size={14} className="text-emerald-400" />
-              2. Fane 2 (Kontroll av innleverte filer) har NULL nettverkskall
+              2. Fane 2 (Kontroll av innleverte filer) er utformet for lokal behandling
             </h4>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Når læreren slipper inn PDF-er eller hele «Student Work»-mappen fra Teams/SharePoint, er det <strong>fysisk umulig</strong> at dokumentene lekker ut:
+              Når læreren slipper inn PDF-er eller hele «Student Work»-mappen fra Teams/SharePoint, behandles filene utelukkende lokalt i nettleseren:
             </p>
             <ul className="text-xs text-slate-300 space-y-1 list-disc pl-4">
               <li>Koden i Fane 2 inneholder ingen <code className="text-slate-400">fetch</code>, <code className="text-slate-400">XMLHttpRequest</code> eller Firebase-klienter.</li>
-              <li>Dette håndheves automatisk i kildekoden før hver eneste deploy av en statisk kodegransker (<code className="text-emerald-400">scripts/privacy-guard.mjs</code>).</li>
-              <li>Innholdet i PDF-en leses utelukkende i nettleserens RAM via Mozilla <code className="text-slate-400">pdf.js</code> og sjekkes mot den matematiske SHA-256 kontrollsummen.</li>
+              <li>Dette kontrolleres automatisk i kildekoden før hver eneste deploy av en statisk kodegransker (<code className="text-emerald-400">scripts/privacy-guard.mjs</code>).</li>
+              <li>Innholdet i PDF-en leses utelukkende lokalt i nettleserens RAM via Mozilla <code className="text-slate-400">pdf.js</code> og sjekkes mot den matematiske SHA-256 kontrollsummen.</li>
             </ul>
           </div>
 
