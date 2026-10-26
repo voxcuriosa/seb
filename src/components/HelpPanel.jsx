@@ -94,7 +94,7 @@ export default function HelpPanel({ onClose }) {
           <span>100 % Open Source (MIT-lisens med krav om kreditering):</span>
         </div>
         <p className="leading-relaxed">
-          Utviklet av <strong className="text-white"><AuthorMailLink label="Christian Borchgrevink-Vigeland" className="text-white hover:text-emerald-300 underline font-semibold" /> / VoxCuriosa</strong>. Kildekoden er åpen og kan fritt brukes, modifiseres og driftes på egne servere av skoler, kommuner og fylkeskommuner, forutsatt synlig kreditering av opphavspersonen i kode og brukergrensesnitt:
+          Utviklet av <strong className="text-white"><AuthorMailLink label="Christian Borchgrevink-Vigeland" className="text-white hover:text-emerald-300 underline font-semibold" /> / VoxCuriosa</strong>. Kildekoden er åpen og leveres «as is» (uten garantier). Den kan fritt brukes, modifiseres og driftes på egne servere av skoler, kommuner og fylkeskommuner, forutsatt synlig kreditering av opphavspersonen i kode og brukergrensesnitt:
         </p>
         <a
           href="https://github.com/voxcuriosa/seb"

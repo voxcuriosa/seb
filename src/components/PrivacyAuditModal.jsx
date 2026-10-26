@@ -22,7 +22,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               <h2 id="privacy-modal-title" className="text-lg font-black text-white">
                 Personvern, Databehandling og IT-sikkerhet (DPIA)
               </h2>
-              <p className="text-xs text-slate-400">Teknisk garanti for personvernombud, IT-drift og lærere</p>
+              <p className="text-xs text-slate-400">Nøkkelfunksjoner for IT og personvern (koden leveres «as is» eller kan modifiseres)</p>
             </div>
           </div>
           <button
@@ -132,7 +132,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               </div>
               <div className="flex items-start gap-2 sm:col-span-2">
                 <span className="text-emerald-400 font-bold">✓</span>
-                <span><strong>100 % Open Source (MIT-lisens med krav om kreditering):</strong> Utviklet av <strong className="text-white"><AuthorMailLink label="Christian Borchgrevink-Vigeland" className="text-emerald-400 hover:text-emerald-300 underline font-semibold" /></strong> / VoxCuriosa. Kildekoden ligger åpent på GitHub (<a href="https://github.com/voxcuriosa/seb" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline font-mono">github.com/voxcuriosa/seb</a>). Skoler og IT-avdelinger kan fritt revidere, laste ned og drifte løsningen på egne servere mot synlig kreditering av opphavspersonen.</span>
+                <span><strong>100 % Open Source (MIT-lisens med krav om kreditering):</strong> Utviklet av <strong className="text-white"><AuthorMailLink label="Christian Borchgrevink-Vigeland" className="text-emerald-400 hover:text-emerald-300 underline font-semibold" /></strong> / VoxCuriosa. Kildekoden ligger åpent på GitHub (<a href="https://github.com/voxcuriosa/seb" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline font-mono">github.com/voxcuriosa/seb</a>). Koden leveres «as is» uten garantier. Skoler, kommuner og IT-avdelinger kan fritt revidere, laste ned, modifisere eller drifte løsningen på egne servere mot synlig kreditering av opphavspersonen.</span>
               </div>
             </div>
           </div>
@@ -141,7 +141,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
         {/* Footer */}
         <div className="p-4 border-t border-slate-800 bg-slate-950 flex items-center justify-between shrink-0">
           <span className="text-xs text-slate-400 font-mono">
-            Standard: GDPR Art. 25 (Privacy by Design) og Art. 32 (Sikkerhet)
+            Standard: GDPR Art. 25 (Privacy by Design) og Art. 32 (Sikkerhet) · Leveres «as is» under MIT-lisens
           </span>
           <button
             type="button"

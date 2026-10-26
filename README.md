@@ -10,7 +10,9 @@ GitHub Repository: [https://github.com/voxcuriosa/seb](https://github.com/voxcur
 
 ---
 
-## Nøkkelfunksjoner og garantier for IT og personvern
+## Nøkkelfunksjoner for IT og personvern
+
+Modulen leveres som åpen kildekode under MIT-lisens («as is», uten garantier). Løsningen kan brukes som den er, revideres eller modifiseres fritt av skoler, kommuner og IT-avdelinger etter egne behov. Følgende tekniske prinsipper og mekanismer er bygget inn i arkitekturen:
 
 1. **Elevarbeid forlater ALDRI nettleseren:**
    - Det eleven skriver under prøven overføres **aldri** over internett til noen server eller skytjeneste.
