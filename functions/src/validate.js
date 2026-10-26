@@ -38,13 +38,13 @@ export function sanitizePromptHtml(html) {
       ol: ['start']
     },
     allowedSchemes: ['https', 'mailto'],
-    allowedSchemesByTag: { img: ['https', 'data'] },
+    allowedSchemesByTag: { img: ['data'] },
     allowProtocolRelative: false,
     transformTags: {
       a: sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer', target: '_blank', referrerpolicy: 'no-referrer' }),
       img: sanitizeHtml.simpleTransform('img', { referrerpolicy: 'no-referrer' })
     }
-  }).replace(/<img[^>]+src="data:(?!image\/(png|jpe?g|gif|webp);base64,)[^"]*"[^>]*>/gi, '');
+  }).replace(/<img(?![^>]*\bsrc="data:image\/(?:png|jpe?g|gif|webp);base64,[^"]+")[^>]*>/gi, '');
 }
 
 function cleanDomain(raw) {

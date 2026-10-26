@@ -22,12 +22,16 @@ describe('validateExamInput', () => {
     expect(html).toContain('Hei');
   });
 
-  it('beholder tabeller, lister og overskrifter fra Word og legger på referrerpolicy="no-referrer"', () => {
-    const html = sanitizePromptHtml('<h1>T</h1><table><tr><td colspan="2">A</td></tr></table><ol start="3"><li><a href="https://snl.no">x</a><img src="https://snl.no/b.png"></li></ol>');
+  it('beholder tabeller, lister, overskrifter og innebygde Word-bilder (base64), men fjerner eksterne bilde-URL-er', () => {
+    const html = sanitizePromptHtml(
+      '<h1>T</h1><table><tr><td colspan="2">A</td></tr></table><ol start="3"><li><a href="https://snl.no">x</a><img src="https://snl.no/b.png"><img src="data:image/png;base64,iVBORw0KGgo="></li></ol>'
+    );
     expect(html).toContain('<table>');
     expect(html).toContain('colspan="2"');
     expect(html).toContain('<ol start="3">');
     expect(html).toContain('referrerpolicy="no-referrer"');
+    expect(html).toContain('data:image/png;base64,iVBORw0KGgo=');
+    expect(html).not.toContain('https://snl.no/b.png');
   });
 
   it('avviser for lang tittel, tom tekst og ugyldig hash', () => {

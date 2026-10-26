@@ -70,11 +70,13 @@ export default function SebExamRoom() {
 
   const isFormsExam = exam?.sourceType === 'forms' || Boolean(exam?.formsUrl);
   const formsUrl = exam?.formsUrl || 'https://forms.office.com';
+  const allowedApps = exam?.sebConfig?.allowedApps || exam?.allowedApps;
+  const allowedWebsites = exam?.sebConfig?.allowedWebsites || exam?.allowedWebsites;
   const hasAids = Boolean(
-    exam?.allowedApps?.voxlex ||
-    exam?.allowedApps?.lingdys ||
-    exam?.allowedApps?.ordnett ||
-    (Array.isArray(exam?.allowedWebsites) && exam.allowedWebsites.length > 0)
+    allowedApps?.voxlex ||
+    allowedApps?.lingdys ||
+    allowedApps?.ordnett ||
+    (Array.isArray(allowedWebsites) && allowedWebsites.length > 0)
   );
 
   const log = useExamIntegrityLog({
@@ -263,7 +265,7 @@ export default function SebExamRoom() {
               onChange={handleEditorChange}
               onLargePaste={(len) => addIncident('PASTE', `${len} tegn limt inn`)}
               onReady={onEditorReady}
-              hasReadingApp={Boolean(exam?.allowedApps?.lingdys || exam?.allowedApps?.voxlex)}
+              hasReadingApp={Boolean(allowedApps?.lingdys || allowedApps?.voxlex)}
             />
           </section>
         </div>

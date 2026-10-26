@@ -26,6 +26,11 @@ function ensureHooks() {
       node.setAttribute('referrerpolicy', 'no-referrer');
     }
     if (node.tagName === 'IMG') {
+      const src = String(node.getAttribute('src') || '');
+      if (!/^data:image\/(?:png|jpe?g|gif|webp);base64,/i.test(src)) {
+        node.parentNode?.removeChild(node);
+        return;
+      }
       node.setAttribute('referrerpolicy', 'no-referrer');
     }
   });
