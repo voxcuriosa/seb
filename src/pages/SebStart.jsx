@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Lock, ShieldCheck, Download, ArrowRight, ExternalLink, RefreshCw, ArrowUpRight, AlertTriangle } from 'lucide-react';
+import { Lock, ShieldCheck, Download, ArrowRight, ExternalLink, RefreshCw, ArrowUp, AlertTriangle } from 'lucide-react';
 import { fetchSebExam } from '../firebase';
 import { isSebEnvironment, markAsSebEnvironment } from '../utils/seb/sebEnvironment';
 import { downloadStandaloneSebExamFile } from '../utils/seb/sebConfigGenerator';
@@ -123,7 +123,7 @@ export default function SebStart() {
               {downloadStarted && (
                 <div className="p-5 bg-red-950 border-2 border-red-500 rounded-2xl space-y-2.5">
                   <div className="flex items-center gap-2.5 text-red-200 font-black text-xs uppercase tracking-wider">
-                    <ArrowUpRight size={22} className="text-red-300" aria-hidden="true" />
+                    <ArrowUp size={22} className="text-red-300" aria-hidden="true" />
                     <span>{t.downloadedTitle}</span>
                   </div>
                   <p className="text-sm text-white leading-relaxed font-semibold">{t.downloadedBody}</p>
@@ -142,11 +142,11 @@ export default function SebStart() {
 
           {downloadStarted && (
             <div
-              className="fixed top-3 right-3 sm:top-5 sm:right-6 z-[1000] flex items-start gap-3.5 bg-red-600 text-white p-4 sm:p-5 rounded-3xl shadow-2xl border-4 border-white max-w-sm animate-bounce"
+              className="fixed top-20 sm:top-24 left-1/2 -translate-x-1/2 z-[1000] flex items-start gap-3.5 bg-red-600 text-white p-4 sm:p-5 rounded-3xl shadow-2xl border-4 border-white w-[92%] max-w-md animate-bounce"
               role="alert"
             >
               <div className="w-12 h-12 rounded-2xl bg-white text-red-600 flex items-center justify-center shrink-0">
-                <ArrowUpRight size={32} strokeWidth={3} aria-hidden="true" />
+                <ArrowUp size={32} strokeWidth={3} aria-hidden="true" />
               </div>
               <div className="space-y-1">
                 <span className="block text-xs font-black uppercase tracking-wider text-red-100">{t.lookUpHere}</span>
