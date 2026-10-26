@@ -193,8 +193,8 @@ export default function CreateExamTab() {
               />
               <p className="text-xs text-slate-400">
                 {form.sourceType === 'forms'
-                  ? 'SEB åpner Forms direkte mot skolens Microsoft 365 / Feide. Ingen KI brukes, og ingen elevdata lagres i VoxCuriosa.'
-                  : 'Alt behandles lokalt i nettleseren. Ingen KI brukes.'}
+                  ? 'SEB åpner Forms direkte mot skolens Microsoft 365 / Feide. Ingen KI brukes, og intet elevarbeid lagres på noen server.'
+                  : 'Alt behandles lokalt i nettleseren. Ingen KI brukes, og intet elevarbeid lagres på noen server.'}
               </p>
             </Step>
 

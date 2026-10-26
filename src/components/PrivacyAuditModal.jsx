@@ -116,7 +116,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
             <div className="grid sm:grid-cols-2 gap-2 text-xs text-slate-300">
               <div className="flex items-start gap-2">
                 <span className="text-emerald-400 font-bold">✓</span>
-                <span><strong>Ingen brukerkontoer i VoxCuriosa:</strong> Verken lærere eller elever logger inn hos oss. Ingen brukernavn, e-poster eller passord lagres.</span>
+                <span><strong>Ingen brukerkontoer eller registrering:</strong> Verken lærere eller elever logger inn. Ingen brukernavn, e-poster eller passord lagres, og intet elevarbeid lagres på noen server.</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-emerald-400 font-bold">✓</span>
