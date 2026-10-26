@@ -6,3 +6,4 @@ setGlobalOptions({ region: 'europe-west1' });
 
 export { createSebExam } from './src/createSebExam.js';
 export { signSebSubmission } from './src/signSebSubmission.js';
+export { cleanupExamStorage } from './src/cleanupExamStorage.js';

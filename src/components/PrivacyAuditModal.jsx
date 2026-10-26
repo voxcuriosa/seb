@@ -44,7 +44,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               1. Hovedprinsipp: Elevarbeid forlater ALDRI nettleseren
             </h3>
             <p className="text-xs text-emerald-100 leading-relaxed">
-              Verken det eleven skriver, elevens navn, besvarelser eller innleverte PDF-filer overføres over nettverket til noen ekstern server eller skytjeneste. Alt elevtekstarbeid pakkes og formateres som en PDF direkte i elevens nettleserminne, lastes ned til elevens disk, og forsvinner helt fra nettleseren når økten lukkes.
+              Verken det eleven skriver, elevens navn, oppgaveløsning eller innleverte PDF-filer overføres over nettverket til noen ekstern server eller skytjeneste under den ordinære skriveprøven. Alt elevtekstarbeid pakkes og formateres som en PDF direkte i elevens nettleserminne og lastes ned til elevens disk. Teksten mellomlagres lokalt underveis for å tåle krasj og strømbrudd, og tømmes automatisk fra nettleseren ved normal innlevering og avslutning.
             </p>
           </div>
 
@@ -59,8 +59,8 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
                 <li><strong>Lærerens oppgavetekst</strong> (tittel og instrukser) lagret som statisk JSON.</li>
                 <li>Eventuell <strong>oppgave-PDF</strong> dersom læreren la ved et vedlegg til oppgaven.</li>
                 <li><strong>Tillatte hjelpemidler og URL-er</strong> for SEB-profilen.</li>
-                <li><strong>Auto-sletting:</strong> Alt slettes deterministisk og ugjenkallelig etter 90 dager via Firestore TTL.</li>
-                <li><strong className="text-red-400">Ingen elevdata eller elevsvar</strong> lagres noensinne i databasen.</li>
+                <li><strong>Auto-sletting etter 90 dager:</strong> Oppgaven slettes automatisk fra Firestore via TTL, og eventuelle oppgave-PDF-er slettes fra Cloud Storage via funksjonstriggeren <code className="text-slate-400">cleanupExamStorage</code> (i tillegg til bøttens livssyklusregel).</li>
+                <li><strong className="text-red-400">Ingen elevdata eller elevsvar</strong> lagres noensinne i databasen eller skylagringen.</li>
               </ul>
             </div>
 
@@ -70,8 +70,8 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
                 Hva skjer lokalt på elevens maskin
               </h4>
               <ul className="text-xs text-slate-300 space-y-1.5 list-disc pl-4">
-                <li><strong>Autosave:</strong> Teksten lagres hvert sekund i nettleserens lokale minne (<code className="text-slate-400">localStorage / IndexedDB</code>).</li>
-                <li><strong>Strømbrudd / Krasj:</strong> Hvis maskinen går tom for batteri eller omstartes, gjenopprettes teksten umiddelbart lokalt.</li>
+                <li><strong>Autosave og krasjsikring:</strong> Teksten lagres fortløpende i nettleserens lokale minne (<code className="text-slate-400">localStorage / IndexedDB</code>). Hvis maskinen går tom for batteri eller omstartes, gjenopprettes teksten umiddelbart.</li>
+                <li><strong>Sletting ved avslutning:</strong> Ved fullført innlevering og på avslutningssiden tømmes det lokale utkastet. Ved unormal avslutning (f.eks. strømbrudd) beholdes dataene lokalt på maskinen inntil eleven fortsetter eller utkastet tømmes.</li>
                 <li><strong>Eksport:</strong> Ved levering genereres PDF-dokumentet lokalt i minnet via klientbiblioteket pdf-lib.</li>
               </ul>
             </div>
@@ -103,7 +103,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               Ved ferdigstillelse sender elevens nettleser <em>kun</em> to verdier: <code className="text-emerald-400">&#123; examId, sha256 &#125;</code> til Cloud Function <code className="text-slate-300">signSebSubmission</code>.
             </p>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Serveren mottar <strong>ingen ord, ingen setninger og intet elevnavn</strong>. Serveren signerer den enveis-krypterte SHA-256-hashen med Ed25519 og returnerer signaturen. Hvis eleven var offline, fullføres innleveringen likevel lokalt uten signatur (merkes som «Verifisert, ikke signert»).
+              Serveren mottar <strong>ingen tekst, ingen ord og intet elevnavn</strong>, men utelukkende den matematiske kontrollsummen som brukes til integritetskontroll. Serveren signerer SHA-256-hashen med Ed25519 og returnerer signaturen. Hvis eleven er offline, fullføres innleveringen likevel lokalt uten signatur (merkes som «Verifisert, ikke signert»).
             </p>
           </div>
 

@@ -17,8 +17,8 @@ Modulen leveres som åpen kildekode under MIT-lisens («as is», uten garantier)
 1. **Elevarbeid forlater ALDRI nettleseren (Ordinær skriveprøve):**
    - Det eleven skriver under prøven overføres **aldri** over internett til noen server eller skytjeneste.
    - All tekst pakkes og formateres som en PDF lokalt i elevens nettleserminne (`pdf-lib`) ved levering.
-   - Når PDF-en er lastet ned til elevens maskin og nettleserøkten lukkes, forsvinner dataene fra nettleseren.
-   - **Kryptografisk signering:** Ved innlevering overføres kun to tekniske verdier til Cloud Function `signSebSubmission` (dersom eleven har nett): `{ examId, sha256 }`. Dette er en enveis matematisk kontrollsum (SHA-256) som signeres med Ed25519. Det overføres ingen elevtekst, ord eller elevnavn. Dersom eleven er offline, fullføres innleveringen likevel lokalt uten signatur.
+   - **Krasjsikring og lokal sletting:** Under prøven mellomlagres teksten fortløpende lokalt (`localStorage` og `IndexedDB`) slik at eleven ikke mister arbeid ved strømbrudd eller maskinkrasj. Ved normal innlevering og avslutning tømmes utkastet automatisk fra nettleseren. Ved en unormal avslutning (f.eks. tomt batteri) forblir dataene liggende lokalt på enheten inntil eleven fortsetter eller utkastet tømmes.
+   - **Kryptografisk signering:** Ved innlevering overføres kun to tekniske verdier til Cloud Function `signSebSubmission` (dersom eleven har nett): `{ examId, sha256 }`. Dette er en matematisk kontrollsum (SHA-256) for integritetskontroll som signeres med Ed25519. Det overføres ingen elevtekst, oppgaveløsning eller elevnavn. Dersom eleven er offline, fullføres innleveringen likevel lokalt uten signatur.
 2. **Skille mellom skriveprøve og Microsoft Forms:**
    - **Skriveprøve (Curiosa editor):** Elevarbeidet forblir lokalt, og ingen data lagres eksternt.
    - **Microsoft Forms-prøver:** Når læreren velger Forms-modus, fungerer Safe Exam Browser som en sikker, nedlåst nettleser mot skolens egen Microsoft 365- og Feide-leietaker. Besvarelsen leveres direkte til Microsoft Forms i henhold til skoleeiers eksisterende databehandleravtale (DPA) med Microsoft.
@@ -30,8 +30,9 @@ Modulen leveres som åpen kildekode under MIT-lisens («as is», uten garantier)
    - Elevene trenger ingen brukerkonto, e-post eller passord for å ta prøven.
 5. **Ingen Kunstig Intelligens (KI):**
    - Ingen elevbesvarelser sendes til noen eksterne språkmodeller eller KI-leverandører.
-6. **Auto-sletting etter 90 dager:**
-   - Kun lærerens oppgavedefinisjon (oppgavetekst og tillatte nettsider) lagres i skyen (europe-west1), og slettes automatisk etter 90 dager via Firestore TTL (Time-to-Live er aktivert på `expiresAt` i samlingen `sebExams`).
+6. **Auto-sletting etter 90 dager (både database og skylagring):**
+   - Lærerens oppgavedefinisjon slettes automatisk etter 90 dager via Firestore TTL (Time-to-Live er aktivert på `expiresAt` i samlingen `sebExams`).
+   - Eventuelle oppgave-PDF-er som læreren har lastet opp slettes automatisk fra Cloud Storage via triggerfunksjonen `cleanupExamStorage` når Firestore-dokumentet slettes (i tillegg til bøttens GCS-livssyklusregel).
 
 ---
 
