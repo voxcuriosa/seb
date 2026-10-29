@@ -205,6 +205,12 @@ ${buildDictionariesXml(dictionaries)}
   <false/>
   <key>screenSharingMacEnforceBlocked</key>
   <true/>
+  <key>allowSiri</key>
+  <false/>
+  <key>allowDictation</key>
+  <false/>
+  <key>sebServiceIgnore</key>
+  <false/>
   <key>allowSwitchToApplications</key>
   ${hasAllowedApps ? '<true/>' : '<false/>'}
 ${buildUrlFilterXml(websites, effectiveStartUrl)}

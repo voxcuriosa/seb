@@ -80,6 +80,9 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toMatch(/<key>allowUploads<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>allowDisplayMirroring<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>screenSharingMacEnforceBlocked<\/key>\s*<true\/>/);
+    expect(xml).toMatch(/<key>allowSiri<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>allowDictation<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>sebServiceIgnore<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>clipboardPolicy<\/key>\s*<integer>0<\/integer>/);
     expect(xml).toMatch(/<key>enablePrivateClipboard<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>enablePrivateClipboardMacEnforce<\/key>\s*<false\/>/);

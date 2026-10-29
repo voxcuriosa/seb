@@ -18,6 +18,14 @@ export function markAsSebEnvironment() {
   } catch {
     /* ikke alle SEB-versjoner eksponerer updateKeys */
   }
+  try {
+    if (navigator?.mediaDevices && typeof navigator.mediaDevices.getDisplayMedia === 'function') {
+      navigator.mediaDevices.getDisplayMedia = () =>
+        Promise.reject(new DOMException('Skjermdeling er sperret under prøven.', 'NotAllowedError'));
+    }
+  } catch {
+    /* mediaDevices kan være skrivebeskyttet */
+  }
 }
 
 /**
