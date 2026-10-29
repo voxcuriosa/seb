@@ -8,7 +8,9 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /sebExams/{examId}/oppgave.pdf {
-      allow get: if true;
+      // Tillat kun lesing så lenge oppgave-PDF-en ikke har passert 90-dagersfristen (TTL).
+      // Bruker filens eget opprettelsestidspunkt i Storage (ingen kryss-oppslag mot Firestore).
+      allow get: if resource != null && request.time < resource.timeCreated + duration.value(90, 'd');
       allow list, write: if false;
     }
 
