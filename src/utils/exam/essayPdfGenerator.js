@@ -160,13 +160,18 @@ export function downloadBytes(bytes, fileName, type = 'application/pdf') {
   const url = useDataUri
     ? `data:${type};base64,${bytesToBase64(bytes)}`
     : URL.createObjectURL(new Blob([bytes], { type }));
+  for (const prev of document.querySelectorAll('a[data-seb-download="1"]')) {
+    if (prev.parentNode) prev.parentNode.removeChild(prev);
+  }
   const link = document.createElement('a');
   link.href = url;
   link.download = fileName;
+  link.setAttribute('data-seb-download', '1');
+  link.style.display = 'none';
   document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
-  if (!useDataUri) {
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-  }
+  setTimeout(() => {
+    if (link.parentNode) link.parentNode.removeChild(link);
+    if (!useDataUri) URL.revokeObjectURL(url);
+  }, 10000);
 }

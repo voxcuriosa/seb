@@ -64,6 +64,8 @@ export function buildStandaloneSebPlist({
   <integer>0</integer>
   <key>sendBrowserExamKey</key>
   <true/>
+  <key>browserWindowWebView</key>
+  <integer>3</integer>
   <key>allowVirtualMachine</key>
   <true/>
   <key>allowDeveloperConsole</key>
@@ -271,10 +273,13 @@ function triggerDownload(content, fileName, type) {
   const a = document.createElement('a');
   a.href = url;
   a.download = fileName;
+  a.style.display = 'none';
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  setTimeout(() => {
+    if (a.parentNode) a.parentNode.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 10000);
 }
 
 /**

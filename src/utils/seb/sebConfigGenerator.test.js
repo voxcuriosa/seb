@@ -41,6 +41,7 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toContain('<string>https://voxcuriosa.no/seb/exam/Ab12_x?seb=1</string>');
     expect(xml).toContain('<string>https://voxcuriosa.no/seb/quit</string>');
     expect(xml).toMatch(/<key>showQuitButton<\/key>\s*<true\/>/);
+    expect(xml).toMatch(/<key>browserWindowWebView<\/key>\s*<integer>3<\/integer>/);
     expect(xml).toMatch(/<key>allowSpellCheck<\/key>\s*<true\/>/);
     expect(xml).toMatch(/<key>enableRightMouse<\/key>\s*<true\/>/);
     expect(xml).toMatch(/<key>clearBrowserCache<\/key>\s*<false\/>/);

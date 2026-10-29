@@ -18,6 +18,7 @@ import { compactForCompare, extractVisibleBody } from './textNormalize';
 import { verifySebSignature } from './signature';
 import { extractVisibleText } from '../pdf/pdfjsLoader';
 import { docToPlainText } from '../exam/essayDocModel';
+import { isPdfFile } from '../files';
 import { renderEssayPdf } from '../exam/essayPdfGenerator';
 
 const PAYLOAD_RE = /CURIOSA_PAYLOAD:([A-Za-z0-9+/=]+)/;
@@ -139,7 +140,13 @@ export async function parseExamPdfFile(file) {
 }
 
 export async function parseExamPdfFiles(fileList, onProgress) {
-  const pdfs = Array.from(fileList || []).filter((f) => /\.pdf$/i.test(f.name) || f.type === 'application/pdf');
+  const candidates = Array.from(fileList || []);
+  const pdfs = [];
+  for (const f of candidates) {
+    if (/\.pdf$/i.test(f.name) || f.type === 'application/pdf' || await isPdfFile(f)) {
+      pdfs.push(f);
+    }
+  }
   const results = [];
   for (let i = 0; i < pdfs.length; i++) {
     try {

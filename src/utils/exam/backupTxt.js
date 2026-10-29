@@ -17,10 +17,11 @@ export function downloadBackupTxt({ examTitle, text }) {
   const a = document.createElement('a');
   a.href = url;
   a.download = `sikkerhetskopi-${slug || 'prove'}.txt`;
+  a.style.display = 'none';
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-  if (!useDataUri) {
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-  }
+  setTimeout(() => {
+    if (a.parentNode) a.parentNode.removeChild(a);
+    if (!useDataUri) URL.revokeObjectURL(url);
+  }, 10000);
 }

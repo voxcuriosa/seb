@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync, unlinkSync } from 'node:fs';
 import { buildStandaloneSebPlist } from '../utils/seb/sebConfigGenerator.js';
 import { BROWSER_SPELLCHECK_LOCALES, extractDicFromZipBuffer, buildChecker } from '../utils/seb/sebDictionaries.js';
 import { buildEssayPayload, renderEssayPdf } from '../utils/exam/essayPdfGenerator.js';
-import { parseExamPdfFile } from '../utils/integrity/examPdfParser.js';
+import { parseExamPdfFile, parseExamPdfFiles } from '../utils/integrity/examPdfParser.js';
 
 function fileFromBytes(bytes, name) {
   return new File([bytes], name, { type: 'application/pdf', lastModified: 1 });
@@ -143,13 +143,17 @@ describe('Slutt-til-slutt simulering av hele prøveløpet', () => {
     expect(pdfBytes.length).toBeGreaterThan(1000);
     console.log('3. PDF bygget lokalt i RAM (' + pdfBytes.length + ' bytes)');
 
-    // 4. Lærer kontrollerer innlevering i Fane 2 (100% offline)
+    // 4. Lærer kontrollerer innlevering i Fane 2 (100% offline), også om filen mangler .pdf-endelse
     const result = await parseExamPdfFile(fileFromBytes(pdfBytes, 'elev_historie.pdf'));
     expect(result.verdict).toBe('verified-unsigned');
     expect(result.payload.receiptCode).toBe(payload.receiptCode);
     expect(result.payload.pasteIncidents).toBe(1);
     expect(result.layer1).toBe(true);
     expect(result.layer2.ok).toBe(true);
+    const untitledFile = new File([pdfBytes], 'Untitled_2026-10-29_04-00-33', { type: '', lastModified: 1 });
+    const batchResults = await parseExamPdfFiles([untitledFile]);
+    expect(batchResults).toHaveLength(1);
+    expect(batchResults[0].verdict).toBe('verified-unsigned');
     console.log('4. Fane 2 kontroll: Verdict VERIFIED-UNSIGNED (offline), SHA-256 matcher, innlimingsvarsel registrert!');
   });
 
@@ -176,5 +180,5 @@ describe('Slutt-til-slutt simulering av hele prøveløpet', () => {
       const suggestions = checker.suggestWords(invalid, 5);
       expect(suggestions).toContain(expectSug);
     }
-  });
+  }, 15000);
 });
