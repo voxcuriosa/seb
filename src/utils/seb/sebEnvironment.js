@@ -70,3 +70,34 @@ export function isSebEnvironment() {
   }
   return false;
 }
+
+const GUEST_VM_GPU_RE = /\b(VirtualBox|VBox|VMware|Parallels|QEMU|VirGL|Bochs)\b/i;
+
+/**
+ * Sjekker skjermkortdriver (WebGL UNMASKED_RENDERER_WEBGL / UNMASKED_VENDOR_WEBGL)
+ * for faktiske gjeste-VM-adaptere (VirtualBox, VMware, Parallels, QEMU).
+ * Fysiske Windows 11 skole-PC-er med Hyper-V/VBS/Kjerneisolasjon bruker fysisk
+ * Intel/AMD/NVIDIA-skjermkort og utløser aldri falsk alarm her.
+ */
+export function detectGuestVirtualMachine() {
+  if (typeof document === 'undefined') return null;
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) return null;
+    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+    const renderer = dbg
+      ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '')
+      : String(gl.getParameter(gl.RENDERER) || '');
+    const vendor = dbg
+      ? String(gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) || '')
+      : String(gl.getParameter(gl.VENDOR) || '');
+    const combined = `${vendor} ${renderer}`.trim();
+    if (GUEST_VM_GPU_RE.test(combined)) {
+      return combined;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}

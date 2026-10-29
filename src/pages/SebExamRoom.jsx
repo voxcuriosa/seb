@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { AlertTriangle, GripVertical, GripHorizontal, ShieldAlert } from 'lucide-react';
 import { fetchSebExam } from '../firebase';
 import { EXAM_QUIT_URL } from '../config';
-import { markAsSebEnvironment, isVerifiedSebClient } from '../utils/seb/sebEnvironment';
+import { markAsSebEnvironment, isVerifiedSebClient, detectGuestVirtualMachine } from '../utils/seb/sebEnvironment';
 import { loadDraft, clearDraft } from '../utils/exam/localStore';
 import { downloadBackupTxt } from '../utils/exam/backupTxt';
 import { docToPlainText } from '../utils/exam/essayDocModel';
@@ -182,6 +182,33 @@ export default function SebExamRoom() {
           >
             Gå til startsiden for prøven
           </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const detectedVm = typeof window !== 'undefined' && !new URLSearchParams(window.location.search || '').get('allowVm')
+    ? detectGuestVirtualMachine()
+    : null;
+  if (detectedVm) {
+    return (
+      <main className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
+        <div dir={t.rtl ? 'rtl' : 'ltr'} className="max-w-md p-6 rounded-3xl bg-slate-900 border border-amber-500/60 text-slate-100 space-y-4">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="shrink-0 text-amber-400 mt-0.5" size={24} aria-hidden="true" />
+            <div className="space-y-1.5">
+              <h1 className="text-base font-black text-white">Virtuell maskin er ikke tillatt</h1>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Prøven kan ikke gjennomføres inne i en virtuell maskin ({detectedVm}). Lukk den virtuelle maskinen og åpne prøven direkte på skole-PC-en.
+              </p>
+            </div>
+          </div>
+          <a
+            href={EXAM_QUIT_URL}
+            className="w-full px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-widest inline-flex items-center justify-center"
+          >
+            Lukk Safe Exam Browser
+          </a>
         </div>
       </main>
     );
