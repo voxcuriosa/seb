@@ -11,7 +11,7 @@ const GradeSubmissionsTab = lazy(() => import('../components/grade/GradeSubmissi
 
 const TABS = [
   { id: 'create', label: '1. Opprett SEB-prøve', icon: FilePlus2 },
-  { id: 'grade', label: '2. Kontroller innleverte PDF-er', icon: ShieldCheck }
+  { id: 'grade', label: '2. Kontroller innleverte PDF-er (valgfritt)', icon: ShieldCheck }
 ];
 
 /** Lærersenter på voxcuriosa.no/seb. */

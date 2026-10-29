@@ -30,6 +30,9 @@ export default function VerificationStepsGuide() {
 
   return (
     <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
+      <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 leading-relaxed">
+        <strong className="text-emerald-300">Frivillig kontrollverktøy:</strong> Elevenes PDF-er kan leses og vurderes direkte i Teams som vanlig. Du bruker bare denne fanen dersom du ønsker å sjekke sjekksummen og signaturen på én eller flere besvarelser.
+      </div>
       <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400">
         Slik sjekkes filene for manipulasjon:
       </h3>

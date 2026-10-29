@@ -15,6 +15,9 @@ export default function TeamsGuide() {
       </button>
       {open && (
         <div className="px-4 pb-4 space-y-3 text-sm text-slate-200 leading-relaxed">
+          <p className="text-xs text-slate-300 bg-slate-950 border border-slate-800 p-3 rounded-xl">
+            <strong className="text-emerald-300">Merk:</strong> Denne kontrollfanen er <strong>helt frivillig å bruke</strong>. Elevene leverer en vanlig, ferdig formatert PDF som du kan lese og vurdere direkte inne i Teams. Bruk kun denne fanen dersom du ønsker å sjekke én enkelt PDF eller hele klassens mappe for etterfølgende endringer.
+          </p>
           <ol className="space-y-2 list-decimal pl-5">
             <li><strong className="text-white">Del SEB-lenken eller .seb-filen i en Teams-oppgave.</strong></li>
             <li><strong className="text-white">Elevene laster opp den ferdige PDF-en fra Nedlastinger</strong> til Teams-oppgaven og trykker «Lever».</li>

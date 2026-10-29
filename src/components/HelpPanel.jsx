@@ -19,8 +19,8 @@ export default function HelpPanel({ onClose }) {
           <p>Opprett en vanlig oppgave i Teams («Opprett -&gt; Oppgave») og lim inn SEB-lenken eller legg ved .seb-filen. Sett «Elever kan angre innlevering: Nei» (kan settes som fast standard for klassen under tannhjulet «Oppgaveinnstillinger» i Oppgaver-fanen).</p>
         </section>
         <section>
-          <h3 className="font-black text-emerald-300 mb-1">3. Innlevering og kontroll</h3>
-          <p>Ved skriveprøver laster eleven ned en signert PDF som leveres i Teams og kontrolleres i fane 2. Sjekk at eleven står som «Innlevert» i Teams før eleven går. Ved Forms-prøver lagres svarene direkte i Microsoft Forms.</p>
+          <h3 className="font-black text-emerald-300 mb-1">3. Innlevering (og valgfri kontroll)</h3>
+          <p>Ved skriveprøver laster eleven ned en ferdig PDF som leveres i Teams. Sjekk at eleven står som «Innlevert» i Teams før eleven går. Du kan lese og vurdere PDF-ene direkte i Teams – <strong>fane 2 er helt frivillig</strong> og brukes bare hvis du vil kontrollere sjekksum og signatur. Ved Forms-prøver lagres svarene direkte i Microsoft Forms.</p>
         </section>
       </div>
 
@@ -109,7 +109,7 @@ export default function HelpPanel({ onClose }) {
       <ul className="text-xs text-slate-300 space-y-1.5 border-t border-slate-800 pt-3">
         <li><strong className="text-white">Omstart av PC:</strong> Er i utgangspunktet frivillig, og elevene kan starte vanlige prøver rett fra skolehverdagen. <strong>Før store og viktige prøver (som heldagsprøver og tentamen) anbefales det likevel at elevene restarter PC-en først.</strong> Dette tømmer maskinminnet og forhindrer at bakgrunnsprogrammer, Discord eller skjermopptakere skaper sjeldne konflikter med Safe Exam Browser.</li>
         <li><strong className="text-white">Lagring:</strong> Bare lærerens prøveoppsett (tittel, oppgavetekst, innstillinger) lagres i EU, og både tilgang og filer utløper og slettes automatisk etter 90 dager.</li>
-        <li><strong className="text-white">Fane 2 (Kontroll):</strong> Utfører ingen nettverkskall under filkontrollen – PDF-er fra Teams leses og verifiseres kun lokalt i din nettleser.</li>
+        <li><strong className="text-white">Fane 2 (Valgfri kontroll):</strong> Helt frivillig å bruke – PDF-ene kan leses direkte i Teams som vanlig, eller slippes inn i fane 2 dersom du ønsker å sjekke sjekksum og signatur. Utfører ingen nettverkskall under filkontrollen.</li>
         <li><strong className="text-white">Stavekontroll:</strong> Innebygd stavekontroll for norsk bokmål, nynorsk, engelsk (UK/US), tysk, spansk og fransk. Høyreklikk på ord med rød strek for å få forslag.</li>
         <li><strong className="text-white">Statusmerker:</strong> «Verifisert» betyr at SHA-256, synlig tekst og Ed25519-serversignatur (med serverens uforfalskelige klokkeslett) stemmer. «Verifisert, ikke signert» betyr at eleven var offline ved innlevering. «Ugyldig» betyr at filen er endret etter eksport.</li>
       </ul>
