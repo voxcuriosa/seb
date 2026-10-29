@@ -73,7 +73,7 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toContain('LingX.exe');
     expect(xml).toMatch(/<key>createNewDesktop<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>killExplorerShell<\/key>\s*<false\/>/);
-    expect(xml).toMatch(/<key>allowVirtualMachine<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>allowVirtualMachine<\/key>\s*<true\/>/);
     expect(xml).toMatch(/<key>allowDeveloperConsole<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>sendBrowserExamKey<\/key>\s*<true\/>/);
     expect(xml).toMatch(/<key>allowDownloads<\/key>\s*<true\/>/);
@@ -101,7 +101,7 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toMatch(/<key>allowQuit<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>showQuitButton<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>createNewDesktop<\/key>\s*<true\/>/);
-    expect(xml).toMatch(/<key>allowVirtualMachine<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>allowVirtualMachine<\/key>\s*<true\/>/);
     expect(xml).toMatch(/<key>allowUploads<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>allowDisplayMirroring<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>examSessionClearCookiesOnStart<\/key>\s*<false\/>/);

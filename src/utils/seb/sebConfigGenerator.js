@@ -65,7 +65,7 @@ export function buildStandaloneSebPlist({
   <key>sendBrowserExamKey</key>
   <true/>
   <key>allowVirtualMachine</key>
-  <false/>
+  <true/>
   <key>allowDeveloperConsole</key>
   <false/>
   <key>browserUserAgentWinDesktopMode</key>
