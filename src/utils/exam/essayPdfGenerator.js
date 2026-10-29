@@ -11,7 +11,7 @@ import {
   encodePayload,
   SEB_ESSAY_TYPE
 } from '../integrity/payloadHash';
-import { generateReceiptCode } from '../integrity/sha256';
+import { generateReceiptCode, generateRandomNonceHex } from '../integrity/sha256';
 import {
   BODY_START_MARKER,
   BODY_END_MARKER,
@@ -39,6 +39,7 @@ export async function buildEssayPayload({ exam, essayDoc, startedAt, activeSecon
     type: SEB_ESSAY_TYPE,
     version: 3,
     receiptCode: generateReceiptCode(),
+    nonce: generateRandomNonceHex(16),
     examId: exam.id,
     examTitle: exam.title || 'Prøve',
     startedAt: new Date(startedAt || Date.now()).toISOString(),

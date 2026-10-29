@@ -3,15 +3,25 @@ import { Eye, EyeOff, KeyRound, AlertTriangle, ShieldCheck, RefreshCw, Copy, Che
 
 const CODE_WORDS = [
   'sol', 'fjord', 'stein', 'skog', 'vann', 'fjell', 'storm', 'kyst',
-  'nord', 'elv', 'breen', 'hav', 'lyn', '가rd', 'tind', 'dal', 'is', 'vind'
+  'nord', 'elv', 'breen', 'hav', 'lyn', 'gard', 'tind', 'dal', 'is', 'vind',
+  'bjork', 'furu', 'gran', 'lyng', 'myr', 'svaberg', 'bekk', 'foss',
+  'odde', 'holme', 'sund', 'varde', 'vidde', 'hei', 'eng', 'li',
+  'berg', 'strand', 'vik', 'nes', 'kolle', 'skar', 'knaus', 'ur',
+  'stjerne', 'sky', 'frost', 'dugg', 'solgang', 'brim'
 ].filter((w) => /^[a-z]+$/.test(w));
 
 function generateReadableCode() {
-  const buf = new Uint32Array(2);
+  const buf = new Uint32Array(4);
   crypto.getRandomValues(buf);
-  const word = CODE_WORDS[buf[0] % CODE_WORDS.length];
-  const num = 100 + (buf[1] % 900);
-  return `${word}-${num}`;
+  const w1 = CODE_WORDS[buf[0] % CODE_WORDS.length];
+  let w2 = CODE_WORDS[buf[1] % CODE_WORDS.length];
+  if (w2 === w1) w2 = CODE_WORDS[(buf[1] + 1) % CODE_WORDS.length];
+  let w3 = CODE_WORDS[buf[2] % CODE_WORDS.length];
+  while (w3 === w1 || w3 === w2) {
+    w3 = CODE_WORDS[( CODE_WORDS.indexOf(w3) + 1 ) % CODE_WORDS.length];
+  }
+  const num = 1000 + (buf[3] % 9000);
+  return `${w1}-${w2}-${w3}-${num}`;
 }
 
 /**
@@ -24,8 +34,8 @@ export default function QuitPasswordField({ value, onChange, required = false })
   const [copied, setCopied] = useState(false);
 
   const trimmed = String(value || '').trim();
-  const tooShort = trimmed.length > 0 && trimmed.length < 6;
-  const digitsOnly = trimmed.length >= 6 && /^\d+$/.test(trimmed);
+  const tooShort = trimmed.length > 0 && trimmed.length < 8;
+  const digitsOnly = trimmed.length >= 8 && /^\d+$/.test(trimmed);
 
   const handleGenerate = () => {
     const code = generateReadableCode();
@@ -68,7 +78,7 @@ export default function QuitPasswordField({ value, onChange, required = false })
 
       <p className="text-xs text-slate-300 leading-relaxed">
         {required
-          ? 'Siden Microsoft Forms ikke kan lukke SEB automatisk, må du sette et kodeord (minst 6 tegn, f.eks. «sol-482»). Når eleven har levert og viser kvitteringsskjermen på pulten, oppgir eller taster du inn koden for å avslutte SEB.'
+          ? 'Siden Microsoft Forms ikke kan lukke SEB automatisk, må du sette en avslutningsfrase (minst 8 tegn, f.eks. «fjord-storm-tind-4829»). Når eleven har levert og viser kvitteringsskjermen på pulten, oppgir eller taster du inn koden for å avslutte SEB.'
           : 'Lar deg avslutte SEB manuelt på en elevmaskin (f.eks. ved tekniske problemer). Uten kodeord kan SEB bare avsluttes ved fullført innlevering.'}
       </p>
 
@@ -79,7 +89,7 @@ export default function QuitPasswordField({ value, onChange, required = false })
             value={value}
             onChange={(e) => onChange(e.target.value)}
             autoComplete="new-password"
-            placeholder="Minst 6 tegn (f.eks. sol-482)"
+            placeholder="Minst 8 tegn (f.eks. fjord-storm-tind-4829)"
             aria-label="Avslutningspassord"
             aria-required={required}
             className={`w-full bg-slate-950 border rounded-xl px-3.5 py-2.5 pr-16 text-sm text-white placeholder-slate-500 focus:outline-none font-mono ${
@@ -131,18 +141,18 @@ export default function QuitPasswordField({ value, onChange, required = false })
       {tooShort && (
         <p className="text-xs text-amber-200 flex items-start gap-1.5">
           <AlertTriangle size={14} className="shrink-0 mt-0.5 text-amber-300" aria-hidden="true" />
-          Kodeordet må være minst 6 tegn (f.eks. «sol-482»), slik at hashen i .seb-filen ikke kan slås opp av elever.
+          Kodeordet må være minst 8 tegn (f.eks. «fjord-storm-tind-4829»), slik at SHA-256-hashen i .seb-filen ikke kan knekkes med ordbokssøk.
         </p>
       )}
 
       {digitsOnly && (
         <p className="text-xs text-amber-200 flex items-start gap-1.5">
           <AlertTriangle size={14} className="shrink-0 mt-0.5 text-amber-300" aria-hidden="true" />
-          Rene tallkoder kan lettere slås opp fra .seb-filen. Kombiner gjerne et ord og tall (f.eks. «sol-482»).
+          Rene tallkoder er ikke tillatt fordi de kan knekkes fra .seb-filen. Kombiner ord og tall (f.eks. «fjord-storm-tind-4829»).
         </p>
       )}
 
-      {trimmed.length >= 6 && !digitsOnly && (
+      {trimmed.length >= 8 && !digitsOnly && (
         <p className="text-xs text-emerald-400 flex items-center gap-1.5">
           <ShieldCheck size={14} className="shrink-0" aria-hidden="true" />
           Sikkert kodeord ({trimmed.length} tegn). Hashes lokalt med SHA-256 og sendes aldri i klartekst. Husk å notere koden!

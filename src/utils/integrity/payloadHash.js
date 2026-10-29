@@ -37,6 +37,7 @@ function legacyCanonical(p) {
 function sebEssayCanonical(p) {
   return {
     receiptCode: p.receiptCode,
+    ...(p.nonce ? { nonce: p.nonce } : {}),
     examId: p.examId,
     startedAt: p.startedAt,
     completedAt: p.completedAt,

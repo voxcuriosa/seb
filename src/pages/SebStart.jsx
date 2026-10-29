@@ -4,6 +4,7 @@ import { Lock, ShieldCheck, Download, ArrowRight, ExternalLink, RefreshCw, Arrow
 import { fetchSebExam } from '../firebase';
 import { isSebEnvironment, markAsSebEnvironment } from '../utils/seb/sebEnvironment';
 import { downloadStandaloneSebExamFile } from '../utils/seb/sebConfigGenerator';
+import { purgeExpiredDrafts } from '../utils/exam/localStore';
 import { useStudentUiLang } from '../hooks/useStudentUiLang';
 import StudentLanguageSelect from '../components/common/StudentLanguageSelect';
 
@@ -35,6 +36,7 @@ export default function SebStart() {
   }, [examId, exam, navigate]);
 
   useEffect(() => {
+    purgeExpiredDrafts();
     let cancelled = false;
     fetchSebExam(examId)
       .then((data) => {

@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import { validateExamInput, sanitizePromptHtml, ValidationError, isValidExamId } from './validate.js';
+import { validateExamInput, sanitizePromptHtml, ValidationError, isValidExamId, isFormsUrl } from './validate.js';
+import { clientIp, ipKey } from './rateLimit.js';
 
 const base = {
   title: 'Prøve i Historie VG3',
@@ -47,14 +48,15 @@ describe('validateExamInput', () => {
     expect(validateExamInput({ ...base, sourceType: 'pdf', promptHtml: '', pdfBase64: pdf }).pdfBuffer.length).toBeGreaterThan(5);
   });
 
-  it('validerer og deduplikerer nettsider', () => {
+  it('validerer og deduplikerer nettsider (krever https://)', () => {
     const sites = [{ url: 'https://snl.no', title: 'SNL' }];
     expect(validateExamInput({ ...base, sebConfig: { allowedWebsites: sites } }).sebConfig.allowedWebsites[0].domain).toBe('snl.no');
     expect(() => validateExamInput({ ...base, sebConfig: { allowedWebsites: [...sites, ...sites] } })).toThrow(/Duplikat/);
     expect(() => validateExamInput({ ...base, sebConfig: { allowedWebsites: [{ url: 'javascript:alert(1)' }] } })).toThrow(ValidationError);
+    expect(() => validateExamInput({ ...base, sebConfig: { allowedWebsites: [{ url: 'http://snl.no' }] } })).toThrow(/https:\/\//);
   });
 
-  it('krever gyldig Forms-lenke og avslutningspassord (PIN) ved sourceType forms', () => {
+  it('krever gyldig Forms-lenke (avviser prefiks-spoofing) og avslutningspassord ved sourceType forms', () => {
     const validHash = 'a'.repeat(64);
     // Mangler passord
     expect(() =>
@@ -66,12 +68,16 @@ describe('validateExamInput', () => {
       })
     ).toThrow(/Avslutningspassord \(PIN\) er påkrevd/);
 
-    // Ugyldig forms-lenke
+    // Ugyldig forms-lenke og prefiks-spoofing
+    expect(isFormsUrl('https://forms.office.com.evil.no/r/abc')).toBe(false);
+    expect(isFormsUrl('https://forms.office.comevil.no/r/abc')).toBe(false);
+    expect(isFormsUrl('http://forms.office.com/r/abc')).toBe(false);
+    expect(isFormsUrl('https://forms.office.com/r/abc')).toBe(true);
     expect(() =>
       validateExamInput({
         ...base,
         sourceType: 'forms',
-        formsUrl: 'https://notforms.com/r/abc1234',
+        formsUrl: 'https://forms.office.com.evil.no/r/abc1234',
         sebConfig: { quitPasswordHash: validHash }
       })
     ).toThrow(/Ugyldig Microsoft Forms-lenke/);
@@ -91,5 +97,21 @@ describe('validateExamInput', () => {
   it('validerer examId', () => {
     expect(isValidExamId('AbCdEfGhIj0123456789')).toBe(true);
     expect(isValidExamId('../etc')).toBe(false);
+  });
+
+  it('sikrer clientIp mot X-Forwarded-For-spoofing og separerer ipKey per scope', () => {
+    // Klient sender falsk 1.2.3.4 først; Google Front End legger reell IP (84.215.10.20) bakerst
+    const req = { headers: { 'x-forwarded-for': '1.2.3.4, 84.215.10.20' } };
+    expect(clientIp(req)).toBe('84.215.10.20');
+
+    // x-appengine-user-ip foretrekkes hvis til stede
+    expect(clientIp({ headers: { 'x-appengine-user-ip': '91.100.20.30', 'x-forwarded-for': '1.2.3.4' } })).toBe('91.100.20.30');
+
+    // Domeneseparasjon i HKDF gjør at samme IP + secret gir ulike nøkler for ulike scopes
+    const kPin = ipKey('84.215.10.20', 'test-secret-256-bits-long-value', 'pinfail');
+    const kSign = ipKey('84.215.10.20', 'test-secret-256-bits-long-value', 'sign');
+    expect(kPin).toHaveLength(32);
+    expect(kSign).toHaveLength(32);
+    expect(kPin).not.toBe(kSign);
   });
 });

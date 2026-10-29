@@ -1,8 +1,36 @@
 /**
  * formsAuthList.js
  * Liste over tillatte URL-uttrykk for Microsoft Forms, Clarify og Feide SSO i SEB.
- * Kun nødvendige autentiserings-, ordbok- og skjemadomener (ikke hele office.com eller outlook).
+ * Kun nødvendige autentiserings-, ordbok- og skjemadomener (ikke hele office.com,
+ * outlook eller åpne fylkeskommunale informasjonssider).
  */
+
+const COUNTY_FEIDE_ROOTS = [
+  'vfk.no',
+  'telemarkfylke.no',
+  'vestfoldfylke.no',
+  'afk.no',
+  'agderfk.no',
+  'bfk.no',
+  'ofk.no',
+  'innlandetfylke.no',
+  'rogfk.no',
+  'vlfk.no',
+  'mrfylke.no',
+  'trondelagfylke.no',
+  'nfk.no',
+  'tffk.no',
+  'ffk.no',
+  'osloskolen.no',
+  'ude.oslo.kommune.no'
+];
+
+const SSO_SUBDOMAIN_PREFIXES = ['adfs', 'sts', 'feide', 'idp', 'login', 'sso', 'auth', 'fs'];
+
+const COUNTY_SSO_EXPRESSIONS = COUNTY_FEIDE_ROOTS.flatMap((root) =>
+  SSO_SUBDOMAIN_PREFIXES.map((sub) => `${sub}.${root}/*`)
+);
+
 export const FORMS_AUTH_EXPRESSIONS = [
   'forms.office.com/*',
   '*.forms.office.com/*',
@@ -10,8 +38,6 @@ export const FORMS_AUTH_EXPRESSIONS = [
   '*.forms.microsoft.com/*',
   'forms.cloud.microsoft/*',
   '*.forms.cloud.microsoft/*',
-  'cloud.microsoft/*',
-  '*.cloud.microsoft/*',
   'login.microsoftonline.com/*',
   '*.login.microsoftonline.com/*',
   'login.microsoft.com/*',
@@ -44,28 +70,8 @@ export const FORMS_AUTH_EXPRESSIONS = [
   'dataporten.no/*',
   '*.dataporten.no/*',
   'auth.dataporten.no/*',
-  'sikt.no/*',
-  '*.sikt.no/*',
-  'uninett.no/*',
-  '*.uninett.no/*',
-  // Fylkeskommunale og kommunale Feide/ADFS-innsjekkingssider
-  '*.vfk.no/*',
-  '*.telemarkfylke.no/*',
-  '*.vestfoldfylke.no/*',
-  '*.afk.no/*',
-  '*.agderfk.no/*',
-  '*.bfk.no/*',
-  '*.ofk.no/*',
-  '*.innlandetfylke.no/*',
-  '*.rogfk.no/*',
-  '*.vlfk.no/*',
-  '*.mrfylke.no/*',
-  '*.trondelagfylke.no/*',
-  '*.nfk.no/*',
-  '*.tffk.no/*',
-  '*.ffk.no/*',
-  '*.osloskolen.no/*',
-  '*.ude.oslo.kommune.no/*',
+  // Fylkeskommunale og kommunale Feide/ADFS-påloggingstjenere (kun SSO-subdomener, ikke www.<fylke>.no)
+  ...COUNTY_SSO_EXPRESSIONS,
   'clarify.no/*',
   '*.clarify.no/*',
   'app.clarify.no/*',

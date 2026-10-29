@@ -60,7 +60,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
                 <li>Eventuell <strong>oppgave-PDF</strong> dersom læreren la ved et vedlegg til oppgaven.</li>
                 <li><strong>Tillatte hjelpemidler og URL-er</strong> for SEB-profilen.</li>
                 <li><strong>Auto-sletting etter 90 dager:</strong> Tilgang til både oppgavetekst og oppgave-PDF sperres på sekundet ved utløp i <code className="text-slate-400">firestore.rules</code> og <code className="text-slate-400">storage.rules</code>, og slettes fysisk via Firestore TTL og funksjonstriggeren <code className="text-slate-400">cleanupExamStorage</code>.</li>
-                <li><strong>DoS-vern og infrastruktur:</strong> En midlertidig, enveis HMAC-hashet teller (<code className="text-slate-400">rateLimits</code>, TTL 2 timer) beskytter mot misbruk uten å lagre IP i klartekst. Underliggende Google Cloud-infrastruktur i EU har standard tekniske driftslogger (30 dager) ved nedlasting av oppgave og signering.</li>
+                <li><strong>DoS-vern og infrastruktur:</strong> En midlertidig, enveis HMAC-hashet teller (<code className="text-slate-400">rateLimits</code>, TTL 2–24 timer) med 10-delt sharding beskytter mot misbruk uten å lagre IP i klartekst. Underliggende Google Cloud-infrastruktur i EU har standard tekniske driftslogger (30 dager) ved nedlasting av oppgave og signering.</li>
                 <li><strong className="text-red-400">Ingen elevdata eller elevsvar</strong> lagres noensinne i databasen eller skylagringen.</li>
               </ul>
             </div>
@@ -72,7 +72,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               </h4>
               <ul className="text-xs text-slate-300 space-y-1.5 list-disc pl-4">
                 <li><strong>Autosave og krasjsikring:</strong> Teksten lagres fortløpende i nettleserens lokale minne (<code className="text-slate-400">localStorage / IndexedDB</code>). Hvis maskinen går tom for batteri eller omstartes, gjenopprettes teksten umiddelbart.</li>
-                <li><strong>Sletting ved avslutning:</strong> Ved fullført innlevering og på avslutningssiden tømmes det lokale utkastet. Ved unormal avslutning (f.eks. strømbrudd) beholdes dataene lokalt på maskinen inntil eleven fortsetter eller utkastet tømmes.</li>
+                <li><strong>Sletting ved avslutning og 12-timers utløp:</strong> Ved fullført innlevering og på avslutningssiden (<code className="text-slate-400">/quit</code>) tømmes det lokale utkastet umiddelbart. Dersom en prøve ble avbrutt unormalt uten å nå <code className="text-slate-400">/quit</code>, slettes utkastet automatisk etter 12 timer (<code className="text-slate-400">purgeExpiredDrafts</code>) slik at gammel tekst aldri blir liggende på delte skole-PC-er.</li>
                 <li><strong>Eksport:</strong> Ved levering genereres PDF-dokumentet lokalt i minnet via klientbiblioteket pdf-lib.</li>
               </ul>
             </div>
@@ -104,7 +104,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               Ved ferdigstillelse sender elevens nettleser <em>kun</em> to verdier: <code className="text-emerald-400">&#123; examId, sha256 &#125;</code> til Cloud Function <code className="text-slate-300">signSebSubmission</code>.
             </p>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Serveren mottar <strong>ingen tekst, ingen ord og intet elevnavn</strong>, men utelukkende den matematiske kontrollsummen som brukes til integritetskontroll. Serveren signerer prøve-ID, SHA-256-hash og serverens eget klokkeslett (<code className="text-slate-300">signedAt</code>) med Ed25519 og returnerer signaturen uten å lagre besvarelsen (kun en midlertidig, HMAC-hashet DoS-teller i <code className="text-slate-300">rateLimits</code> med 2 timers levetid oppdateres). I Fane 2 vises det serversignerte klokkeslettet direkte for læreren. Hvis eleven er offline, fullføres innleveringen likevel lokalt uten signatur (merkes som «Verifisert, ikke signert»).
+              Serveren mottar <strong>ingen tekst, ingen ord og intet elevnavn</strong>, men utelukkende den matematiske kontrollsummen som er saltet lokalt med et kryptografisk tilfeldig 128-bits <code className="text-slate-300">nonce</code> (som kun ligger i elevens lokale PDF og aldri sendes til serveren). Serveren signerer prøve-ID, SHA-256-hash og serverens eget klokkeslett (<code className="text-slate-300">signedAt</code>) med Ed25519 og returnerer signaturen uten å lagre besvarelsen. En aktiv runtime-brannmur (<code className="text-slate-300">runtimeNetworkFirewall.js</code>) i nettleseren verifiserer i tillegg ved kjøring at ingen utgående forespørsel fra prøverommet kan inneholde annet enn <code className="text-slate-300">&#123; examId, sha256 &#125;</code>.
             </p>
           </div>
 

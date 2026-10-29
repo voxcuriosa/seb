@@ -8,7 +8,22 @@
 const DB_NAME = 'seb_standalone';
 const STORE = 'exams';
 
+/**
+ * Maks levetid (12 timer) for lokale krasjutkast på en elevmaskin.
+ * Hvis en prøve ble avbrutt uten å nå /quit (f.eks. ved strømbrudd), slettes
+ * utkastet automatisk etter 12 timer slik at eldre tekst aldri blir liggende
+ * igjen på delte skole-PC-er.
+ */
+export const DRAFT_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+
 export const storageKey = (examId) => `seb_standalone_exam_${examId}`;
+
+function isDraftExpired(draft, maxAgeMs = DRAFT_MAX_AGE_MS) {
+  if (!draft || typeof draft !== 'object') return true;
+  const ts = Date.parse(draft.savedAt || '');
+  if (!Number.isFinite(ts) || ts <= 0) return true;
+  return Date.now() - ts > maxAgeMs;
+}
 
 function openDb() {
   return new Promise((resolve, reject) => {
@@ -80,8 +95,9 @@ export function saveDraftSync(examId, draft) {
   }
 }
 
-/** Leser nyeste utkast fra localStorage eller IndexedDB. */
+/** Leser nyeste utkast fra localStorage eller IndexedDB (sletter automatisk utløpte utkast > 12t). */
 export async function loadDraft(examId) {
+  await purgeExpiredDrafts();
   const key = storageKey(examId);
   const local = readLocal(key);
   let idb;
@@ -90,9 +106,14 @@ export async function loadDraft(examId) {
   } catch {
     idb = null;
   }
-  if (!local) return idb || null;
-  if (!idb) return local;
-  return Date.parse(idb.savedAt || 0) > Date.parse(local.savedAt || 0) ? idb : local;
+  const validLocal = local && !isDraftExpired(local) ? local : null;
+  const validIdb = idb && !isDraftExpired(idb) ? idb : null;
+  if ((local && !validLocal) || (idb && !validIdb)) {
+    await clearDraft(examId);
+  }
+  if (!validLocal) return validIdb || null;
+  if (!validIdb) return validLocal;
+  return Date.parse(validIdb.savedAt || 0) > Date.parse(validLocal.savedAt || 0) ? validIdb : validLocal;
 }
 
 async function idbDelete(key) {
@@ -144,6 +165,47 @@ export async function clearAllDrafts() {
     await new Promise((resolve, reject) => {
       const tx = db.transaction(STORE, 'readwrite');
       tx.objectStore(STORE).clear();
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  } catch {
+    /* ignorer */
+  }
+}
+
+/**
+ * Rydd opp utløpte prøveutkast (> 12 timer gamle) fra både localStorage og IndexedDB.
+ * Kalles automatisk ved oppstart på alle sider for å beskytte delte skole-PC-er.
+ */
+export async function purgeExpiredDrafts(maxAgeMs = DRAFT_MAX_AGE_MS) {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('seb_standalone_exam_')) {
+        const draft = readLocal(k);
+        if (isDraftExpired(draft, maxAgeMs)) {
+          localStorage.removeItem(k);
+        }
+      }
+    }
+  } catch {
+    /* ignorer */
+  }
+  try {
+    const db = await openDb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      const store = tx.objectStore(STORE);
+      const req = store.openCursor();
+      req.onsuccess = (e) => {
+        const cursor = e.target?.result;
+        if (!cursor) return;
+        if (String(cursor.key || '').startsWith('seb_standalone_exam_') && isDraftExpired(cursor.value, maxAgeMs)) {
+          cursor.delete();
+        }
+        cursor.continue();
+      };
       tx.oncomplete = resolve;
       tx.onerror = () => reject(tx.error);
     });

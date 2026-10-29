@@ -16,6 +16,16 @@ export const LIMITS = {
 export const ALLOWED_APP_IDS = ['voxlex', 'ordnett', 'lingdys'];
 const SOURCE_TYPES = ['text', 'docx', 'pdf', 'forms'];
 const DOMAIN_RE = /^(?=.{3,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
+const FORMS_HOSTS = ['forms.office.com', 'forms.microsoft.com', 'forms.cloud.microsoft'];
+
+export function isFormsUrl(u) {
+  try {
+    const x = new URL(String(u || '').trim());
+    return x.protocol === 'https:' && FORMS_HOSTS.includes(x.hostname.toLowerCase());
+  } catch {
+    return false;
+  }
+}
 
 export class ValidationError extends Error {}
 
@@ -62,8 +72,16 @@ export function validateWebsites(list) {
   if (list.length > LIMITS.websitesMax) fail(`Maks ${LIMITS.websitesMax} nettsider.`);
   const seen = new Set();
   return list.map((site, idx) => {
-    const url = String(site?.url || '').trim();
-    if (!/^https:\/\//i.test(url) && !/^http:\/\//i.test(url)) fail(`Nettside ${idx + 1} mangler gyldig adresse.`);
+    const rawUrl = String(site?.url || '').trim();
+    if (!/^https:\/\//i.test(rawUrl)) fail(`Nettside ${idx + 1} må bruke https://.`);
+    let parsedUrl;
+    try {
+      parsedUrl = new URL(rawUrl);
+    } catch {
+      fail(`Nettside ${idx + 1} mangler gyldig adresse.`);
+    }
+    if (parsedUrl.protocol !== 'https:') fail(`Nettside ${idx + 1} må bruke https://.`);
+    const url = parsedUrl.toString();
     const domain = cleanDomain(url);
     if (!DOMAIN_RE.test(domain)) fail(`Ugyldig domene: ${domain || url}`);
     if (seen.has(domain)) fail(`Duplikat domene: ${domain}`);
@@ -104,14 +122,7 @@ export function validateExamInput(data) {
     if (pdfBuffer.subarray(0, 5).toString('latin1') !== '%PDF-') fail('Filen er ikke en gyldig PDF.');
   } else if (sourceType === 'forms') {
     const formsUrl = String(data.formsUrl || '').trim();
-    if (
-      !formsUrl ||
-      (
-        !formsUrl.startsWith('https://forms.office.com') &&
-        !formsUrl.startsWith('https://forms.microsoft.com') &&
-        !formsUrl.startsWith('https://forms.cloud.microsoft')
-      )
-    ) {
+    if (!isFormsUrl(formsUrl)) {
       fail('Ugyldig Microsoft Forms-lenke.');
     }
   } else if (!promptHtml.replace(/<[^>]*>/g, '').trim()) {

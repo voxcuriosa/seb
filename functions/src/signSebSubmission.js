@@ -35,9 +35,10 @@ export const signSebSubmission = onCall(
     }
 
     const db = getFirestore();
-    const key = ipKey(clientIp(request.rawRequest), SEB_SIGNING_KEY.value());
-    // Hele klasser deler ofte én offentlig IP på skolen: romslig grense.
-    await enforceRateLimit(db, { scope: 'sign', key, limit: 600, windowSec: 3600 });
+    const key = ipKey(clientIp(request.rawRequest), SEB_SIGNING_KEY.value(), 'sign');
+    // Hele klasser deler ofte én offentlig IP på skolen: 10 shards unngår Firestore-kø
+    // når 30+ elever leverer samtidig (60 per shard = 600 per time totalt per skole-IP).
+    await enforceRateLimit(db, { scope: 'sign', key, limit: 600, windowSec: 3600, shards: 10 });
 
     const snap = await db.collection('sebExams').doc(examId).get();
     const expiresAt = snap.exists ? snap.get('expiresAt')?.toMillis?.() : 0;

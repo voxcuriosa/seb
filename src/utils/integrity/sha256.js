@@ -16,3 +16,15 @@ export function generateReceiptCode() {
   crypto.getRandomValues(arr);
   return Array.from(arr, (byte) => chars[byte % chars.length]).join('');
 }
+
+/**
+ * Genererer et kryptografisk tilfeldig 128-bits (32 hex-tegn) salt/nonce.
+ * Inkluderes i den lokale PDF-payloaden før SHA-256 beregnes, men sendes ALDRI
+ * til serveren. Dermed blir sha256 et kryptografisk skjult commitment som er
+ * umulig å gjette eller brute-force selv for svært korte eller tomme tekster.
+ */
+export function generateRandomNonceHex(byteLength = 16) {
+  const arr = new Uint8Array(byteLength);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, (b) => b.toString(16).padStart(2, '0')).join('');
+}

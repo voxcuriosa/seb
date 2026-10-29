@@ -9,7 +9,8 @@ import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { validateExamInput, ValidationError } from './validate.js';
-import { clientIp, ipKey, enforceRateLimit, recordFailure } from './rateLimit.js';
+import { clientIp, ipKey, enforceRateLimit } from './rateLimit.js';
+import { SEB_SIGNING_KEY } from './signSebSubmission.js';
 import { CALLABLE_OPTS } from './options.js';
 
 export const SEB_TEACHER_PIN = defineSecret('SEB_TEACHER_PIN');
@@ -23,24 +24,28 @@ function pinMatches(given, expected) {
 }
 
 export const createSebExam = onCall(
-  { ...CALLABLE_OPTS, secrets: [SEB_TEACHER_PIN], memory: '512MiB', timeoutSeconds: 60 },
+  { ...CALLABLE_OPTS, secrets: [SEB_TEACHER_PIN, SEB_SIGNING_KEY], memory: '512MiB', timeoutSeconds: 60 },
   async (request) => {
     const db = getFirestore();
     const data = request.data || {};
-    const key = ipKey(clientIp(request.rawRequest), SEB_TEACHER_PIN.value());
+    const ip = clientIp(request.rawRequest);
+    const hmacSecret = SEB_SIGNING_KEY.value() || SEB_TEACHER_PIN.value();
+    const pinKey = ipKey(ip, hmacSecret, 'pinfail');
 
-    // 1. Stopp gjetting av PIN: maks 5 feil per 15 minutter per IP.
-    await enforceRateLimit(db, { scope: 'pinfail', key, limit: 5, windowSec: 900, increment: false });
+    // 1. Stopp gjetting av PIN atomisk: tell forsøket FØR PIN-sjekk (lukker kappløpshull
+    // ved parallelle forespørsler) og slett telleren umiddelbart ved gyldig PIN.
+    await enforceRateLimit(db, { scope: 'pinfail', key: pinKey, limit: 5, windowSec: 900 });
     if (!pinMatches(data.pin, SEB_TEACHER_PIN.value())) {
-      await recordFailure(db, { scope: 'pinfail', key, windowSec: 900 });
       throw new HttpsError('permission-denied', 'Feil PIN-kode.');
     }
+    await db.collection('rateLimits').doc(`pinfail_${pinKey}`).delete();
 
     // Kun PIN-sjekk (brukes når læreren låser opp Fane 1).
     if (data.dryRun === true) return { ok: true };
 
     // 2. Maks 30 nye prøver per døgn per IP.
-    await enforceRateLimit(db, { scope: 'create', key, limit: 30, windowSec: 86400 });
+    const createKey = ipKey(ip, hmacSecret, 'create');
+    await enforceRateLimit(db, { scope: 'create', key: createKey, limit: 30, windowSec: 86400 });
 
     let clean;
     try {

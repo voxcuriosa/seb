@@ -1,10 +1,11 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Lock, FilePlus2, ShieldCheck, HelpCircle, ArrowLeft, Shield } from 'lucide-react';
 import CreateExamTab from '../components/create/CreateExamTab';
 import HelpPanel from '../components/HelpPanel';
 import PrivacyAuditModal from '../components/PrivacyAuditModal';
 import LoadingScreen from '../components/common/LoadingScreen';
 import AuthorMailLink from '../components/common/AuthorMailLink';
+import { purgeExpiredDrafts } from '../utils/exam/localStore';
 
 // Fane 2 laster pdf.js og kjører helt lokalt: lastes bare ved behov.
 const GradeSubmissionsTab = lazy(() => import('../components/grade/GradeSubmissionsTab'));
@@ -19,6 +20,10 @@ export default function TeacherHub() {
   const [tab, setTab] = useState('create');
   const [showHelp, setShowHelp] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
+
+  useEffect(() => {
+    purgeExpiredDrafts();
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">

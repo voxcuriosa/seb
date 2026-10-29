@@ -10,6 +10,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { buildEssayPayload, renderEssayPdf } from '../utils/exam/essayPdfGenerator.js';
 import { parseExamPdfFile } from '../utils/integrity/examPdfParser.js';
+import { assertAllowedExamRoomPayload, withZeroNetworkFirewall, installRuntimeNetworkFirewall } from '../utils/runtimeNetworkFirewall.js';
 
 describe('Empirisk nettverksrevisjon av Fane 2 (Kontroll av PDF-er)', () => {
   const recordedNetworkCalls = [];
@@ -112,5 +113,45 @@ describe('Empirisk nettverksrevisjon av Fane 2 (Kontroll av PDF-er)', () => {
     // 4. BEVIS: Absolutt 0 nettverksforespørsler ble sendt
     expect(recordedNetworkCalls).toHaveLength(0);
     expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it('Verifiserer at runtimeNetworkFirewall blokkerer ethvert forsøk på å sende elevtekst og tillater kun { examId, sha256 }', async () => {
+    const validBody = JSON.stringify({
+      data: {
+        examId: 'exam_12345',
+        sha256: 'a'.repeat(64)
+      }
+    });
+
+    // Gyldig signeringskall skal passere
+    expect(() =>
+      assertAllowedExamRoomPayload('https://europe-west1-voxcuriosa-seb.cloudfunctions.net/signSebSubmission', validBody)
+    ).not.toThrow();
+
+    // Forsøk på å snike med elevtekst eller navn skal blokkeres på direkten
+    const leakedBody = JSON.stringify({
+      data: {
+        examId: 'exam_12345',
+        sha256: 'a'.repeat(64),
+        essayText: 'Hemmelig elevbesvarelse'
+      }
+    });
+    expect(() =>
+      assertAllowedExamRoomPayload('https://europe-west1-voxcuriosa-seb.cloudfunctions.net/signSebSubmission', leakedBody)
+    ).toThrow(/Forbudte felter/);
+
+    // For stor kropp (> 512 byte) skal blokkeres
+    expect(() =>
+      assertAllowedExamRoomPayload('https://europe-west1-voxcuriosa-seb.cloudfunctions.net/signSebSubmission', 'x'.repeat(600))
+    ).toThrow(/overstiger maksgrensen/);
+
+    // withZeroNetworkFirewall skal totalblokkere fetch under lokal PDF-kontroll
+    const fakeGlobal = {
+      fetch: vi.fn(() => Promise.resolve({ ok: true }))
+    };
+    installRuntimeNetworkFirewall(fakeGlobal);
+    await expect(
+      withZeroNetworkFirewall(() => fakeGlobal.fetch('https://example.com'))
+    ).rejects.toThrow(/totalblokkert/);
   });
 });

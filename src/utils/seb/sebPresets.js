@@ -94,8 +94,11 @@ export function cleanDomainFromUrl(raw = '') {
 export function normalizeWebsiteUrl(raw = '') {
   const str = String(raw || '').trim();
   if (!str) return '';
-  if (str.startsWith('http://') || str.startsWith('https://')) {
+  if (/^https:\/\//i.test(str)) {
     return str;
+  }
+  if (/^http:\/\//i.test(str)) {
+    return str.replace(/^http:\/\//i, 'https://');
   }
   return `https://${str}`;
 }

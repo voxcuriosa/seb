@@ -17,14 +17,15 @@
       (function() {
         try {
           // 1. STRENG SJEKK: Sporing er KUN tillatt på lærerforsiden (/seb eller /seb/ eller /seb/index.html)
-          var pathname = window.location.pathname.replace(/\/+$/, '') || '/';
+          var pathname = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
           var isTeacherPage = (pathname === '/seb' || pathname === '/seb/index.html');
 
           // 2. ELEVBLOKKERING: Hvis URL-en inneholder /start/, /exam/, /quit eller ?seb=1, er dette en elevlenke.
           // Da avbryter vi umiddelbart. 0% sporing, null nettverkskall, fullstendig taushet.
-          var isStudentLink = window.location.pathname.indexOf('/start/') !== -1 ||
-                              window.location.pathname.indexOf('/exam/') !== -1 ||
-                              window.location.pathname.indexOf('/quit') !== -1 ||
+          var rawPath = window.location.pathname.toLowerCase();
+          var isStudentLink = rawPath.indexOf('/start/') !== -1 ||
+                              rawPath.indexOf('/exam/') !== -1 ||
+                              rawPath.indexOf('/quit') !== -1 ||
                               window.location.search.indexOf('seb=1') !== -1;
 
           if (!isTeacherPage || isStudentLink) {

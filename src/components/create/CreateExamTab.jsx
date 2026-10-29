@@ -76,12 +76,14 @@ export default function CreateExamTab() {
       if (!isValidForms) {
         return 'Lim inn en gyldig Microsoft Forms-lenke (f.eks. https://forms.office.com/... eller https://forms.cloud.microsoft/...).';
       }
-      if (!form.quitPassword || form.quitPassword.trim().length < 6) {
-        return 'Avslutningspassord / kodeord (minst 6 tegn, f.eks. «sol-482») er påkrevd for Microsoft Forms-prøver, slik at du kan låse opp og avslutte SEB etter innlevering.';
+      if (!form.quitPassword || form.quitPassword.trim().length < 8 || /^\d+$/.test(form.quitPassword.trim())) {
+        return 'Avslutningspassord / kodeord (minst 8 tegn med bokstaver, f.eks. «fjord-storm-tind-4829») er påkrevd for Microsoft Forms-prøver, slik at du kan låse opp og avslutte SEB etter innlevering.';
       }
     }
-    if (form.quitPassword && form.quitPassword.trim().length > 0 && form.quitPassword.trim().length < 6) {
-      return 'Avslutningspassordet må være minst 6 tegn (eller la feltet stå tomt).';
+    if (form.quitPassword && form.quitPassword.trim().length > 0) {
+      if (form.quitPassword.trim().length < 8 || /^\d+$/.test(form.quitPassword.trim())) {
+        return 'Avslutningspassordet må være minst 8 tegn og inneholde bokstaver (f.eks. «fjord-storm-tind-4829»), eller la feltet stå tomt.';
+      }
     }
     if (form.sourceType !== 'pdf' && form.sourceType !== 'forms' && !htmlToPlainText(form.promptHtml)) {
       return 'Oppgaveteksten er tom.';

@@ -12,10 +12,21 @@ import { clearDraft } from '../utils/exam/localStore';
 const SIGN_TIMEOUT_MS = 8000;
 
 async function requestSignature(examId, sha256) {
-  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), SIGN_TIMEOUT_MS));
-  // Personvern: bare examId og hashen sendes. Aldri tekst eller navn.
-  const res = await Promise.race([callSignSebSubmission({ examId, sha256 }), timeout]);
-  return res?.data || null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), SIGN_TIMEOUT_MS));
+      // Personvern: bare examId og hashen sendes. Aldri tekst eller navn.
+      const res = await Promise.race([callSignSebSubmission({ examId, sha256 }), timeout]);
+      if (res?.data?.signature) return res.data;
+    } catch (err) {
+      if (attempt === 0) {
+        await new Promise((r) => setTimeout(r, 250 + Math.floor(Math.random() * 300)));
+        continue;
+      }
+      throw err;
+    }
+  }
+  return null;
 }
 
 export function useFinishExam({ exam, getEssayDoc, getActiveSeconds, getIncidents, getStartedAt, onFinished, onBeforeExit }) {
