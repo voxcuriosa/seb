@@ -32,6 +32,9 @@ export async function buildEssayPayload({ exam, essayDoc, startedAt, activeSecon
   const pasteIncidents = incidents.filter((i) => i?.type === 'PASTE').length;
   const appSwitchIncidents = incidents.filter((i) => i?.type === 'APP_SWITCH').length;
   const focusLossIncidents = incidents.filter((i) => i?.type === 'FOCUS_LOST').length;
+  const sebSec = typeof window !== 'undefined' ? window.SafeExamBrowser?.security : null;
+  const sebConfigKey = typeof sebSec?.configKey === 'string' && sebSec.configKey.length > 0 ? sebSec.configKey : null;
+  const sebVersion = (typeof window !== 'undefined' && window.SafeExamBrowser?.version) || sebSec?.appVersion || null;
   const payload = {
     type: SEB_ESSAY_TYPE,
     version: 3,
@@ -47,6 +50,8 @@ export async function buildEssayPayload({ exam, essayDoc, startedAt, activeSecon
     appSwitchIncidents,
     focusLossIncidents,
     incidents: incidents.slice(0, 200),
+    ...(sebConfigKey ? { sebConfigKey } : {}),
+    ...(sebVersion ? { sebVersion } : {}),
     essayText,
     essayDoc
   };

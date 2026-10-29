@@ -111,6 +111,7 @@ export default function HelpPanel({ onClose }) {
         <li><strong className="text-white">Lagring:</strong> Bare lærerens prøveoppsett (tittel, oppgavetekst, innstillinger) lagres i EU, og både tilgang og filer utløper og slettes automatisk etter 90 dager.</li>
         <li><strong className="text-white">Fane 2 (Valgfri kontroll):</strong> Helt frivillig å bruke – PDF-ene kan leses direkte i Teams som vanlig, eller slippes inn i fane 2 dersom du ønsker å sjekke sjekksum og signatur. Utfører ingen nettverkskall under filkontrollen.</li>
         <li><strong className="text-white">Stavekontroll:</strong> Innebygd stavekontroll for norsk bokmål, nynorsk, engelsk (UK/US), tysk, spansk og fransk. Høyreklikk på ord med rød strek for å få forslag.</li>
+        <li><strong className="text-white">Herdet SEB-profil:</strong> Konfigurasjonsfilen (<code className="text-emerald-300">.seb</code>) pakkes i SEBs binære <code className="text-slate-400">plnd</code>-format slik at den ikke kan åpnes og endres i Notisblokk. Profilen sperrer virtuelle maskiner, trådløs skjermspeiling, utviklerverktøy og filopplasting, og oppretter et isolert Windows-skrivebord på prøver uten eksterne hjelpeprogrammer.</li>
         <li><strong className="text-white">Statusmerker:</strong> «Verifisert» betyr at SHA-256, synlig tekst og Ed25519-serversignatur (med serverens uforfalskelige klokkeslett) stemmer. «Verifisert, ikke signert» betyr at eleven var offline ved innlevering. «Ugyldig» betyr at filen er endret etter eksport.</li>
       </ul>
     </aside>

@@ -71,6 +71,7 @@ export default function SubmissionDetail({ submission }) {
           <p className="text-xs text-slate-400">
             {submission.signature.detail}
             {submission.signature.status === 'valid' && p.signedAt ? ` Serverklokke: ${formatDateTime(p.signedAt)}.` : ''}
+            {p.sebConfigKey ? ` SEB ConfigKey: ${String(p.sebConfigKey).slice(0, 16)}…` : ''}
           </p>
         )}
       </div>

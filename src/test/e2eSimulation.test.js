@@ -29,6 +29,10 @@ describe('Slutt-til-slutt simulering av hele prøveløpet', () => {
     // Sikkerhetssjekker på SEB-profilen
     expect(plist).toContain('<key>allowSwitchToApplications</key>\n  <false/>');
     expect(plist).toContain('<key>enableAltTab</key>\n  <false/>');
+    expect(plist).toContain('<key>createNewDesktop</key>\n  <true/>');
+    expect(plist).toContain('<key>allowVirtualMachine</key>\n  <false/>');
+    expect(plist).toContain('<key>allowUploads</key>\n  <false/>');
+    expect(plist).toContain('<key>allowDisplayMirroring</key>\n  <false/>');
     expect(plist).toContain('<key>showMenuBar</key>\n  <false/>');
     expect(plist).toContain('<key>browserWindowAllowAddressBar</key>\n  <false/>');
     expect(plist).toContain('<key>newBrowserWindowAllowAddressBar</key>\n  <false/>');

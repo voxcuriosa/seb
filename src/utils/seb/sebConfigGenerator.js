@@ -47,6 +47,9 @@ export function buildStandaloneSebPlist({
     /forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(effectiveStartUrl) ||
     websites.some((w) => /forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(`${w?.domain || ''} ${w?.url || ''}`));
   const hasClarify = websites.some((w) => /clarify\.no/i.test(`${w?.domain || ''} ${w?.url || ''}`));
+  // Isolert Windows-skrivebord (createNewDesktop = true) blokkerer overlegg (Discord, Steam, GeForce)
+  // når verken lokale hjelpeapper (Lingdys/VoxLex/Ordnett) eller Feide-pålogging (Forms/Clarify) brukes.
+  const needsDefaultDesktop = hasAllowedApps || isFormsStart || hasClarify;
   const resourcesXml = buildAdditionalResourcesXml(websites, { autoOpen: false });
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -59,6 +62,12 @@ export function buildStandaloneSebPlist({
   <string>${escapeXml(effectiveStartUrl)}</string>
   <key>sebConfigPurpose</key>
   <integer>0</integer>
+  <key>sendBrowserExamKey</key>
+  <true/>
+  <key>allowVirtualMachine</key>
+  <false/>
+  <key>allowDeveloperConsole</key>
+  <false/>
   <key>browserUserAgentWinDesktopMode</key>
   <integer>0</integer>
   <key>browserUserAgent</key>
@@ -78,7 +87,7 @@ export function buildStandaloneSebPlist({
   <key>quitURLConfirm</key>
   <false/>
   <key>createNewDesktop</key>
-  <false/>
+  ${needsDefaultDesktop ? '<false/>' : '<true/>'}
   <key>killExplorerShell</key>
   <false/>
   <key>browserViewMode</key>
@@ -151,7 +160,7 @@ ${buildDictionariesXml(dictionaries)}
   <key>allowDownloads</key>
   <true/>
   <key>allowUploads</key>
-  <true/>
+  ${isFormsStart ? '<true/>' : '<false/>'}
   <key>allowCustomDownUploadLocation</key>
   <false/>
   <key>useTemporaryDownUploadDirectory</key>
@@ -192,12 +201,62 @@ ${buildDictionariesXml(dictionaries)}
   <false/>
   <key>blockScreenSharing</key>
   <true/>
+  <key>allowDisplayMirroring</key>
+  <false/>
+  <key>screenSharingMacEnforceBlocked</key>
+  <true/>
   <key>allowSwitchToApplications</key>
   ${hasAllowedApps ? '<true/>' : '<false/>'}
 ${buildUrlFilterXml(websites, effectiveStartUrl)}
 ${buildPermittedProcessesXml(allowedApps)}${resourcesXml ? `\n${resourcesXml}` : ''}
 </dict>
 </plist>`;
+}
+
+async function gzipBytes(uint8) {
+  if (typeof CompressionStream === 'undefined') return null;
+  try {
+    const cs = new CompressionStream('gzip');
+    const writer = cs.writable.getWriter();
+    writer.write(uint8);
+    writer.close();
+    const reader = cs.readable.getReader();
+    const chunks = [];
+    let total = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      total += value.byteLength;
+    }
+    const out = new Uint8Array(total);
+    let offset = 0;
+    for (const c of chunks) {
+      out.set(c, offset);
+      offset += c.byteLength;
+    }
+    return out;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Pakker XML-plisten i Safe Exam Browsers offisielle binære «plnd»-format:
+ *   gzip( ASCII("plnd") + gzip( UTF8(xml) ) )
+ * Dette støttes direkte av SEB på både Windows og macOS, krymper filstørrelsen
+ * og gjør .seb-filen binær slik at den ikke kan åpnes og redigeres i Notisblokk.
+ */
+export async function encodeSebFileBytes(xml) {
+  const xmlBytes = new TextEncoder().encode(String(xml || ''));
+  const innerGz = await gzipBytes(xmlBytes);
+  if (!innerGz) return xmlBytes;
+  const prefix = new TextEncoder().encode('plnd');
+  const combined = new Uint8Array(prefix.byteLength + innerGz.byteLength);
+  combined.set(prefix, 0);
+  combined.set(innerGz, prefix.byteLength);
+  const outerGz = await gzipBytes(combined);
+  return outerGz || xmlBytes;
 }
 
 function triggerDownload(content, fileName, type) {
@@ -237,7 +296,8 @@ export async function downloadStandaloneSebExamFile({
     quitPasswordHash: effectiveHash,
     dictionaries
   });
+  const bytes = await encodeSebFileBytes(xml);
   const fileName = `prove-${safeFileSlug(title)}.seb`;
-  triggerDownload(xml, fileName, 'application/seb');
-  return { fileName, size: xml.length, dictionaries: dictionaries.map((d) => d.localeName) };
+  triggerDownload(bytes, fileName, 'application/seb');
+  return { fileName, size: bytes.byteLength, dictionaries: dictionaries.map((d) => d.localeName) };
 }

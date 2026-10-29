@@ -2,9 +2,10 @@
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, writeFileSync, readFileSync } from 'node:fs';
+import { gunzipSync } from 'node:zlib';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { buildStandaloneSebPlist, safeFileSlug } from './sebConfigGenerator';
+import { buildStandaloneSebPlist, encodeSebFileBytes, safeFileSlug } from './sebConfigGenerator';
 import { arrayBufferToBase64, extractDicFromZipBuffer, buildChecker } from './sebDictionaries';
 import { sha256Hex } from '../integrity/sha256';
 
@@ -72,6 +73,13 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toContain('LingX.exe');
     expect(xml).toMatch(/<key>createNewDesktop<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>killExplorerShell<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>allowVirtualMachine<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>allowDeveloperConsole<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>sendBrowserExamKey<\/key>\s*<true\/>/);
+    expect(xml).toMatch(/<key>allowDownloads<\/key>\s*<true\/>/);
+    expect(xml).toMatch(/<key>allowUploads<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>allowDisplayMirroring<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>screenSharingMacEnforceBlocked<\/key>\s*<true\/>/);
     expect(xml).toMatch(/<key>clipboardPolicy<\/key>\s*<integer>0<\/integer>/);
     expect(xml).toMatch(/<key>enablePrivateClipboard<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>enablePrivateClipboardMacEnforce<\/key>\s*<false\/>/);
@@ -87,11 +95,15 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toContain('<string>nn-NO</string>');
   });
 
-  it('uten passord er avslutning sperret og ingen hash skrives', () => {
+  it('uten passord og uten hjelpeapper brukes isolert Windows-skrivebord (createNewDesktop=true) og ingen hash skrives', () => {
     const xml = buildStandaloneSebPlist({ examId: 'x1' });
     expect(lint(xml)).toMatch(/OK/);
     expect(xml).toMatch(/<key>allowQuit<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>showQuitButton<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>createNewDesktop<\/key>\s*<true\/>/);
+    expect(xml).toMatch(/<key>allowVirtualMachine<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>allowUploads<\/key>\s*<false\/>/);
+    expect(xml).toMatch(/<key>allowDisplayMirroring<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>examSessionClearCookiesOnStart<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>examSessionClearCookiesOnEnd<\/key>\s*<false\/>/);
     expect(xml).toMatch(/<key>clipboardPolicy<\/key>\s*<integer>2<\/integer>/);
@@ -100,6 +112,19 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).not.toContain('hashedQuitPassword');
     expect(xml).toContain('CredentialUIBroker.exe');
     expect(xml).toContain('PickerHost.exe');
+  });
+
+  it('pakker .seb-filen i SEBs binære plnd-format (gzip("plnd" + gzip(xml))) slik at den ikke er klartekst i Notisblokk', async () => {
+    const xml = buildStandaloneSebPlist({ examId: 'bin_test' });
+    const encoded = await encodeSebFileBytes(xml);
+    // Skal ikke starte med '<?xml' i klartekst, men med GZIP-magiske bytes (0x1f, 0x8b)
+    expect(encoded[0]).toBe(0x1f);
+    expect(encoded[1]).toBe(0x8b);
+    const outerUnzipped = gunzipSync(encoded);
+    expect(outerUnzipped.subarray(0, 4).toString('utf8')).toBe('plnd');
+    const innerXml = gunzipSync(outerUnzipped.subarray(4)).toString('utf8');
+    expect(innerXml).toBe(xml);
+    expect(lint(innerXml)).toMatch(/OK/);
   });
 
   it('URL-koder examId i startURL', () => {
