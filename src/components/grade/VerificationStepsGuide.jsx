@@ -24,7 +24,7 @@ export default function VerificationStepsGuide() {
     {
       icon: Lock,
       title: '4. Få umiddelbar status per elev',
-      desc: 'Grønt stempel bekrefter at teksten ble skrevet i SEB og ikke er endret eller tuklet med.'
+      desc: 'Grønt stempel bekrefter at sjekksum, synlig tekst og Ed25519-serversignatur med serverklokkeslett stemmer uten etterfølgende tekstendring.'
     }
   ];
 
@@ -50,12 +50,12 @@ export default function VerificationStepsGuide() {
         })}
       </ol>
       <p className="text-xs text-slate-400 border-t border-slate-800 pt-3">
-        Fullstendig offline kontroll: Elevbesvarelsene forlater aldri datamaskinen din.
+        Lokal kontroll i nettleseren: Elevbesvarelsene forlater ikke datamaskinen din.
       </p>
       <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-xs text-emerald-200 space-y-1">
         <p className="font-bold text-emerald-300">Nøkkelfunksjoner for IT og personvern:</p>
         <p className="leading-relaxed text-slate-300">
-          Fane 2 utfører <strong>0 nettverkskall</strong>. Koden leveres «as is», og er statisk revidert av en automatisert personvernvakt før deploy.
+          Kontrollmotoren i Fane 2 utfører <strong>ingen nettverkskall</strong> under PDF-analysen. Koden leveres «as is», og kontrolleres automatisk av personvernvakten og nettverkstester før deploy.
         </p>
       </div>
     </div>

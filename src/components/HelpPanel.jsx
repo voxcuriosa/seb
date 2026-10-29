@@ -84,7 +84,7 @@ export default function HelpPanel({ onClose }) {
           Elevarbeid forlater ALDRI nettleseren:
         </p>
         <p className="text-slate-300 leading-relaxed">
-          Alt eleven skriver i skriveeditoren lagres utelukkende lokalt i nettleseren på elevens egen datamaskin. Ved innlevering pakkes teksten som en ferdig PDF direkte i nettleserminnet og lastes ned til maskinen. Ingen elevtekst sendes til noen server eller skytjeneste, og dataene forsvinner fra nettleserminnet når økten lukkes.
+          Alt eleven skriver i skriveeditoren lagres lokalt i nettleseren på elevens egen datamaskin. Ved innlevering pakkes teksten som en ferdig PDF direkte i nettleserminnet og lastes ned til maskinen. Ingen elevtekst eller elevnavn sendes til noen server eller skytjeneste (kun prøve-ID og SHA-256-kontrollsum ved signering), og det lokale utkastet tømmes automatisk ved normal innlevering og avslutning.
         </p>
       </div>
 
@@ -108,10 +108,10 @@ export default function HelpPanel({ onClose }) {
 
       <ul className="text-xs text-slate-300 space-y-1.5 border-t border-slate-800 pt-3">
         <li><strong className="text-white">Omstart av PC:</strong> Er i utgangspunktet frivillig, og elevene kan starte vanlige prøver rett fra skolehverdagen. <strong>Før store og viktige prøver (som heldagsprøver og tentamen) anbefales det likevel at elevene restarter PC-en først.</strong> Dette tømmer maskinminnet og forhindrer at bakgrunnsprogrammer, Discord eller skjermopptakere skaper sjeldne konflikter med Safe Exam Browser.</li>
-        <li><strong className="text-white">Lagring:</strong> Bare lærerens prøveoppsett (tittel, oppgavetekst, innstillinger) lagres i EU, og slettes automatisk etter 90 dager.</li>
-        <li><strong className="text-white">Fane 2 (Kontroll):</strong> Har fysisk null nettverkskall – PDF-er fra Teams leses kun lokalt i din nettleser.</li>
+        <li><strong className="text-white">Lagring:</strong> Bare lærerens prøveoppsett (tittel, oppgavetekst, innstillinger) lagres i EU, og både tilgang og filer utløper og slettes automatisk etter 90 dager.</li>
+        <li><strong className="text-white">Fane 2 (Kontroll):</strong> Utfører ingen nettverkskall under filkontrollen – PDF-er fra Teams leses og verifiseres kun lokalt i din nettleser.</li>
         <li><strong className="text-white">Stavekontroll:</strong> Innebygd stavekontroll for norsk bokmål, nynorsk, engelsk (UK/US), tysk, spansk og fransk. Høyreklikk på ord med rød strek for å få forslag.</li>
-        <li><strong className="text-white">Statusmerker:</strong> «Verifisert» betyr at alt stemmer. «Verifisert, ikke signert» betyr at eleven var offline ved innlevering. «Ugyldig» betyr at filen er endret etter eksport.</li>
+        <li><strong className="text-white">Statusmerker:</strong> «Verifisert» betyr at SHA-256, synlig tekst og Ed25519-serversignatur (med serverens uforfalskelige klokkeslett) stemmer. «Verifisert, ikke signert» betyr at eleven var offline ved innlevering. «Ugyldig» betyr at filen er endret etter eksport.</li>
       </ul>
     </aside>
   );

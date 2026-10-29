@@ -104,7 +104,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               Ved ferdigstillelse sender elevens nettleser <em>kun</em> to verdier: <code className="text-emerald-400">&#123; examId, sha256 &#125;</code> til Cloud Function <code className="text-slate-300">signSebSubmission</code>.
             </p>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Serveren mottar <strong>ingen tekst, ingen ord og intet elevnavn</strong>, men utelukkende den matematiske kontrollsummen som brukes til integritetskontroll. Serveren signerer SHA-256-hashen med Ed25519 og returnerer signaturen uten å lagre besvarelsen (kun en midlertidig, HMAC-hashet DoS-teller i <code className="text-slate-300">rateLimits</code> med 2 timers levetid oppdateres). Hvis eleven er offline, fullføres innleveringen likevel lokalt uten signatur (merkes som «Verifisert, ikke signert»).
+              Serveren mottar <strong>ingen tekst, ingen ord og intet elevnavn</strong>, men utelukkende den matematiske kontrollsummen som brukes til integritetskontroll. Serveren signerer prøve-ID, SHA-256-hash og serverens eget klokkeslett (<code className="text-slate-300">signedAt</code>) med Ed25519 og returnerer signaturen uten å lagre besvarelsen (kun en midlertidig, HMAC-hashet DoS-teller i <code className="text-slate-300">rateLimits</code> med 2 timers levetid oppdateres). I Fane 2 vises det serversignerte klokkeslettet direkte for læreren. Hvis eleven er offline, fullføres innleveringen likevel lokalt uten signatur (merkes som «Verifisert, ikke signert»).
             </p>
           </div>
 
