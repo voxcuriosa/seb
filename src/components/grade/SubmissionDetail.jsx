@@ -68,13 +68,24 @@ export default function SubmissionDetail({ submission }) {
           </ul>
         )}
         {submission.signature && submission.verdict !== 'invalid' && (
-          <p className="text-xs text-slate-400">{submission.signature.detail}</p>
+          <p className="text-xs text-slate-400">
+            {submission.signature.detail}
+            {submission.signature.status === 'valid' && p.signedAt ? ` Serverklokke: ${formatDateTime(p.signedAt)}.` : ''}
+          </p>
         )}
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-        <Stat label="Start" value={formatDateTime(p.startedAt)} title="Tidspunktet eleven åpnet prøven i SEB" />
-        <Stat label="Levert" value={formatDateTime(p.completedAt)} title="Tidspunktet PDF-en ble generert" />
+        <Stat label="Start" value={formatDateTime(p.startedAt)} title="Tidspunktet eleven åpnet prøven i SEB (lokal klokke)" />
+        <Stat
+          label={submission.signature?.status === 'valid' && p.signedAt ? 'Levert (serversignert)' : 'Levert (lokal klokke)'}
+          value={formatDateTime(submission.signature?.status === 'valid' && p.signedAt ? p.signedAt : p.completedAt)}
+          title={
+            submission.signature?.status === 'valid' && p.signedAt
+              ? `Uforfalskelig servertidspunkt fra Ed25519-signatur (${formatDateTime(p.signedAt)}). Lokal PC-klokke var ${formatDateTime(p.completedAt)}.`
+              : 'Tidspunktet PDF-en ble generert (lokal klokke på elevens maskin)'
+          }
+        />
         <Stat label="Aktiv tid" value={formatDuration(p.activeSeconds)} title="Tid prøvevinduet var synlig og i fokus" />
         <Stat label="Ord" value={p.wordCount ?? '–'} title="Antall ord i besvarelsen" />
         {p.appSwitchIncidents > 0 ? (

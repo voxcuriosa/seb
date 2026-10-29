@@ -46,8 +46,21 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toMatch(/<key>allowQuit<\/key>\s*<true\/>/);
     expect(xml).toContain(`<string>${hash}</string>`);
     expect(xml).not.toContain('nodpin-2026');
-    for (const expr of ['voxcuriosa.no/*', '*.voxcuriosa.no/*', 'curiosa.no/*', 'voxkunnskapeuropa.web.app/*', '*.googleapis.com/*', 'snl.no/*', '*.regjeringen.no/*']) {
+    for (const expr of [
+      'voxcuriosa.no/*',
+      '*.voxcuriosa.no/*',
+      'curiosa.no/*',
+      'voxkunnskapeuropa.web.app/*',
+      'firestore.googleapis.com/*',
+      'firebasestorage.googleapis.com/*',
+      'europe-west1-voxcuriosa-seb.cloudfunctions.net/*',
+      'snl.no/*',
+      '*.regjeringen.no/*'
+    ]) {
       expect(xml).toContain(`<string>${expr}</string>`);
+    }
+    for (const forbidden of ['*.run.app/*', '*.firebaseapp.com/*', '*.cloudfunctions.net/*', '*.gstatic.com/*']) {
+      expect(xml).not.toContain(`<string>${forbidden}</string>`);
     }
     expect(xml).toContain('Regjeringen &amp; &lt;test&gt;');
     expect(xml).toContain('no.voxlex.skole');

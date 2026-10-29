@@ -50,5 +50,9 @@ export async function verifySebSignature(payload, publicKeys = SIGNING_PUBLIC_KE
   if (!Number.isFinite(signedMs) || !Number.isFinite(completedMs) || Math.abs(signedMs - completedMs) > MAX_SIGN_DELAY_MS) {
     return { status: 'late', detail: 'Signert mer enn 5 minutter etter oppgitt fullføringstid.' };
   }
-  return { status: 'valid', detail: 'Gyldig serversignatur.' };
+  return {
+    status: 'valid',
+    signedAt: payload.signedAt,
+    detail: 'Gyldig serversignatur (Ed25519). Signeringstidspunktet er kryptografisk låst av serveren.'
+  };
 }

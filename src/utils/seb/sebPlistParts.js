@@ -159,7 +159,7 @@ export function buildPermittedProcessesXml(allowedApps = {}) {
   return permittedXml;
 }
 
-/** Faste domener prøverommet trenger (app, Firebase, CDN for pdf.js-worker, samt data:/about: for lokal PDF-eksport). */
+/** Faste domener prøverommet trenger (kun egne prosjektsider og eksakte Firebase API-endepunkter, ingen åpne jokertegn). */
 export const BASE_ALLOWED_EXPRESSIONS = [
   'about:blank',
   'about:*',
@@ -172,18 +172,10 @@ export const BASE_ALLOWED_EXPRESSIONS = [
   'voxkunnskapeuropa.web.app/*',
   'voxcuriosa-seb.web.app/*',
   'voxcuriosa-seb.firebaseapp.com/*',
-  '*.firebaseapp.com/*',
-  'firebaseapp.com/*',
-  '*.firebaseio.com/*',
+  'firestore.googleapis.com/*',
   'firebasestorage.googleapis.com/*',
-  '*.firebasestorage.app/*',
-  '*.googleapis.com/*',
-  'googleapis.com/*',
-  '*.cloudfunctions.net/*',
-  'cloudfunctions.net/*',
-  '*.run.app/*',
-  '*.gstatic.com/*',
-  'gstatic.com/*'
+  'storage.googleapis.com/*',
+  'europe-west1-voxcuriosa-seb.cloudfunctions.net/*'
 ];
 
 function filterRule(expression) {
