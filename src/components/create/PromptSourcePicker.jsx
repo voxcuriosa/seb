@@ -122,7 +122,7 @@ export default function PromptSourcePicker({
               Elevene svarer og sender inn direkte i Forms (husk «Ett svar per person» i Forms-innstillingene). Ved pålogging i SEB velger eleven «Bruk passordet mitt / Use my password» (pluss ev. Microsoft Authenticator) i stedet for lokal Windows Hello / Touch ID.
             </p>
             <p className="text-amber-200">
-              <strong>Merk:</strong> Fordi Forms ikke kan lukke SEB automatisk, må du sette et kodeord i steg 2 (minst 6 tegn, f.eks. «sol-482»). Når eleven viser kvitteringsskjermen (eller når prøvetiden er ute), bruker eleven koden til å avslutte SEB.
+              <strong>Merk:</strong> Fordi Forms ikke kan lukke SEB automatisk, må du sette et kodeord i steg 2 (minst 12 tegn, f.eks. «fjord-storm-tind-varde-482915»). Når eleven viser kvitteringsskjermen (eller når prøvetiden er ute), bruker eleven koden til å avslutte SEB.
             </p>
           </div>
         </div>

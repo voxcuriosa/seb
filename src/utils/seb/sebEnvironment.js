@@ -4,15 +4,8 @@
  * Kopiert og forenklet fra voxkunnskap/src/utils/localMode/editionConfig.js.
  */
 
-const SESSION_KEY = 'curiosa_is_seb';
-
 export function markAsSebEnvironment() {
   if (typeof window === 'undefined') return;
-  try {
-    sessionStorage.setItem(SESSION_KEY, '1');
-  } catch {
-    /* sessionStorage kan være sperret */
-  }
   try {
     window.SafeExamBrowser?.security?.updateKeys?.();
   } catch {
@@ -30,22 +23,27 @@ export function markAsSebEnvironment() {
 
 /**
  * Verifiserer at klienten faktisk kjører inne i Safe Exam Browser
- * (via User-Agent eller SEBs injiserte window.SafeExamBrowser-objekt),
+ * (via streng User-Agent-sjekk eller SEBs injiserte window.SafeExamBrowser-objekt),
  * slik at en elev ikke bare kan åpne startURL (/seb/exam/:examId?seb=1) i vanlig nettleser.
- * Tillater localhost / 127.0.0.1 og testmiljøer under lokal utvikling.
+ * Tillater kun localhost/127.0.0.1 i DEV-modus og jsdom/happy-dom under Vitest.
  */
 export function isVerifiedSebClient() {
   if (typeof window === 'undefined') return true;
   try {
     const ua = navigator.userAgent || '';
-    if (/\bSEB\b/i.test(ua) || /\bSafeExamBrowser\b/i.test(ua) || /\bVoxCuriosa\b/i.test(ua)) {
+    if (/\b(SEB|SafeExamBrowser)\/\d/i.test(ua)) {
       return true;
     }
-    if (window.SafeExamBrowser || window.SEB || window.seb) {
+    if (window.SafeExamBrowser) {
       return true;
     }
+    const isVitest = Boolean(import.meta.env?.VITEST || globalThis?.process?.env?.VITEST);
+    if (isVitest && /jsdom|happy-dom/i.test(ua)) {
+      return true;
+    }
+    const isDev = Boolean(import.meta.env?.DEV);
     const host = window.location?.hostname || '';
-    if (host === 'localhost' || host === '127.0.0.1' || /jsdom|happy-dom/i.test(ua)) {
+    if (isDev && (host === 'localhost' || host === '127.0.0.1')) {
       return true;
     }
   } catch {
@@ -56,36 +54,18 @@ export function isVerifiedSebClient() {
 
 export function isSebEnvironment() {
   if (typeof window === 'undefined') return false;
-  try {
-    if (sessionStorage.getItem(SESSION_KEY) === '1') return true;
-
-    const search = new URLSearchParams(window.location.search || '');
-    if (search.get('seb') === '1' || search.get('isSeb') === '1') {
-      markAsSebEnvironment();
-      return true;
-    }
-    const ua = navigator.userAgent || '';
-    if (/\bSEB\b/i.test(ua) || /\bSafeExamBrowser\b/i.test(ua)) {
-      markAsSebEnvironment();
-      return true;
-    }
-    if (window.SafeExamBrowser || window.SEB || window.seb) {
-      markAsSebEnvironment();
-      return true;
-    }
-  } catch {
-    return false;
-  }
-  return false;
+  return isVerifiedSebClient();
 }
 
-const GUEST_VM_GPU_RE = /\b(VirtualBox|VBox|VMware|Parallels|QEMU|VirGL|Bochs)\b/i;
+export const GUEST_VM_GPU_RE =
+  /\b(VirtualBox|VBox|VMware|Parallels|QEMU|VirGL|Bochs|SwiftShader|llvmpipe|Apple Paravirtual|Paravirtualized)\b/i;
 
 /**
  * Sjekker skjermkortdriver (WebGL UNMASKED_RENDERER_WEBGL / UNMASKED_VENDOR_WEBGL)
- * for faktiske gjeste-VM-adaptere (VirtualBox, VMware, Parallels, QEMU).
- * Fysiske Windows 11 skole-PC-er med Hyper-V/VBS/Kjerneisolasjon bruker fysisk
- * Intel/AMD/NVIDIA-skjermkort og utløser aldri falsk alarm her.
+ * for faktiske gjeste-VM-adaptere og programvarerendering (VirtualBox, VMware, Parallels,
+ * QEMU, SwiftShader, llvmpipe, Apple Paravirtual, Paravirtualized).
+ * Fysiske Windows 11 skole-PC-er med Hyper-V/VBS/Kjerneisolasjon eller Microsoft Basic
+ * Render Driver utløser aldri falsk alarm her.
  */
 export function detectGuestVirtualMachine() {
   if (typeof document === 'undefined') return null;

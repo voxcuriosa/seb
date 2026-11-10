@@ -3,14 +3,17 @@
  * Genererer en ukryptert XML-plist (.seb) for frittstående SEB-prøver på voxcuriosa.no/seb.
  * Basert på downloadSebExamFile i voxkunnskap/src/utils/localMode/sebConfigGenerator.js, med:
  *  - startURL direkte til prøverommet (/seb/exam/:examId?seb=1)
- *  - stavekontroll og høyreklikk PÅ (retteforslag fra SEBs ordbok)
+ *  - stavekontroll og høyreklikk PÅ (retteforslag fra SEBs ordbok), macOS oppslagsleksikon AV
  *  - clearBrowserCache AV, slik at localStorage/IndexedDB overlever strømbrudd og omstart
- *  - URL-filter med voxcuriosa.no, Firebase-domener og valgte nettsider
+ *  - examSessionClearCookiesOnStart PÅ for å beskytte delte låne-PC-er
+ *  - URL-filter med voxcuriosa.no, eksakte Firebase-endepunkter og valgte nettsider
  *  - valgfritt avslutningspassord (hashedQuitPassword, SHA-256)
  */
 import { examRoomUrl, EXAM_QUIT_URL } from '../../config.js';
 import {
   escapeXml,
+  isFormsUrl,
+  isClarifyUrl,
   buildPermittedProcessesXml,
   buildUrlFilterXml,
   buildAdditionalResourcesXml
@@ -30,6 +33,7 @@ export function safeFileSlug(title = '') {
 export function buildStandaloneSebPlist({
   examId,
   startURL = '',
+  sourceType = '',
   allowedWebsites = [],
   allowedApps = {},
   quitPasswordHash = '',
@@ -38,15 +42,18 @@ export function buildStandaloneSebPlist({
   if (!examId) throw new Error('examId mangler');
   const hasQuitPassword = /^[a-f0-9]{64}$/i.test(String(quitPasswordHash || ''));
   const hasAllowedApps = Boolean(allowedApps?.voxlex || allowedApps?.ordnett || allowedApps?.lingdys);
-  // SEB clipboardPolicy: 0 = Allow (delt utklippstavle slik at Lingdys/hjelpeapper kan lese Cmd+C),
+  // SEB clipboardPolicy: 0 = Allow (delt utklippstavle slik at Lingdys/VoxLex/Ordnett kan lese Cmd+C),
   // 2 = Isolated (privat utklippstavle kun internt i SEB når ingen hjelpeapper er valgt).
   const clipboardPolicy = hasAllowedApps ? 0 : 2;
   const websites = Array.isArray(allowedWebsites) ? allowedWebsites : [];
   const effectiveStartUrl = startURL || examRoomUrl(examId);
   const isFormsStart =
-    /forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(effectiveStartUrl) ||
-    websites.some((w) => /forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(`${w?.domain || ''} ${w?.url || ''}`));
-  const hasClarify = websites.some((w) => /clarify\.no/i.test(`${w?.domain || ''} ${w?.url || ''}`));
+    sourceType === 'forms' ||
+    isFormsUrl(effectiveStartUrl) ||
+    websites.some((w) => isFormsUrl(w?.url) || isFormsUrl(w?.domain));
+  const hasClarify =
+    isClarifyUrl(effectiveStartUrl) ||
+    websites.some((w) => isClarifyUrl(w?.url) || isClarifyUrl(w?.domain));
   // Isolert Windows-skrivebord (createNewDesktop = true) blokkerer overlegg (Discord, Steam, GeForce)
   // når verken lokale hjelpeapper (Lingdys/VoxLex/Ordnett) eller Feide-pålogging (Forms/Clarify) brukes.
   const needsDefaultDesktop = hasAllowedApps || isFormsStart || hasClarify;
@@ -71,11 +78,11 @@ export function buildStandaloneSebPlist({
   <key>allowDeveloperConsole</key>
   <false/>
   <key>browserUserAgentWinDesktopMode</key>
-  <integer>0</integer>
+  <integer>1</integer>
   <key>browserUserAgent</key>
   <string>SafeExamBrowser/3.6 (SEB; VoxCuriosa)</string>
   <key>browserUserAgentMac</key>
-  <integer>0</integer>
+  <integer>1</integer>
   <key>browserUserAgentMacCustom</key>
   <string>SafeExamBrowser/3.6 (SEB; VoxCuriosa)</string>
   <key>allowQuit</key>
@@ -155,7 +162,7 @@ export function buildStandaloneSebPlist({
   <key>allowSpellCheck</key>
   <true/>
   <key>allowDictionaryLookup</key>
-  <true/>
+  <false/>
 ${buildDictionariesXml(dictionaries)}
   <key>allowDownUploads</key>
   <true/>
@@ -188,7 +195,7 @@ ${buildDictionariesXml(dictionaries)}
   <key>clearBrowserCache</key>
   <false/>
   <key>examSessionClearCookiesOnStart</key>
-  ${isFormsStart ? '<true/>' : '<false/>'}
+  <true/>
   <key>examSessionClearCookiesOnEnd</key>
   ${isFormsStart || hasClarify ? '<true/>' : '<false/>'}
   <key>removeBrowserProfile</key>
@@ -215,8 +222,8 @@ ${buildDictionariesXml(dictionaries)}
   <false/>
   <key>allowSwitchToApplications</key>
   ${hasAllowedApps ? '<true/>' : '<false/>'}
-${buildUrlFilterXml(websites, effectiveStartUrl)}
-${buildPermittedProcessesXml(allowedApps)}${resourcesXml ? `\n${resourcesXml}` : ''}
+${buildUrlFilterXml(websites, effectiveStartUrl, { isForms: isFormsStart })}
+${buildPermittedProcessesXml(allowedApps, { includeSystemAuth: isFormsStart || hasClarify })}${resourcesXml ? `\n${resourcesXml}` : ''}
 </dict>
 </plist>`;
 }
@@ -290,6 +297,7 @@ export async function downloadStandaloneSebExamFile({
   examId,
   title,
   startURL = '',
+  sourceType = '',
   allowedWebsites = [],
   allowedApps = {},
   quitPassword = '',
@@ -302,6 +310,7 @@ export async function downloadStandaloneSebExamFile({
   const xml = buildStandaloneSebPlist({
     examId,
     startURL,
+    sourceType,
     allowedWebsites,
     allowedApps,
     quitPasswordHash: effectiveHash,

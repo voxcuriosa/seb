@@ -2,7 +2,7 @@
  * formsAuthList.js
  * Liste over tillatte URL-uttrykk for Microsoft Forms, Clarify og Feide SSO i SEB.
  * Kun nødvendige autentiserings-, ordbok- og skjemadomener (ikke hele office.com,
- * outlook eller åpne fylkeskommunale informasjonssider).
+ * outlook, globale CDN-jokertegn eller åpne fylkeskommunale informasjonssider).
  */
 
 const COUNTY_FEIDE_ROOTS = [
@@ -31,13 +31,22 @@ const COUNTY_SSO_EXPRESSIONS = COUNTY_FEIDE_ROOTS.flatMap((root) =>
   SSO_SUBDOMAIN_PREFIXES.map((sub) => `${sub}.${root}/*`)
 );
 
-export const FORMS_AUTH_EXPRESSIONS = [
+export const FORMS_ONLY_EXPRESSIONS = [
   'forms.office.com/*',
   '*.forms.office.com/*',
   'forms.microsoft.com/*',
   '*.forms.microsoft.com/*',
   'forms.cloud.microsoft/*',
-  '*.forms.cloud.microsoft/*',
+  '*.forms.cloud.microsoft/*'
+];
+
+export const CLARIFY_ONLY_EXPRESSIONS = [
+  'clarify.no/*',
+  '*.clarify.no/*',
+  'app.clarify.no/*'
+];
+
+export const SSO_AUTH_EXPRESSIONS = [
   'login.microsoftonline.com/*',
   '*.login.microsoftonline.com/*',
   'login.microsoft.com/*',
@@ -60,9 +69,6 @@ export const FORMS_AUTH_EXPRESSIONS = [
   'device.login.microsoftonline.com/*',
   'auth.gfx.ms/*',
   '*.auth.gfx.ms/*',
-  '*.azureedge.net/*',
-  '*.azurefd.net/*',
-  '*.trafficmanager.net/*',
   'account.activedirectory.windowsazure.com/*',
   'feide.no/*',
   '*.feide.no/*',
@@ -71,10 +77,11 @@ export const FORMS_AUTH_EXPRESSIONS = [
   '*.dataporten.no/*',
   'auth.dataporten.no/*',
   // Fylkeskommunale og kommunale Feide/ADFS-påloggingstjenere (kun SSO-subdomener, ikke www.<fylke>.no)
-  ...COUNTY_SSO_EXPRESSIONS,
-  'clarify.no/*',
-  '*.clarify.no/*',
-  'app.clarify.no/*',
-  'verbix.com/*',
-  '*.verbix.com/*'
+  ...COUNTY_SSO_EXPRESSIONS
+];
+
+export const FORMS_AUTH_EXPRESSIONS = [
+  ...FORMS_ONLY_EXPRESSIONS,
+  ...SSO_AUTH_EXPRESSIONS,
+  ...CLARIFY_ONLY_EXPRESSIONS
 ];

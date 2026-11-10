@@ -4,9 +4,46 @@
  * App-blokkene er kopiert fra voxkunnskap/src/utils/localMode/sebConfigGenerator.js.
  */
 import { cleanDomainFromUrl } from './sebPresets';
-import { FORMS_AUTH_EXPRESSIONS } from './formsAuthList';
+import {
+  FORMS_AUTH_EXPRESSIONS,
+  SSO_AUTH_EXPRESSIONS,
+  FORMS_ONLY_EXPRESSIONS,
+  CLARIFY_ONLY_EXPRESSIONS
+} from './formsAuthList';
 
-export { FORMS_AUTH_EXPRESSIONS };
+export {
+  FORMS_AUTH_EXPRESSIONS,
+  SSO_AUTH_EXPRESSIONS,
+  FORMS_ONLY_EXPRESSIONS,
+  CLARIFY_ONLY_EXPRESSIONS
+};
+
+const FORMS_HOSTS = ['forms.office.com', 'forms.microsoft.com', 'forms.cloud.microsoft'];
+
+export function extractSafeHostname(raw = '') {
+  const str = String(raw || '').trim();
+  if (!str || str.startsWith('//')) return '';
+  try {
+    const hasScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(str);
+    const parsed = new URL(hasScheme ? str : `https://${str}`);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return '';
+    return parsed.hostname.toLowerCase().replace(/\.$/, '');
+  } catch {
+    return '';
+  }
+}
+
+export function isFormsUrl(raw = '') {
+  const host = extractSafeHostname(raw);
+  if (!host) return false;
+  return FORMS_HOSTS.some((root) => host === root || host.endsWith(`.${root}`));
+}
+
+export function isClarifyUrl(raw = '') {
+  const host = extractSafeHostname(raw);
+  if (!host) return false;
+  return host === 'clarify.no' || host.endsWith('.clarify.no');
+}
 
 export function escapeXml(str) {
   return String(str ?? '')
@@ -50,25 +87,27 @@ function processDict({ autostart, iconInTaskbar, runInBackground = true, strongK
     </dict>`;
 }
 
-/** os: 1 = Windows, 0 = macOS (SEB-konvensjon). */
+/** os: 1 = Windows, 0 = macOS (SEB-konvensjon).
+ * Merk: originalName på Windows (os: 1) skal stå tom ('') slik at SEB på Windows ikke
+ * blokkerer VoxLex/Lingdys/Ordnett dersom PE VERSIONINFO OriginalFilename avviker eller er tom.
+ */
 const APP_PROCESSES = {
   ordnett: [
-    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: true, title: 'Ordnett Pluss', executable: 'OrdnettPluss.exe', originalName: '', path: '', os: 1 },
+    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: false, title: 'Ordnett Pluss', executable: 'OrdnettPluss.exe', originalName: '', path: '', os: 1 },
     { autostart: false, iconInTaskbar: true, allowUserToChooseApp: false, title: 'Ordnett Pluss', executable: 'Ordnett Pluss', originalName: 'Ordnett Pluss', identifier: 'no.kunnskapsforlaget.ordnettpluss', path: '/Applications/Ordnett Pluss.app', os: 0 }
   ],
   lingdys: [
-    { autostart: true, iconInTaskbar: true, runInBackground: false, strongKill: true, allowUserToChooseApp: true, title: 'Lingdys', executable: 'LingX.exe', originalName: '', path: 'Lingdys4', os: 1 },
+    { autostart: true, iconInTaskbar: true, runInBackground: false, strongKill: true, allowUserToChooseApp: false, title: 'Lingdys', executable: 'LingX.exe', originalName: '', path: 'Lingdys4', os: 1 },
     { autostart: true, iconInTaskbar: true, allowUserToChooseApp: false, title: 'Lingdys', executable: 'Lingdys', originalName: 'Lingdys', identifier: 'no.lingit.lingdys', path: '/Applications/Lingdys.app', os: 0 }
   ],
   voxlex: [
-    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: true, title: 'VoxLex', executable: 'voxlex.exe', originalName: '', path: '%LOCALAPPDATA%\\VoxLex', os: 1 },
+    { autostart: false, iconInTaskbar: true, allowUserToChooseApp: false, title: 'VoxLex', executable: 'voxlex.exe', originalName: '', path: '%LOCALAPPDATA%\\VoxLex', os: 1 },
     { autostart: true, iconInTaskbar: true, allowUserToChooseApp: false, title: 'VoxLex', executable: 'voxlex', originalName: 'voxlex', identifier: 'no.voxlex.skole', path: '/Applications/VoxLex.app', os: 0 }
   ]
 };
 
-/** Systemprosesser i Windows for Feide/Microsoft passordløs pålogging (Windows Hello PIN/FIDO2).
- * Merk: originalName og path må være tomme fordi Windows COM-aktiverer disse som systemtjenester,
- * og SEB kan ikke lese originalName eller fast filsti på tvers av Windows 10/11-versjoner.
+/** Systemprosesser i Windows System32 for Feide/Microsoft passordløs pålogging (Windows Hello PIN/FIDO2).
+ * Legges kun til når prøven bruker Microsoft Forms eller Clarify (SSO).
  */
 const SYSTEM_AUTH_PROCESSES = [
   {
@@ -80,7 +119,7 @@ const SYSTEM_AUTH_PROCESSES = [
     title: 'Windows Sikkerhetsdialog (PIN/Passkey)',
     executable: 'CredentialUIBroker.exe',
     originalName: '',
-    path: '',
+    path: 'System32',
     os: 1
   },
   {
@@ -92,7 +131,7 @@ const SYSTEM_AUTH_PROCESSES = [
     title: 'Windows Sikkerhetsvelger',
     executable: 'PickerHost.exe',
     originalName: '',
-    path: '',
+    path: 'System32',
     os: 1
   },
   {
@@ -104,20 +143,21 @@ const SYSTEM_AUTH_PROCESSES = [
     title: 'Windows PIN-dialog',
     executable: 'PinEnrollmentBroker.exe',
     originalName: '',
-    path: '',
+    path: 'System32',
     os: 1
   }
 ];
 
-export function buildPermittedProcessesXml(allowedApps = {}) {
+export function buildPermittedProcessesXml(allowedApps = {}, { includeSystemAuth = false } = {}) {
   const parts = [];
   for (const appId of ['ordnett', 'lingdys', 'voxlex']) {
     if (allowedApps?.[appId]) {
       parts.push(...APP_PROCESSES[appId].map(processDict));
     }
   }
-  // Tillat alltid Windows' innebygde PIN/sikkerhetsdialoger for passordløs pålogging i skolen
-  parts.push(...SYSTEM_AUTH_PROCESSES.map(processDict));
+  if (includeSystemAuth) {
+    parts.push(...SYSTEM_AUTH_PROCESSES.map(processDict));
+  }
 
   const permittedXml = parts.length > 0
     ? `  <key>permittedProcesses</key>\n  <array>\n${parts.join('\n')}\n  </array>`
@@ -159,7 +199,7 @@ export function buildPermittedProcessesXml(allowedApps = {}) {
   return permittedXml;
 }
 
-/** Faste domener prøverommet trenger (kun egne prosjektsider og eksakte Firebase API-endepunkter, ingen åpne jokertegn). */
+/** Faste domener prøverommet trenger (kun egne prosjektsider og eksakte Firebase API-stier, ingen åpne jokertegn). */
 export const BASE_ALLOWED_EXPRESSIONS = [
   'about:blank',
   'about:*',
@@ -173,8 +213,8 @@ export const BASE_ALLOWED_EXPRESSIONS = [
   'voxcuriosa-seb.web.app/*',
   'voxcuriosa-seb.firebaseapp.com/*',
   'firestore.googleapis.com/*',
-  'firebasestorage.googleapis.com/*',
-  'storage.googleapis.com/*',
+  'firebasestorage.googleapis.com/v0/b/voxcuriosa-seb-storage/*',
+  'storage.googleapis.com/voxcuriosa-seb-storage/*',
   'europe-west1-voxcuriosa-seb.cloudfunctions.net/*'
 ];
 
@@ -191,37 +231,38 @@ function filterRule(expression) {
     </dict>`;
 }
 
-function needsSsoExpressions(dom = '') {
-  return (
-    dom.includes('forms.office.com') ||
-    dom.includes('forms.microsoft.com') ||
-    dom.includes('forms.cloud.microsoft') ||
-    dom.includes('clarify.no')
-  );
-}
-
-export function collectAllowedExpressions(allowedWebsites = [], startURL = '') {
+export function collectAllowedExpressions(allowedWebsites = [], startURL = '', { isForms = false } = {}) {
   const expressions = [...BASE_ALLOWED_EXPRESSIONS];
-  let hasSso = needsSsoExpressions(cleanDomainFromUrl(startURL));
+  let hasForms = Boolean(isForms) || isFormsUrl(startURL);
+  let hasClarify = false;
 
   for (const site of allowedWebsites || []) {
     const dom = cleanDomainFromUrl(site?.domain || site?.url);
     if (!dom) continue;
     expressions.push(`${dom}/*`, `*.${dom}/*`);
-    if (needsSsoExpressions(dom)) {
-      hasSso = true;
+    if (isFormsUrl(site?.url) || isFormsUrl(site?.domain)) {
+      hasForms = true;
+    }
+    if (isClarifyUrl(site?.url) || isClarifyUrl(site?.domain)) {
+      hasClarify = true;
     }
   }
 
-  if (hasSso) {
-    expressions.push(...FORMS_AUTH_EXPRESSIONS);
+  if (hasForms) {
+    expressions.push(...FORMS_ONLY_EXPRESSIONS);
+  }
+  if (hasClarify) {
+    expressions.push(...CLARIFY_ONLY_EXPRESSIONS);
+  }
+  if (hasForms || hasClarify) {
+    expressions.push(...SSO_AUTH_EXPRESSIONS);
   }
 
   return [...new Set(expressions)];
 }
 
-export function buildUrlFilterXml(allowedWebsites = [], startURL = '') {
-  const rules = collectAllowedExpressions(allowedWebsites, startURL).map(filterRule).join('\n');
+export function buildUrlFilterXml(allowedWebsites = [], startURL = '', { isForms = false } = {}) {
+  const rules = collectAllowedExpressions(allowedWebsites, startURL, { isForms }).map(filterRule).join('\n');
   // Dekk både SEB 3.x (URLFilter*) og eldre SEB 2.x (urlFilter*) slik at filteret alltid er aktivt.
   // Merk: BASE_ALLOWED_EXPRESSIONS inkluderer data:* og about:blank fordi SEBs URL-filter på macOS
   // støtter disse protokollene uten vertsnavn, mens lokal PDF-eksport bruker data:-URI i SEB.
