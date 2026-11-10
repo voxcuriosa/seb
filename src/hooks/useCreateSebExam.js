@@ -1,26 +1,20 @@
 /**
  * useCreateSebExam.js
- * PIN-kontroll og oppretting av prøve via Cloud Function createSebExam.
- * PIN-en lagres bare i sessionStorage for denne fanen (forsvinner når fanen lukkes).
+ * PIN-kontroll, oppretting og sletting av prøver via Cloud Functions.
+ * PIN holdes kun i modul-minne (aldri i sessionStorage eller localStorage),
+ * slik at den ikke deles med andre faner eller sider på samme domene og
+ * forsvinner straks siden lukkes eller lastes inn på nytt.
  */
 import { useCallback, useState } from 'react';
-import { callCreateSebExam } from '../firebase';
+import { callCreateSebExam, callDeleteSebExam } from '../firebase';
 import { fileToBase64 } from '../utils/files';
 import { sha256Hex } from '../utils/integrity/sha256';
 
-const PIN_KEY = 'seb_teacher_pin_session';
+let memoryPin = '';
 
-function readPin() {
-  try {
-    return sessionStorage.getItem(PIN_KEY) || '';
-  } catch {
-    return '';
-  }
-}
-
-function friendlyError(err) {
+export function friendlyServerError(err) {
   const code = String(err?.code || '').replace('functions/', '');
-  if (code === 'permission-denied') return 'Feil PIN-kode.';
+  if (code === 'permission-denied') return 'Feil PIN-kode eller manglende slettetilgang.';
   if (code === 'resource-exhausted') return err.message || 'For mange forsøk. Vent litt og prøv igjen.';
   if (code === 'invalid-argument') return err.message || 'Noe i skjemaet er ugyldig.';
   if (code === 'unavailable' || code === 'deadline-exceeded') return 'Fikk ikke kontakt med serveren. Sjekk nettforbindelsen.';
@@ -28,7 +22,7 @@ function friendlyError(err) {
 }
 
 export function useCreateSebExam() {
-  const [pin, setPin] = useState(readPin);
+  const [pin, setPin] = useState(() => memoryPin);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -37,11 +31,12 @@ export function useCreateSebExam() {
     setError('');
     try {
       await callCreateSebExam({ pin: candidate, dryRun: true });
-      sessionStorage.setItem(PIN_KEY, candidate);
+      memoryPin = candidate;
       setPin(candidate);
       return true;
     } catch (err) {
-      setError(friendlyError(err));
+      const code = String(err?.code || '').replace('functions/', '');
+      setError(code === 'permission-denied' ? 'Feil PIN-kode.' : friendlyServerError(err));
       return false;
     } finally {
       setBusy(false);
@@ -49,7 +44,7 @@ export function useCreateSebExam() {
   }, []);
 
   const lock = useCallback(() => {
-    sessionStorage.removeItem(PIN_KEY);
+    memoryPin = '';
     setPin('');
   }, []);
 
@@ -73,16 +68,35 @@ export function useCreateSebExam() {
       if (form.sourceType === 'pdf' && form.pdfFile) {
         exam.pdfBase64 = await fileToBase64(form.pdfFile);
       }
-      const res = await callCreateSebExam({ pin, exam });
+      const res = await callCreateSebExam({ pin: pin || memoryPin, exam });
       return { ...res.data, quitPasswordHash: exam.sebConfig.quitPasswordHash };
     } catch (err) {
       if (String(err?.code).includes('permission-denied')) lock();
-      setError(friendlyError(err));
+      setError(friendlyServerError(err));
       return null;
     } finally {
       setBusy(false);
     }
   }, [pin, lock]);
 
-  return { isUnlocked: Boolean(pin), unlock, lock, createExam, busy, error, setError };
+  const deleteServerExam = useCallback(async (examId, deleteToken = null) => {
+    const res = await callDeleteSebExam({
+      examId,
+      deleteToken: deleteToken || null,
+      pin: pin || memoryPin || null
+    });
+    return res?.data || { ok: true };
+  }, [pin]);
+
+  return {
+    isUnlocked: Boolean(pin),
+    pin,
+    unlock,
+    lock,
+    createExam,
+    deleteServerExam,
+    busy,
+    error,
+    setError
+  };
 }

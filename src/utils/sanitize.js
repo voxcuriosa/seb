@@ -12,6 +12,7 @@ const CONFIG = {
     'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'a', 'img'
   ],
   ALLOWED_ATTR: ['href', 'title', 'src', 'alt', 'width', 'height', 'colspan', 'rowspan', 'start', 'target', 'rel', 'referrerpolicy'],
+  ALLOW_DATA_ATTR: false,
   ALLOWED_URI_REGEXP: /^(?:https:|mailto:|data:image\/(?:png|jpe?g|gif|webp);base64,)/i,
   FORBID_ATTR: ['style', 'class', 'id']
 };
@@ -43,7 +44,10 @@ export function sanitizeHtml(html = '') {
 }
 
 export function htmlToPlainText(html = '') {
-  const div = document.createElement('div');
-  div.innerHTML = sanitizeHtml(html);
-  return (div.textContent || '').trim();
+  const sanitized = sanitizeHtml(html);
+  if (typeof DOMParser !== 'undefined') {
+    const doc = new DOMParser().parseFromString(sanitized, 'text/html');
+    return (doc.body?.textContent || '').trim();
+  }
+  return sanitized.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 }

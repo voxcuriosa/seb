@@ -17,6 +17,48 @@ const STORE = 'exams';
 export const DRAFT_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 
 export const storageKey = (examId) => `seb_standalone_exam_${examId}`;
+export const sessionTokenKey = (examId) => `seb_active_session_${examId}`;
+
+function createRandomSessionToken() {
+  try {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  } catch {
+    return `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  }
+}
+
+export function getActiveSessionToken(examId) {
+  if (!examId || typeof sessionStorage === 'undefined') return '';
+  try {
+    return sessionStorage.getItem(sessionTokenKey(examId)) || '';
+  } catch {
+    return '';
+  }
+}
+
+export function ensureActiveSessionToken(examId) {
+  if (!examId || typeof sessionStorage === 'undefined') return '';
+  const existing = getActiveSessionToken(examId);
+  if (existing) return existing;
+  const next = createRandomSessionToken();
+  try {
+    sessionStorage.setItem(sessionTokenKey(examId), next);
+    return next;
+  } catch {
+    return '';
+  }
+}
+
+export function clearActiveSessionToken(examId) {
+  if (!examId || typeof sessionStorage === 'undefined') return;
+  try {
+    sessionStorage.removeItem(sessionTokenKey(examId));
+  } catch {
+    /* ignorer */
+  }
+}
 
 function isDraftExpired(draft, maxAgeMs = DRAFT_MAX_AGE_MS) {
   if (!draft || typeof draft !== 'object') return true;
@@ -137,6 +179,7 @@ async function idbDelete(key) {
  */
 export async function clearDraft(examId) {
   const key = storageKey(examId);
+  clearActiveSessionToken(examId);
   try {
     localStorage.removeItem(key);
   } catch {
@@ -150,6 +193,18 @@ export async function clearDraft(examId) {
  * Kalles på avslutningssiden (/quit) for å garantere at ingen elevtekst kan ligge igjen.
  */
 export async function clearAllDrafts() {
+  try {
+    if (typeof sessionStorage !== 'undefined') {
+      for (let i = sessionStorage.length - 1; i >= 0; i--) {
+        const sk = sessionStorage.key(i);
+        if (sk && sk.startsWith('seb_active_session_')) {
+          sessionStorage.removeItem(sk);
+        }
+      }
+    }
+  } catch {
+    /* ignorer */
+  }
   try {
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const k = localStorage.key(i);

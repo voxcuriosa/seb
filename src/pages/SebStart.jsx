@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Lock, ShieldCheck, Download, ArrowRight, ExternalLink, RefreshCw, ArrowUp, AlertTriangle } from 'lucide-react';
-import { fetchSebExam } from '../firebase';
-import { isSebEnvironment, markAsSebEnvironment } from '../utils/seb/sebEnvironment';
+import { fetchSebExamMeta } from '../firebase';
+import { isVerifiedSebClient, markAsSebEnvironment } from '../utils/seb/sebEnvironment';
 import { downloadStandaloneSebExamFile } from '../utils/seb/sebConfigGenerator';
 import { purgeExpiredDrafts } from '../utils/exam/localStore';
 import { useStudentUiLang } from '../hooks/useStudentUiLang';
 import StudentLanguageSelect from '../components/common/StudentLanguageSelect';
 
 const isFormsDomain = (val = '') => /forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(String(val));
-const hasHelperWebsites = (sites = []) =>
-  Array.isArray(sites) && sites.some((w) => w?.id !== 'web_forms_main' && !isFormsDomain(`${w?.domain || ''} ${w?.url || ''}`));
 
-/** Elevens startside: laster ned .seb-filen, eller går rett til prøverommet hvis vi allerede er i SEB. */
+/** Elevens startside: laster ned .seb-filen, eller går rett til prøverommet hvis vi allerede er i ekte SEB. */
 export default function SebStart() {
   const { examId } = useParams();
   const navigate = useNavigate();
@@ -24,21 +22,16 @@ export default function SebStart() {
   const dir = t.rtl ? 'rtl' : 'ltr';
 
   useEffect(() => {
-    if (isSebEnvironment() && exam) {
+    if (isVerifiedSebClient() && exam) {
       markAsSebEnvironment();
-      const hasHelpers = hasHelperWebsites(exam.sebConfig?.allowedWebsites);
-      if ((exam.sourceType === 'forms' || exam.formsUrl) && exam.formsUrl && !hasHelpers) {
-        window.location.replace(exam.formsUrl);
-      } else {
-        navigate(`/exam/${encodeURIComponent(examId)}?seb=1`, { replace: true });
-      }
+      navigate(`/exam/${encodeURIComponent(examId)}?seb=1`, { replace: true });
     }
   }, [examId, exam, navigate]);
 
   useEffect(() => {
     purgeExpiredDrafts();
     let cancelled = false;
-    fetchSebExam(examId)
+    fetchSebExamMeta(examId)
       .then((data) => {
         if (cancelled) return;
         setExam(data);
@@ -56,15 +49,15 @@ export default function SebStart() {
     try {
       const isForms = exam.sourceType === 'forms' || Boolean(exam.formsUrl);
       const rawSites = Array.isArray(exam.sebConfig?.allowedWebsites) ? exam.sebConfig.allowedWebsites : [];
-      const hasHelpers = hasHelperWebsites(rawSites);
-      const startURL = isForms && !hasHelpers ? exam.formsUrl : null;
-      const sebSites = isForms && exam.formsUrl && !rawSites.some((w) => isFormsDomain(`${w?.domain || ''} ${w?.url || ''}`))
-        ? [{ id: 'web_forms_main', title: 'Microsoft Forms', url: exam.formsUrl, domain: 'forms.office.com' }, ...rawSites]
-        : rawSites;
+      const sebSites =
+        isForms && !rawSites.some((w) => isFormsDomain(`${w?.domain || ''} ${w?.url || ''}`))
+          ? [{ id: 'web_forms_main', title: 'Microsoft Forms', url: 'https://forms.office.com', domain: 'forms.office.com' }, ...rawSites]
+          : rawSites;
       await downloadStandaloneSebExamFile({
         examId: exam.id,
         title: exam.title,
-        startURL,
+        startURL: null,
+        sourceType: exam.sourceType,
         allowedWebsites: sebSites,
         allowedApps: exam.sebConfig?.allowedApps || {},
         quitPasswordHash: exam.sebConfig?.quitPasswordHash || ''
@@ -175,6 +168,10 @@ export default function SebStart() {
               </button>
             )}
           </div>
+
+          <p className="pt-3 border-t border-slate-800/80 text-[11px] leading-relaxed text-slate-400">
+            Personvern (GDPR art. 13): Skolen er behandlingsansvarlig for prøven. Besvarelsen din behandles lokalt på denne maskinen (ved Microsoft Forms-prøver leveres svaret i skolens Microsoft 365). Teknisk tilkobling og IP-adresse behandles i EØS kun ved nedlasting av oppgave og signering av kontrollsum, uten sporing eller KI.
+          </p>
         </div>
       </div>
     </main>

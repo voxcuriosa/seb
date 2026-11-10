@@ -32,13 +32,17 @@ function copyTextToSystemClipboard(text) {
   return true;
 }
 
+const ROLLING_PASTE_WINDOW_MS = 30_000;
+const ROLLING_PASTE_THRESHOLD = 250;
+
 /**
  * Elevens skrivefelt (Tiptap). Innliming limer bare inn ren tekst, og store
- * innliminger registreres lokalt i loggen (pasteIncidents).
+ * innliminger (både enkeltstående og akkumulert innenfor 30 s) registreres lokalt i loggen (pasteIncidents).
  */
 export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, onLargePaste, onReady, hasReadingApp = false }) {
   const editorRef = useRef(null);
   const checkerRef = useRef(null);
+  const pasteHistoryRef = useRef([]);
   const [spellMenu, setSpellMenu] = useState(null);
   const [copiedNotice, setCopiedNotice] = useState(false);
   const { t } = useStudentUiLang();
@@ -59,7 +63,21 @@ export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, 
         const text = event.clipboardData?.getData('text/plain') ?? '';
         event.preventDefault();
         if (!text) return true;
-        if (text.length > LARGE_PASTE_THRESHOLD) onLargePaste?.(text.length);
+        const now = Date.now();
+        if (text.length > LARGE_PASTE_THRESHOLD) {
+          pasteHistoryRef.current = pasteHistoryRef.current.filter((p) => now - p.at <= ROLLING_PASTE_WINDOW_MS);
+          onLargePaste?.(text.length);
+        } else {
+          const recent = pasteHistoryRef.current.filter((p) => now - p.at <= ROLLING_PASTE_WINDOW_MS);
+          recent.push({ at: now, len: text.length });
+          const rollingTotal = recent.reduce((sum, p) => sum + p.len, 0);
+          if (rollingTotal > ROLLING_PASTE_THRESHOLD) {
+            pasteHistoryRef.current = [];
+            onLargePaste?.(rollingTotal);
+          } else {
+            pasteHistoryRef.current = recent;
+          }
+        }
         const paragraphs = text.replace(/\r\n?/g, '\n').split('\n');
         editorRef.current?.chain().focus().insertContent(
           paragraphs.map((p) => ({ type: 'paragraph', content: p ? [{ type: 'text', text: p }] : [] }))

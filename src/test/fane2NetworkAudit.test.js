@@ -1,7 +1,8 @@
 // @vitest-environment node
 /**
  * fane2NetworkAudit.test.js
- * Empirisk nettverksovervåking av Fane 2 (sensor/kontroll av innleverte PDF-er).
+ * Empirisk nettverksovervåking av Fane 2 (sensor/kontroll av innleverte PDF-er)
+ * og enhetstester for runtimeNetworkFirewall i prøverommet.
  *
  * Installerer aktive nettverkssonder på alle kjente transportlag (fetch, XMLHttpRequest,
  * sendBeacon, WebSocket), mater inn ekte PDF-er og verifiserer at Fane 2 utfører
@@ -71,7 +72,7 @@ describe('Empirisk nettverksrevisjon av Fane 2 (Kontroll av PDF-er)', () => {
 
   it('Verifiserer at Fane 2 leser, parser og kontrollerer PDF-er med nøyaktig 0 nettverkskall', async () => {
     // 1. Klargjør en ekte prøvebesvarelse
-    const exam = { id: 'exam_net_audit_999', title: 'Tentamen med empirisk personverntest' };
+    const exam = { id: 'examNetAudit999abc', title: 'Tentamen med empirisk personverntest' };
     const essayDoc = {
       type: 'doc',
       content: [
@@ -106,7 +107,7 @@ describe('Empirisk nettverksrevisjon av Fane 2 (Kontroll av PDF-er)', () => {
     expect(parseResult.verdict).toBe('verified-unsigned');
     expect(parseResult.layer1).toBe(true);
     expect(parseResult.layer2.ok).toBe(true);
-    expect(parseResult.payload.examId).toBe('exam_net_audit_999');
+    expect(parseResult.payload.examId).toBe('examNetAudit999abc');
     expect(parseResult.payload.examTitle).toBe('Tentamen med empirisk personverntest');
     expect(parseResult.payload.wordCount).toBe(23);
 
@@ -115,43 +116,99 @@ describe('Empirisk nettverksrevisjon av Fane 2 (Kontroll av PDF-er)', () => {
     expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 
-  it('Verifiserer at runtimeNetworkFirewall blokkerer ethvert forsøk på å sende elevtekst og tillater kun { examId, sha256 }', async () => {
-    const validBody = JSON.stringify({
+  it('Verifiserer at runtimeNetworkFirewall kun tillater { examId } eller { examId, sha256 } med gyldig format og null ekstra nøkler', async () => {
+    const contentEndpoint = 'https://europe-west1-voxcuriosa-seb.cloudfunctions.net/getSebExamContent';
+    const signEndpoint = 'https://europe-west1-voxcuriosa-seb.cloudfunctions.net/signSebSubmission';
+
+    // 1. Gyldig henting av oppgaveinnhold ({ examId }) skal passere
+    const validContentBody = JSON.stringify({
       data: {
-        examId: 'exam_12345',
+        examId: 'Abc1234567890xyz'
+      }
+    });
+    expect(() => assertAllowedExamRoomPayload(contentEndpoint, validContentBody)).not.toThrow();
+
+    // 2. Gyldig signeringskall ({ examId, sha256 }) skal passere
+    const validSignBody = JSON.stringify({
+      data: {
+        examId: 'Abc1234567890xyz',
         sha256: 'a'.repeat(64)
       }
     });
+    expect(() => assertAllowedExamRoomPayload(signEndpoint, validSignBody)).not.toThrow();
 
-    // Gyldig signeringskall skal passere
-    expect(() =>
-      assertAllowedExamRoomPayload('https://europe-west1-voxcuriosa-seb.cloudfunctions.net/signSebSubmission', validBody)
-    ).not.toThrow();
+    // 3. Ugyldig examId (for kort, ulovlige tegn eller for lang) skal blokkeres
+    for (const badId of ['kort123', 'exam_med_understrek_12', 'A'.repeat(41)]) {
+      expect(() =>
+        assertAllowedExamRoomPayload(contentEndpoint, JSON.stringify({ data: { examId: badId } }))
+      ).toThrow(/Ugyldig examId/);
+    }
 
-    // Forsøk på å snike med elevtekst eller navn skal blokkeres på direkten
+    // 4. Forsøk på å snike med elevtekst eller ekstra nøkler (inne i eller utenfor data) skal blokkeres
     const leakedBody = JSON.stringify({
       data: {
-        examId: 'exam_12345',
+        examId: 'Abc1234567890xyz',
         sha256: 'a'.repeat(64),
         essayText: 'Hemmelig elevbesvarelse'
       }
     });
+    expect(() => assertAllowedExamRoomPayload(signEndpoint, leakedBody)).toThrow(/Forbudte felter/);
+
+    const leakedOuterBody = JSON.stringify({
+      data: { examId: 'Abc1234567890xyz' },
+      extra: 'Hemmelig tekst'
+    });
+    expect(() => assertAllowedExamRoomPayload(contentEndpoint, leakedOuterBody)).toThrow(/Forbudte felter/);
+
+    // 5. sha256 alene uten examId eller med ugyldig sha256-verdi skal blokkeres
     expect(() =>
-      assertAllowedExamRoomPayload('https://europe-west1-voxcuriosa-seb.cloudfunctions.net/signSebSubmission', leakedBody)
+      assertAllowedExamRoomPayload(signEndpoint, JSON.stringify({ data: { sha256: 'a'.repeat(64) } }))
     ).toThrow(/Forbudte felter/);
 
-    // For stor kropp (> 512 byte) skal blokkeres
     expect(() =>
-      assertAllowedExamRoomPayload('https://europe-west1-voxcuriosa-seb.cloudfunctions.net/signSebSubmission', 'x'.repeat(600))
-    ).toThrow(/overstiger maksgrensen/);
+      assertAllowedExamRoomPayload(signEndpoint, JSON.stringify({ data: { examId: 'Abc1234567890xyz', sha256: '1234' } }))
+    ).toThrow(/Ugyldig sha256/);
 
-    // withZeroNetworkFirewall skal totalblokkere fetch under lokal PDF-kontroll
+    // 6. For stor kropp (> 512 byte) skal blokkeres
+    expect(() => assertAllowedExamRoomPayload(signEndpoint, 'x'.repeat(600))).toThrow(/overstiger maksgrensen/);
+
+    // 7. withZeroNetworkFirewall skal totalblokkere fetch under lokal PDF-kontroll
     const fakeGlobal = {
       fetch: vi.fn(() => Promise.resolve({ ok: true }))
     };
     installRuntimeNetworkFirewall(fakeGlobal);
+    await expect(withZeroNetworkFirewall(() => fakeGlobal.fetch('https://example.com'))).rejects.toThrow(/totalblokkert/);
+  });
+
+  it('Verifiserer at history.replaceState ikke kan skru av brannmuren etter at prøverommet (/exam/*) er lastet', async () => {
+    const locationObj = { pathname: '/seb/exam/Abc1234567890xyz' };
+    const fakeExamGlobal = {
+      location: locationObj,
+      history: {
+        replaceState: (_state, _title, nextUrl) => {
+          locationObj.pathname = nextUrl;
+        }
+      },
+      navigator: {
+        sendBeacon: vi.fn(() => true)
+      },
+      fetch: vi.fn(() => Promise.resolve({ ok: true }))
+    };
+
+    installRuntimeNetworkFirewall(fakeExamGlobal);
+
+    // Simuler angrep som prøver å endre URL bort fra /exam/ via history.replaceState
+    fakeExamGlobal.history.replaceState(null, '', '/seb/');
+    expect(fakeExamGlobal.location.pathname).toBe('/seb/');
+
+    // Brannmuren skal fortsatt være låst PÅ og avvise elevtekst og sendBeacon
     await expect(
-      withZeroNetworkFirewall(() => fakeGlobal.fetch('https://example.com'))
-    ).rejects.toThrow(/totalblokkert/);
+      fakeExamGlobal.fetch('https://europe-west1-voxcuriosa-seb.cloudfunctions.net/signSebSubmission', {
+        method: 'POST',
+        body: JSON.stringify({ data: { examId: 'Abc1234567890xyz', leaked: 'elevtekst' } })
+      })
+    ).rejects.toThrow(/Forbudte felter/);
+
+    expect(fakeExamGlobal.navigator.sendBeacon('https://example.com', 'data')).toBe(false);
   });
 });

@@ -1,10 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { AlertTriangle, GripVertical, GripHorizontal, ShieldAlert } from 'lucide-react';
 import { fetchSebExam } from '../firebase';
 import { EXAM_QUIT_URL } from '../config';
 import { markAsSebEnvironment, isVerifiedSebClient, detectGuestVirtualMachine } from '../utils/seb/sebEnvironment';
-import { loadDraft, clearDraft } from '../utils/exam/localStore';
+import {
+  loadDraft,
+  clearDraft,
+  getActiveSessionToken,
+  ensureActiveSessionToken
+} from '../utils/exam/localStore';
 import { downloadBackupTxt } from '../utils/exam/backupTxt';
 import { docToPlainText } from '../utils/exam/essayDocModel';
 import { countWords } from '../utils/integrity/textNormalize';
@@ -22,12 +27,18 @@ import LoadingScreen from '../components/common/LoadingScreen';
 import { useStudentUiLang } from '../hooks/useStudentUiLang';
 
 const clampPct = (v) => Math.min(82, Math.max(18, Number(v) || 40));
+const isHttpsUrl = (val = '') => /^https:\/\/\S+/i.test(String(val || '').trim());
+const isFormsDomain = (val = '') => /forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(String(val || ''));
+const hasHelperWebsites = (sites = []) =>
+  Array.isArray(sites) &&
+  sites.some((w) => w?.id !== 'web_forms_main' && !isFormsDomain(`${w?.domain || ''} ${w?.url || ''}`));
 
 export default function SebExamRoom() {
   const { examId } = useParams();
   const [exam, setExam] = useState(null);
   const [status, setStatus] = useState('loading');
   const [initialDraft, setInitialDraft] = useState(null);
+  const [pendingDraft, setPendingDraft] = useState(null);
   const [layout, setLayout] = useState('split');
   const [splitPct, setSplitPct] = useState(40);
   const [draggingSplit, setDraggingSplit] = useState(false);
@@ -40,43 +51,76 @@ export default function SebExamRoom() {
   const { t } = useStudentUiLang();
   const editorRef = useRef(null);
   const startedAtRef = useRef(null);
+  const pendingDraftRef = useRef(null);
   const splitContainerRef = useRef(null);
+  const detectedVm = detectGuestVirtualMachine();
 
   useEffect(() => {
+    if (!isVerifiedSebClient()) return undefined;
+    if (detectedVm) return undefined;
     markAsSebEnvironment();
     let cancelled = false;
     Promise.all([fetchSebExam(examId).catch(() => null), loadDraft(examId).catch(() => null)]).then(([data, draft]) => {
       if (cancelled) return;
       if (!data) return setStatus('missing');
-      const initialStart = draft?.startedAt || new Date().toISOString();
-      startedAtRef.current = initialStart;
-      setStartedAt(initialStart);
+
+      const rawSites = Array.isArray(data.sebConfig?.allowedWebsites) ? data.sebConfig.allowedWebsites : [];
+      const isForms = data.sourceType === 'forms' || Boolean(data.formsUrl);
+      if (isForms && !hasHelperWebsites(rawSites) && isHttpsUrl(data.formsUrl)) {
+        window.location.replace(data.formsUrl.trim());
+        return;
+      }
+
+      const nowIso = new Date().toISOString();
+      const draftWords = draft?.doc ? countWords(docToPlainText(draft.doc)) : 0;
+      const activeToken = getActiveSessionToken(examId);
+      const isSameSession = Boolean(activeToken && draft?.sessionToken && activeToken === draft.sessionToken);
+
       setExam(data);
-      setInitialDraft(draft);
-      if (draft?.lang) setLang(draft.lang);
-      if (draft?.layout) setLayout(draft.layout);
-      if (draft?.splitPct) setSplitPct(clampPct(draft.splitPct));
-      if (draft?.doc && countWords(docToPlainText(draft.doc)) > 0) {
-        const wc = countWords(docToPlainText(draft.doc));
-        setRestored({ savedAt: draft.savedAt, wordCount: wc });
-        setWordCount(wc);
+      if (!isForms && draftWords > 0 && isSameSession) {
+        const initialStart = draft.startedAt || nowIso;
+        startedAtRef.current = initialStart;
+        setStartedAt(initialStart);
+        setInitialDraft(draft);
+        pendingDraftRef.current = null;
+        setPendingDraft(null);
+        if (draft.lang) setLang(draft.lang);
+        if (draft.layout) setLayout(draft.layout);
+        if (draft.splitPct) setSplitPct(clampPct(draft.splitPct));
+        setRestored({ savedAt: draft.savedAt, wordCount: draftWords });
+        setWordCount(draftWords);
+      } else {
+        startedAtRef.current = nowIso;
+        setStartedAt(nowIso);
+        setInitialDraft(null);
+        if (!isForms && draftWords > 0) {
+          const pending = { ...draft, wordCount: draftWords };
+          pendingDraftRef.current = pending;
+          setPendingDraft(pending);
+        } else {
+          pendingDraftRef.current = null;
+          setPendingDraft(null);
+        }
       }
       setStatus('ready');
     });
     return () => {
       cancelled = true;
     };
-  }, [examId]);
+  }, [examId, detectedVm]);
 
   const isFormsExam = exam?.sourceType === 'forms' || Boolean(exam?.formsUrl);
-  const formsUrl = exam?.formsUrl || 'https://forms.office.com';
+  const formsUrl = isHttpsUrl(exam?.formsUrl) ? exam.formsUrl.trim() : 'https://forms.office.com';
   const allowedApps = exam?.sebConfig?.allowedApps || exam?.allowedApps;
-  const allowedWebsites = exam?.sebConfig?.allowedWebsites || exam?.allowedWebsites;
+  const safeWebsites = useMemo(() => {
+    const raw = exam?.sebConfig?.allowedWebsites || exam?.allowedWebsites || [];
+    return Array.isArray(raw) ? raw.filter((w) => isHttpsUrl(w?.url)) : [];
+  }, [exam]);
   const hasAids = Boolean(
     allowedApps?.voxlex ||
     allowedApps?.lingdys ||
     allowedApps?.ordnett ||
-    (Array.isArray(allowedWebsites) && allowedWebsites.length > 0)
+    safeWebsites.length > 0
   );
 
   const log = useExamIntegrityLog({
@@ -88,7 +132,7 @@ export default function SebExamRoom() {
   const { reset: resetLog, addIncident } = log;
 
   useEffect(() => {
-    if (status !== 'ready' || isFormsExam) return;
+    if (status !== 'ready' || isFormsExam || !initialDraft) return;
     resetLog(Number(initialDraft?.activeSeconds) || 0, Array.isArray(initialDraft?.incidents) ? initialDraft.incidents : []);
   }, [status, initialDraft, resetLog, isFormsExam]);
 
@@ -98,23 +142,26 @@ export default function SebExamRoom() {
   }, [log.incidents]);
 
   const getDraft = useCallback(() => {
-    if (status !== 'ready') return null;
+    if (status !== 'ready' || pendingDraftRef.current) return null;
+    const sessionToken = getActiveSessionToken(examId);
+    if (!sessionToken) return null;
     return {
       doc: editorRef.current?.getJSON() || null,
       activeSeconds: log.getActiveSeconds(),
       incidents: incidentsRef.current,
       startedAt: startedAtRef.current,
+      sessionToken,
       lang,
       layout,
       splitPct
     };
-  }, [status, lang, layout, splitPct, log]);
+  }, [status, examId, lang, layout, splitPct, log]);
 
   const autosave = useExamAutosave(examId, getDraft);
   const { schedule } = autosave;
   useEffect(() => {
-    if (status === 'ready' && !isFormsExam) schedule();
-  }, [lang, layout, splitPct, log.incidents, status, schedule, isFormsExam]);
+    if (status === 'ready' && !isFormsExam && !pendingDraft && getActiveSessionToken(examId)) schedule();
+  }, [examId, lang, layout, splitPct, log.incidents, status, schedule, isFormsExam, pendingDraft]);
 
   useEffect(() => {
     if (!draggingSplit) return undefined;
@@ -143,7 +190,7 @@ export default function SebExamRoom() {
     getActiveSeconds: log.getActiveSeconds,
     getIncidents: () => incidentsRef.current,
     getStartedAt: () => startedAtRef.current,
-    onFinished: async () => autosave.flush(),
+    onFinished: async () => autosave.stop(),
     onBeforeExit: () => autosave.stop()
   });
 
@@ -154,8 +201,45 @@ export default function SebExamRoom() {
 
   const handleEditorChange = useCallback(() => {
     setWordCount(countWords(editorRef.current?.getText({ blockSeparator: '\n' }) || ''));
+    if (!pendingDraftRef.current) {
+      ensureActiveSessionToken(examId);
+      schedule();
+    }
+  }, [examId, schedule]);
+
+  const handleRestorePendingDraft = useCallback(() => {
+    const d = pendingDraftRef.current;
+    if (!d) return;
+    ensureActiveSessionToken(examId);
+    pendingDraftRef.current = null;
+    setPendingDraft(null);
+    if (d.startedAt) {
+      startedAtRef.current = d.startedAt;
+      setStartedAt(d.startedAt);
+    }
+    if (d.lang) setLang(d.lang);
+    if (d.layout) setLayout(d.layout);
+    if (d.splitPct) setSplitPct(clampPct(d.splitPct));
+    resetLog(Number(d.activeSeconds) || 0, Array.isArray(d.incidents) ? d.incidents : []);
+    setInitialDraft(d);
+    if (editorRef.current && d.doc) {
+      editorRef.current.commands.setContent(d.doc);
+    }
+    setWordCount(d.wordCount);
+    setRestored({ savedAt: d.savedAt, wordCount: d.wordCount });
     schedule();
-  }, [schedule]);
+  }, [examId, resetLog, schedule]);
+
+  const handleDiscardPendingDraft = useCallback(async () => {
+    pendingDraftRef.current = null;
+    setPendingDraft(null);
+    await clearDraft(examId);
+    const currentText = editorRef.current?.getText({ blockSeparator: '\n' }) || '';
+    if (countWords(currentText) > 0) {
+      ensureActiveSessionToken(examId);
+      schedule();
+    }
+  }, [examId, schedule]);
 
   const handleFormsExitConfirm = async () => {
     autosave.stop();
@@ -187,9 +271,6 @@ export default function SebExamRoom() {
     );
   }
 
-  const detectedVm = typeof window !== 'undefined' && !new URLSearchParams(window.location.search || '').get('allowVm')
-    ? detectGuestVirtualMachine()
-    : null;
   if (detectedVm) {
     return (
       <main className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
@@ -233,7 +314,7 @@ export default function SebExamRoom() {
         startedAt={startedAt}
         layout={layout}
         setLayout={setLayout}
-        websites={exam.sebConfig?.allowedWebsites || []}
+        websites={safeWebsites}
         savedAt={autosave.savedAt}
         saveError={autosave.saveError}
         onBackup={() => downloadBackupTxt({ examTitle: exam.title, text: docToPlainText(editorRef.current?.getJSON()) })}
@@ -242,7 +323,16 @@ export default function SebExamRoom() {
         isForms={isFormsExam}
         onFormsExit={() => setFormsExitOpen(true)}
       />
-      {restored && !isFormsExam && (
+      {pendingDraft && !isFormsExam && (
+        <RestoreBanner
+          pending
+          savedAt={pendingDraft.savedAt}
+          wordCount={pendingDraft.wordCount}
+          onRestore={handleRestorePendingDraft}
+          onDiscard={handleDiscardPendingDraft}
+        />
+      )}
+      {!pendingDraft && restored && !isFormsExam && (
         <RestoreBanner savedAt={restored.savedAt} wordCount={restored.wordCount} onClose={() => setRestored(null)} />
       )}
 
@@ -250,7 +340,7 @@ export default function SebExamRoom() {
         <FormsHubView
           title={exam.title}
           formsUrl={formsUrl}
-          websites={exam.sebConfig?.allowedWebsites || []}
+          websites={safeWebsites}
           onExit={() => setFormsExitOpen(true)}
         />
       ) : (
@@ -335,6 +425,7 @@ export default function SebExamRoom() {
 
       <FormsExitDialog
         open={formsExitOpen}
+        quitPasswordHash={exam?.sebConfig?.quitPasswordHash || ''}
         onConfirm={handleFormsExitConfirm}
         onCancel={() => setFormsExitOpen(false)}
       />

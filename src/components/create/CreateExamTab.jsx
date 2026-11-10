@@ -7,11 +7,14 @@ import QuitPasswordField from './QuitPasswordField';
 import ExamResultCard from './ExamResultCard';
 import MyExamsList from './MyExamsList';
 import QuickStepsGuide from './QuickStepsGuide';
-import { useCreateSebExam } from '../../hooks/useCreateSebExam';
+import { useCreateSebExam, friendlyServerError } from '../../hooks/useCreateSebExam';
 import { useMyExams } from '../../hooks/useMyExams';
 import { DEFAULT_SEB_APPS, cleanDomainFromUrl, normalizeWebsiteUrl, isValidDomain } from '../../utils/seb/sebPresets';
 import { htmlToPlainText } from '../../utils/sanitize';
 import { examStartUrl } from '../../config';
+
+const MIN_QUIT_PASSWORD_LEN = 12;
+const hasLetters = (val = '') => /[A-Za-zÆØÅæøå]/.test(String(val));
 
 async function copyToClipboard(text) {
   try {
@@ -55,7 +58,7 @@ const EMPTY = { title: '', sourceType: 'text', promptHtml: '', pdfFile: null, fo
 
 /** Fane 1: Opprett SEB-prøve (basert på voxkunnskap SebConfigModal). */
 export default function CreateExamTab() {
-  const { isUnlocked, unlock, lock, createExam, busy, error, setError } = useCreateSebExam();
+  const { isUnlocked, unlock, lock, createExam, deleteServerExam, busy, error, setError } = useCreateSebExam();
   const { exams, addExam, removeExam } = useMyExams();
   const [form, setForm] = useState(EMPTY);
   const [allowedApps, setAllowedApps] = useState(DEFAULT_SEB_APPS);
@@ -70,19 +73,20 @@ export default function CreateExamTab() {
   const validationError = () => {
     if (!form.title.trim()) return 'Gi prøven en tittel.';
     if (form.sourceType === 'pdf' && !form.pdfFile) return 'Velg en oppgave-PDF.';
+    const trimmedPwd = String(form.quitPassword || '').trim();
     if (form.sourceType === 'forms') {
       const trimmed = form.formsUrl.trim();
       const isValidForms = /^https:\/\/(forms\.office\.com|forms\.microsoft\.com|forms\.cloud\.microsoft)\//i.test(trimmed);
       if (!isValidForms) {
         return 'Lim inn en gyldig Microsoft Forms-lenke (f.eks. https://forms.office.com/... eller https://forms.cloud.microsoft/...).';
       }
-      if (!form.quitPassword || form.quitPassword.trim().length < 8 || /^\d+$/.test(form.quitPassword.trim())) {
-        return 'Avslutningspassord / kodeord (minst 8 tegn med bokstaver, f.eks. «fjord-storm-tind-4829») er påkrevd for Microsoft Forms-prøver, slik at du kan låse opp og avslutte SEB etter innlevering.';
+      if (trimmedPwd.length < MIN_QUIT_PASSWORD_LEN || /^\d+$/.test(trimmedPwd) || !hasLetters(trimmedPwd)) {
+        return 'Avslutningspassord / kodeord (minst 12 tegn med bokstaver, f.eks. «fjord-storm-tind-4829») er påkrevd for Microsoft Forms-prøver, slik at du kan låse opp og avslutte SEB etter innlevering.';
       }
     }
-    if (form.quitPassword && form.quitPassword.trim().length > 0) {
-      if (form.quitPassword.trim().length < 8 || /^\d+$/.test(form.quitPassword.trim())) {
-        return 'Avslutningspassordet må være minst 8 tegn og inneholde bokstaver (f.eks. «fjord-storm-tind-4829»), eller la feltet stå tomt.';
+    if (trimmedPwd.length > 0) {
+      if (trimmedPwd.length < MIN_QUIT_PASSWORD_LEN || /^\d+$/.test(trimmedPwd) || !hasLetters(trimmedPwd)) {
+        return 'Avslutningspassordet må være minst 12 tegn og inneholde bokstaver (f.eks. «fjord-storm-tind-4829»), eller la feltet stå tomt.';
       }
     }
     if (form.sourceType !== 'pdf' && form.sourceType !== 'forms' && !htmlToPlainText(form.promptHtml)) {
@@ -132,7 +136,7 @@ export default function CreateExamTab() {
           {
             id: 'web_forms_main',
             title: 'Microsoft Forms',
-            url: trimmedFormsUrl,
+            url: 'https://forms.office.com',
             domain: cleanDomainFromUrl(trimmedFormsUrl) || 'forms.office.com'
           },
           ...finalWebsites.filter((w) => !/forms\.(office\.com|microsoft\.com|cloud\.microsoft)/i.test(w?.url || w?.domain || ''))
@@ -143,21 +147,44 @@ export default function CreateExamTab() {
       title: form.title.trim(),
       createdAt: new Date().toISOString(),
       expiresAt: res.expiresAt,
+      deleteToken: res.deleteToken || null,
       sourceType: form.sourceType,
-      formsUrl: isForms ? trimmedFormsUrl : null,
+      formsUrl: null,
       autoCopied,
       sebFileArgs: {
         examId: res.examId,
         title: form.title.trim(),
+        sourceType: form.sourceType,
         allowedWebsites: sebWebsites,
         allowedApps,
         quitPasswordHash: res.quitPasswordHash,
-        startURL: isForms && finalWebsites.length === 0 ? trimmedFormsUrl : undefined
+        startURL: null
       }
     };
     addExam(entry);
     setResult(entry);
     window.scrollTo({ top: 0 });
+  };
+
+  const handleDeleteExam = async (examEntry) => {
+    try {
+      await deleteServerExam(examEntry.examId, examEntry.deleteToken);
+      removeExam(examEntry.examId);
+      if (result?.examId === examEntry.examId) setResult(null);
+      return { ok: true, message: `Prøven «${examEntry.title}» ble slettet på serveren og fjernet fra listen.` };
+    } catch (err) {
+      const code = String(err?.code || '').replace('functions/', '');
+      const isAlreadyExpired = Boolean(examEntry.expiresAt && Date.parse(examEntry.expiresAt) <= Date.now());
+      if (code === 'not-found' || isAlreadyExpired) {
+        removeExam(examEntry.examId);
+        if (result?.examId === examEntry.examId) setResult(null);
+        return {
+          ok: true,
+          message: `Prøven «${examEntry.title}» var allerede utløpt eller slettet på serveren, og ble fjernet fra listen.`
+        };
+      }
+      return { ok: false, message: friendlyServerError(err) };
+    }
   };
 
   const reset = () => {
@@ -194,9 +221,7 @@ export default function CreateExamTab() {
                 formsUrl={form.formsUrl} setFormsUrl={set('formsUrl')}
               />
               <p className="text-xs text-slate-400">
-                {form.sourceType === 'forms'
-                  ? 'SEB åpner Forms direkte mot skolens Microsoft 365 / Feide. Ingen KI brukes, og intet elevarbeid lagres på noen server.'
-                  : 'Alt behandles lokalt i nettleseren. Ingen KI brukes, og intet elevarbeid lagres på noen server.'}
+                Prøveoppsettet lagres i EU (90 dager). Elevenes besvarelser forblir 100 % lokalt på elevens maskin, og ingen KI brukes.
               </p>
             </Step>
 
@@ -219,7 +244,7 @@ export default function CreateExamTab() {
                 {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Save size={16} aria-hidden="true" />}
                 <span>Lagre og generer SEB-prøve</span>
               </button>
-              <p className="text-xs text-slate-400">Prøveoppsettet lagres i EU (europe-west1) og slettes automatisk etter 90 dager. Ingen elevdata lagres.</p>
+              <p className="text-xs text-slate-400">Prøveoppsettet lagres i EU (europe-west1) og kan slettes når som helst under «Mine prøver» (slettes ellers automatisk etter 90 dager). Ingen elevdata lagres.</p>
             </Step>
           </div>
 
@@ -229,7 +254,7 @@ export default function CreateExamTab() {
         </div>
       )}
 
-      <MyExamsList exams={exams} onRemove={removeExam} />
+      <MyExamsList exams={exams} onDelete={handleDeleteExam} onRemove={removeExam} />
     </div>
   );
 }

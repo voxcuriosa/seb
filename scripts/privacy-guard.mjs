@@ -33,7 +33,7 @@ export const LOCAL_ONLY_ENTRIES = [
 
 export const EXAM_ROOM_ENTRIES = ['src/pages/SebExamRoom.jsx'];
 
-export const APPROVED_FIREBASE_EXPORTS = ['db', 'functions', 'storage', 'fetchSebExam', 'fetchPromptPdf', 'callCreateSebExam', 'callSignSebSubmission'];
+export const APPROVED_FIREBASE_EXPORTS = ['db', 'functions', 'storage', 'fetchSebExamMeta', 'fetchSebExam', 'fetchPromptPdf', 'callCreateSebExam', 'callSignSebSubmission', 'callDeleteSebExam'];
 const EXAM_ROOM_ALLOWED_FIREBASE_IMPORTS = ['fetchSebExam', 'fetchPromptPdf', 'callSignSebSubmission'];
 
 /** Filer som får bruke fetch() mot egne statiske filer (ordbøker), aldri med elevdata. */

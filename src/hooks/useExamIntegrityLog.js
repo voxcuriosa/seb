@@ -35,7 +35,7 @@ export function useExamIntegrityLog({ initialActiveSeconds = 0, initialIncidents
     }, 1000);
 
     const onBlur = () => {
-      blurAtRef.current = Date.now();
+      if (!blurAtRef.current) blurAtRef.current = Date.now();
     };
     const onFocus = () => {
       if (blurAtRef.current) {

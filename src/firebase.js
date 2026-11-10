@@ -20,11 +20,25 @@ if (import.meta.env.VITE_USE_EMULATORS === '1') {
   connectStorageEmulator(storage, '127.0.0.1', 9199);
 }
 
-export async function fetchSebExam(examId) {
+const callGetSebExamContent = httpsCallable(functions, 'getSebExamContent', { timeout: 15_000 });
+
+export async function fetchSebExamMeta(examId) {
   const snap = await getDoc(doc(db, 'sebExams', examId));
   if (!snap.exists()) return null;
   const data = snap.data();
   return { ...data, id: snap.id, expiresAt: data.expiresAt?.toDate?.()?.toISOString?.() || null };
+}
+
+export async function fetchSebExam(examId) {
+  const meta = await fetchSebExamMeta(examId);
+  if (!meta) return null;
+  const needsContent =
+    Number(meta.schemaVersion) >= 2 ||
+    (!meta.promptHtml && !meta.pdfPath && !meta.formsUrl);
+  if (!needsContent) return meta;
+  const res = await callGetSebExamContent({ examId });
+  const content = res?.data && typeof res.data === 'object' ? res.data : {};
+  return { ...meta, ...content, id: meta.id };
 }
 
 export async function fetchPromptPdf(pdfPath) {
@@ -34,3 +48,4 @@ export async function fetchPromptPdf(pdfPath) {
 
 export const callCreateSebExam = httpsCallable(functions, 'createSebExam', { timeout: 70_000 });
 export const callSignSebSubmission = httpsCallable(functions, 'signSebSubmission', { timeout: 15_000 });
+export const callDeleteSebExam = httpsCallable(functions, 'deleteSebExam');
