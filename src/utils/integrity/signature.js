@@ -34,19 +34,27 @@ export async function verifySebSignature(payload, publicKeys = SIGNING_PUBLIC_KE
   if (!payload?.signature || !payload?.signedAt) {
     return { status: 'missing', detail: 'Ikke serversignert (eleven var trolig uten nett ved innlevering).' };
   }
-  const pubB64 = publicKeys[payload.keyId || 'k1'];
-  if (!pubB64) {
-    return { status: 'unknown-key', detail: `Ukjent signaturnøkkel (${payload.keyId}).` };
+  const keyId = typeof payload.keyId === 'string' && payload.keyId.length > 0 ? payload.keyId : 'k1';
+  const hasKey = publicKeys === SIGNING_PUBLIC_KEYS
+    ? Object.hasOwn(SIGNING_PUBLIC_KEYS, keyId)
+    : Boolean(publicKeys && typeof publicKeys === 'object' && Object.hasOwn(publicKeys, keyId));
+  const pubB64 = hasKey ? publicKeys[keyId] : null;
+  if (!pubB64 || typeof pubB64 !== 'string') {
+    const label = typeof payload.keyId === 'string' ? payload.keyId : 'ugyldig';
+    return { status: 'unknown-key', detail: `Ukjent signaturnøkkel (${label}).` };
   }
   try {
+    if (typeof payload.signature !== 'string' || typeof payload.signedAt !== 'string') {
+      return { status: 'invalid', detail: 'Serversignaturen kunne ikke leses.' };
+    }
     const msg = new TextEncoder().encode(signatureMessage(payload));
     const ok = await ed.verifyAsync(b64ToBytes(payload.signature), msg, pubKeyToRaw32(pubB64));
     if (!ok) return { status: 'invalid', detail: 'Serversignaturen stemmer ikke med innholdet.' };
   } catch {
     return { status: 'invalid', detail: 'Serversignaturen kunne ikke leses.' };
   }
-  const signedMs = Date.parse(payload.signedAt);
-  const completedMs = Date.parse(payload.completedAt);
+  const signedMs = typeof payload.signedAt === 'string' ? Date.parse(payload.signedAt) : NaN;
+  const completedMs = typeof payload.completedAt === 'string' ? Date.parse(payload.completedAt) : NaN;
   if (!Number.isFinite(signedMs) || !Number.isFinite(completedMs) || Math.abs(signedMs - completedMs) > MAX_SIGN_DELAY_MS) {
     return { status: 'late', detail: 'Signert mer enn 5 minutter etter oppgitt fullføringstid.' };
   }

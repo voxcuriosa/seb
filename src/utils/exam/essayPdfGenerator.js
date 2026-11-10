@@ -35,9 +35,12 @@ export async function buildEssayPayload({ exam, essayDoc, startedAt, activeSecon
   const sebSec = typeof window !== 'undefined' ? window.SafeExamBrowser?.security : null;
   const sebConfigKey = typeof sebSec?.configKey === 'string' && sebSec.configKey.length > 0 ? sebSec.configKey : null;
   const sebVersion = (typeof window !== 'undefined' && window.SafeExamBrowser?.version) || sebSec?.appVersion || null;
+  const cappedIncidents = incidents.length > 200
+    ? [...incidents.slice(0, 100), ...incidents.slice(-100)]
+    : incidents.slice();
   const payload = {
     type: SEB_ESSAY_TYPE,
-    version: 3,
+    version: 4,
     receiptCode: generateReceiptCode(),
     nonce: generateRandomNonceHex(16),
     examId: exam.id,
@@ -50,7 +53,7 @@ export async function buildEssayPayload({ exam, essayDoc, startedAt, activeSecon
     pasteIncidents,
     appSwitchIncidents,
     focusLossIncidents,
-    incidents: incidents.slice(0, 200),
+    incidents: cappedIncidents,
     ...(sebConfigKey ? { sebConfigKey } : {}),
     ...(sebVersion ? { sebVersion } : {}),
     essayText,
@@ -86,9 +89,9 @@ export async function renderEssayPdf(payload) {
   L.text(`Start: ${formatDateTime(payload.startedAt)}   Levert: ${formatDateTime(payload.completedAt)}`, { size: 9.5, spacing: 14 });
   const appSwitch = payload.appSwitchIncidents || 0;
   const focusLoss = payload.focusLossIncidents || 0;
-  const switchLabel = appSwitch > 0
-    ? `App-bytte: ${appSwitch}`
-    : `Fokustap: ${focusLoss}`;
+  const switchLabel = Number(payload?.version) >= 4
+    ? `App-bytter: ${appSwitch}   Fokustap: ${focusLoss}`
+    : (appSwitch > 0 ? `App-bytte: ${appSwitch}` : `Fokustap: ${focusLoss}`);
   L.text(
     `Aktiv tid: ${formatDuration(payload.activeSeconds)}   Ord: ${payload.wordCount}   ${switchLabel}   Innliminger: ${payload.pasteIncidents}`,
     { size: 9.5, spacing: 14, color: MUTED }

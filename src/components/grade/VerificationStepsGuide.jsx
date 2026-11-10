@@ -19,26 +19,25 @@ export default function VerificationStepsGuide() {
     {
       icon: ShieldCheck,
       title: '3. Automatisk 3-lags manipulasjonskontroll',
-      desc: 'SHA-256 innholds-hash, fulltekst-rekonstruksjon og digital Ed25519-kryptosignatur verifiseres.'
+      desc: 'SHA-256 innholds-hash, PDF-struktursjekk med fulltekst-rekonstruksjon og digital Ed25519-kryptosignatur verifiseres.'
     },
     {
       icon: Lock,
-      title: '4. Få umiddelbar status per elev',
-      desc: 'Grønt stempel bekrefter at sjekksum, synlig tekst og Ed25519-serversignatur med serverklokkeslett stemmer uten etterfølgende tekstendring.'
+      title: '4. Vurder den signerte teksten i Fane 2',
+      desc: 'Grønt stempel bekrefter sjekksum, struktur, prøve-ID og serversignert tidspunkt. Tekstvisningen inne i Fane 2 viser garantert den kryptografisk signerte teksten.'
     }
   ];
 
   return (
-    <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
-      <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 leading-relaxed">
-        <strong className="text-emerald-300">Frivillig kontrollverktøy:</strong> Elevenes PDF-er kan leses og vurderes direkte i Teams som vanlig. Du bruker bare denne fanen dersom du ønsker å sjekke sjekksummen og signaturen på én eller flere besvarelser.
+    <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+      <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-200 leading-relaxed">
+        <strong className="text-emerald-300">Sikker sensurvisning:</strong> Det er tekstvisningen her inne i Fane 2 som garantert viser den kryptografisk signerte teksten fra prøven, kontrollert mot duplikater og avvikende prøve-ID.
       </div>
       <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400">
         Slik sjekkes filene for manipulasjon:
       </h3>
       <ol className="space-y-3">
         {steps.map((step, idx) => {
-          const Icon = step.icon;
           return (
             <li key={idx} className="flex items-start gap-3 text-sm">
               <span className="w-6 h-6 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
@@ -46,18 +45,18 @@ export default function VerificationStepsGuide() {
               </span>
               <div>
                 <p className="font-bold text-slate-100 leading-snug">{step.title}</p>
-                <p className="text-xs text-slate-400 mt-0.5">{step.desc}</p>
+                <p className="text-xs text-slate-300 mt-0.5">{step.desc}</p>
               </div>
             </li>
           );
         })}
       </ol>
-      <p className="text-xs text-slate-400 border-t border-slate-800 pt-3">
+      <p className="text-xs text-slate-300 border-t border-slate-800 pt-3">
         Lokal kontroll i nettleseren: Elevbesvarelsene forlater ikke datamaskinen din.
       </p>
-      <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-xs text-emerald-200 space-y-1">
+      <div className="p-3 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 text-xs text-emerald-200 space-y-1">
         <p className="font-bold text-emerald-300">Nøkkelfunksjoner for IT og personvern:</p>
-        <p className="leading-relaxed text-slate-300">
+        <p className="leading-relaxed text-slate-200">
           Kontrollmotoren i Fane 2 utfører <strong>ingen nettverkskall</strong> under PDF-analysen. Koden leveres «as is», og kontrolleres automatisk av personvernvakten og nettverkstester før deploy.
         </p>
       </div>

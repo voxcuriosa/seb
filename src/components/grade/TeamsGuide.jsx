@@ -6,8 +6,12 @@ export default function TeamsGuide() {
   const [open, setOpen] = useState(false);
   return (
     <div className="rounded-2xl bg-slate-900 border border-emerald-500/40">
-      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open}
-        className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left"
+      >
         <span className="text-xs font-black uppercase tracking-wider text-emerald-300 flex items-center gap-2">
           <FolderUp size={15} aria-hidden="true" /> Slik fungerer det med Teams, SharePoint og OneDrive
         </span>
@@ -15,15 +19,15 @@ export default function TeamsGuide() {
       </button>
       {open && (
         <div className="px-4 pb-4 space-y-3 text-sm text-slate-200 leading-relaxed">
-          <p className="text-xs text-slate-300 bg-slate-950 border border-slate-800 p-3 rounded-xl">
-            <strong className="text-emerald-300">Merk:</strong> Denne kontrollfanen er <strong>helt frivillig å bruke</strong>. Elevene leverer en vanlig, ferdig formatert PDF som du kan lese og vurdere direkte inne i Teams. Bruk kun denne fanen dersom du ønsker å sjekke én enkelt PDF eller hele klassens mappe for etterfølgende endringer.
+          <p className="text-xs text-slate-200 bg-slate-950 border border-slate-800 p-3 rounded-xl">
+            <strong className="text-emerald-300">Viktig ved kontroll:</strong> Elevene leverer en ferdig PDF som kan åpnes i Teams, men det er <strong>tekstvisningen her inne i Fane 2 som garantert viser den kryptografisk signerte teksten</strong>. Eksterne PDF-visere kan tolke skjulte lag ulikt, mens Fane 2 verifiserer både PDF-strukturen og rendrer den signerte teksten direkte.
           </p>
           <ol className="space-y-2 list-decimal pl-5">
             <li><strong className="text-white">Del SEB-lenken eller .seb-filen i en Teams-oppgave.</strong></li>
             <li><strong className="text-white">Elevene laster opp den ferdige PDF-en fra Nedlastinger</strong> til Teams-oppgaven og trykker «Lever».</li>
             <li>
               <strong className="text-white">Klikk «Åpne i SharePoint»</strong> i oppgaven, last ned mappen <strong className="text-white">«Student Work»</strong>, pakk ut ZIP-filen
-              og slipp hele mappen (eller alle PDF-ene) her. Alt verifiseres umiddelbart med SHA-256.
+              og slipp hele mappen (eller alle PDF-ene) her. Alt verifiseres umiddelbart med SHA-256 og Ed25519.
             </li>
           </ol>
           <div className="p-3 rounded-xl bg-slate-950 font-mono text-xs text-emerald-200 border border-slate-800 leading-relaxed">
