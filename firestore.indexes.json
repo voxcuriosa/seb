@@ -13,6 +13,17 @@
       "indexes": []
     },
     {
+      "collectionGroup": "sebExamContent",
+      "fieldPath": "promptHtml",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "sebExamContent",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
       "collectionGroup": "rateLimits",
       "fieldPath": "expiresAt",
       "ttl": true,

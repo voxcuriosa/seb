@@ -8,7 +8,9 @@ import sanitizeHtml from 'sanitize-html';
 export const LIMITS = {
   titleMax: 120,
   promptHtmlMaxChars: 200_000,
+  promptHtmlMaxBytes: 400_000,
   pdfMaxBytes: 8 * 1024 * 1024,
+  formsUrlMax: 500,
   websitesMax: 20,
   websiteTitleMax: 80
 };
@@ -113,15 +115,27 @@ export function validateExamInput(data) {
   const rawHtml = String(data.promptHtml || '');
   if (rawHtml.length > LIMITS.promptHtmlMaxChars) fail('Oppgaveteksten er for lang.');
   const promptHtml = sanitizePromptHtml(rawHtml);
+  if (Buffer.byteLength(promptHtml, 'utf8') > LIMITS.promptHtmlMaxBytes) {
+    fail('Oppgaveteksten er for stor etter formatering.');
+  }
 
   let pdfBuffer = null;
   if (sourceType === 'pdf') {
     if (typeof data.pdfBase64 !== 'string' || !data.pdfBase64) fail('PDF mangler.');
+    const maxPdfBase64Length = Math.ceil((LIMITS.pdfMaxBytes * 4) / 3) + 16;
+    if (data.pdfBase64.length > maxPdfBase64Length) fail('PDF-en er større enn 8 MB.');
     pdfBuffer = Buffer.from(data.pdfBase64, 'base64');
     if (pdfBuffer.length > LIMITS.pdfMaxBytes) fail('PDF-en er større enn 8 MB.');
     if (pdfBuffer.subarray(0, 5).toString('latin1') !== '%PDF-') fail('Filen er ikke en gyldig PDF.');
+    const tailStart = Math.max(0, pdfBuffer.length - 1024);
+    if (!pdfBuffer.subarray(tailStart).toString('latin1').includes('%%EOF')) {
+      fail('Filen er ikke en gyldig PDF (mangler %%EOF).');
+    }
   } else if (sourceType === 'forms') {
     const formsUrl = String(data.formsUrl || '').trim();
+    if (formsUrl.length > LIMITS.formsUrlMax) {
+      fail(`Microsoft Forms-lenken kan maks være ${LIMITS.formsUrlMax} tegn.`);
+    }
     if (!isFormsUrl(formsUrl)) {
       fail('Ugyldig Microsoft Forms-lenke.');
     }
@@ -170,4 +184,27 @@ export function isValidSha256(value) {
 
 export function isValidExamId(value) {
   return /^[A-Za-z0-9]{10,40}$/.test(String(value || ''));
+}
+
+/**
+ * Sjekker at kallet kommer fra Safe Exam Browser via User-Agent eller
+ * SEB-spesifikke headere (tillater også lokal Firebase-emulator).
+ */
+export function isSebRequest(rawRequest) {
+  if (process.env.FUNCTIONS_EMULATOR === 'true') return true;
+  const headers = rawRequest?.headers || {};
+  const ua = String(headers['user-agent'] || headers['User-Agent'] || '');
+  if (/\b(SEB|SafeExamBrowser)\b/i.test(ua)) return true;
+  for (const [k, v] of Object.entries(headers)) {
+    const lower = k.toLowerCase();
+    if (
+      (lower === 'x-safeexambrowser-requesthash' ||
+        lower === 'x-safeexambrowser-configkeyhash' ||
+        lower.startsWith('x-safeexambrowser-')) &&
+      String(v || '').trim().length > 0
+    ) {
+      return true;
+    }
+  }
+  return false;
 }

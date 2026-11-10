@@ -8,9 +8,12 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /sebExams/{examId}/oppgave.pdf {
-      // Tillat kun lesing så lenge oppgave-PDF-en ikke har passert 90-dagersfristen (TTL).
-      // Bruker filens eget opprettelsestidspunkt i Storage (ingen kryss-oppslag mot Firestore).
-      allow get: if resource != null && request.time < resource.timeCreated + duration.value(90, 'd');
+      // Tillat kun lesing når examId har gyldig format, prøvedokumentet fortsatt finnes i Firestore,
+      // og oppgave-PDF-en ikke har passert 90-dagersfristen (TTL).
+      allow get: if examId.matches('^[A-Za-z0-9]{10,40}$')
+                 && resource != null
+                 && request.time < resource.timeCreated + duration.value(90, 'd')
+                 && firestore.exists(/databases/(default)/documents/sebExams/$(examId));
       allow list, write: if false;
     }
 

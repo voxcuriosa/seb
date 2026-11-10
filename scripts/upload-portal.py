@@ -2,29 +2,44 @@
 """
 upload-portal.py
 Laster opp oppdatert index.html for vox_portal til public_html/index.html over FTPS.
+Passord hentes utelukkende fra macOS-nøkkelringen (tjeneste 'voxcuriosa-ftp').
 """
-import os
+import ssl
+import subprocess
 import sys
 from ftplib import FTP_TLS
 
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-LOCAL_PW_FILE = os.path.join(REPO_ROOT, ".ftp-password")
+FTP_HOST = "voxcuriosa.no"
+FTP_USER = "cpjvfkip"
 PORTAL_INDEX = "/Users/christianborchgrevink-vigeland/Documents/Privat/vox_portal/index.html"
 
-if not os.path.exists(LOCAL_PW_FILE):
-    print("Mangler .ftp-password", file=sys.stderr)
+
+def get_ftp_password():
+    cmd = ["security", "find-generic-password", "-a", FTP_USER, "-s", "voxcuriosa-ftp", "-w"]
+    try:
+        pw = subprocess.check_output(cmd, stderr=subprocess.PIPE).decode("utf-8").strip()
+        if pw:
+            return pw
+    except Exception:
+        pass
+    print("Fant ikke FTP-passord i macOS-nøkkelringen (voxcuriosa-ftp).", file=sys.stderr)
     sys.exit(1)
 
-with open(LOCAL_PW_FILE, "r", encoding="utf-8") as f:
-    pw = f.read().strip()
 
-ftp = FTP_TLS()
-ftp.connect("voxcuriosa.no", 21, timeout=30)
-ftp.login("cpjvfkip", pw)
-ftp.prot_p()
+def main():
+    pw = get_ftp_password()
+    ssl_context = ssl.create_default_context()
+    ftp = FTP_TLS(context=ssl_context)
+    ftp.connect(FTP_HOST, 21, timeout=30)
+    ftp.login(FTP_USER, pw)
+    ftp.prot_p()
 
-with open(PORTAL_INDEX, "rb") as f:
-    ftp.storbinary("STOR public_html/index.html", f)
+    with open(PORTAL_INDEX, "rb") as f:
+        ftp.storbinary("STOR public_html/index.html", f)
 
-print("Hovedsiden voxcuriosa.no er oppdatert med SEB-flisen!")
-ftp.quit()
+    print("Hovedsiden voxcuriosa.no er oppdatert med SEB-flisen!")
+    ftp.quit()
+
+
+if __name__ == "__main__":
+    main()

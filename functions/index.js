@@ -5,5 +5,7 @@ initializeApp();
 setGlobalOptions({ region: 'europe-west1' });
 
 export { createSebExam } from './src/createSebExam.js';
+export { getSebExamContent } from './src/getSebExamContent.js';
+export { deleteSebExam } from './src/deleteSebExam.js';
 export { signSebSubmission } from './src/signSebSubmission.js';
 export { cleanupExamStorage } from './src/cleanupExamStorage.js';
