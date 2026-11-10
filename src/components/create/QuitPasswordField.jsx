@@ -80,7 +80,7 @@ export default function QuitPasswordField({ value, onChange, required = false })
 
   const trimmed = String(value || '').trim();
   const tooShort = trimmed.length > 0 && trimmed.length < MIN_QUIT_PASSWORD_LENGTH;
-  const digitsOnly = trimmed.length >= MIN_QUIT_PASSWORD_LENGTH && /^\d+$/.test(trimmed);
+  const missingLetters = trimmed.length >= MIN_QUIT_PASSWORD_LENGTH && !/[A-Za-zÆØÅæøå]/.test(trimmed);
 
   const handleGenerate = () => {
     const code = generateReadableCode();
@@ -190,14 +190,14 @@ export default function QuitPasswordField({ value, onChange, required = false })
         </p>
       )}
 
-      {digitsOnly && (
+      {missingLetters && (
         <p className="text-xs text-amber-200 flex items-start gap-1.5">
           <AlertTriangle size={14} className="shrink-0 mt-0.5 text-amber-300" aria-hidden="true" />
-          Rene tallkoder er ikke tillatt fordi de kan knekkes fra .seb-filen. Kombiner ord og tall (f.eks. «fjord-storm-tind-varde-482915»).
+          Kodeord uten bokstaver er ikke tillatt fordi de kan knekkes fra .seb-filen. Kombiner ord og tall (f.eks. «fjord-storm-tind-varde-482915»).
         </p>
       )}
 
-      {trimmed.length >= MIN_QUIT_PASSWORD_LENGTH && !digitsOnly && (
+      {trimmed.length >= MIN_QUIT_PASSWORD_LENGTH && !missingLetters && (
         <p className="text-xs text-emerald-400 flex items-center gap-1.5">
           <ShieldCheck size={14} className="shrink-0" aria-hidden="true" />
           Sikkert kodeord ({trimmed.length} tegn). Hashes lokalt med SHA-256 og sendes aldri i klartekst. Husk å notere koden!

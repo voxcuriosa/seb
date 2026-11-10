@@ -3,7 +3,7 @@ import { Loader2, Save, LockOpen } from 'lucide-react';
 import TeacherPinGate from './TeacherPinGate';
 import PromptSourcePicker from './PromptSourcePicker';
 import SebResourcesPicker from './SebResourcesPicker';
-import QuitPasswordField from './QuitPasswordField';
+import QuitPasswordField, { MIN_QUIT_PASSWORD_LENGTH } from './QuitPasswordField';
 import ExamResultCard from './ExamResultCard';
 import MyExamsList from './MyExamsList';
 import QuickStepsGuide from './QuickStepsGuide';
@@ -13,7 +13,6 @@ import { DEFAULT_SEB_APPS, cleanDomainFromUrl, normalizeWebsiteUrl, isValidDomai
 import { htmlToPlainText } from '../../utils/sanitize';
 import { examStartUrl } from '../../config';
 
-const MIN_QUIT_PASSWORD_LEN = 12;
 const hasLetters = (val = '') => /[A-Za-zÆØÅæøå]/.test(String(val));
 
 async function copyToClipboard(text) {
@@ -80,13 +79,13 @@ export default function CreateExamTab() {
       if (!isValidForms) {
         return 'Lim inn en gyldig Microsoft Forms-lenke (f.eks. https://forms.office.com/... eller https://forms.cloud.microsoft/...).';
       }
-      if (trimmedPwd.length < MIN_QUIT_PASSWORD_LEN || /^\d+$/.test(trimmedPwd) || !hasLetters(trimmedPwd)) {
-        return 'Avslutningspassord / kodeord (minst 12 tegn med bokstaver, f.eks. «fjord-storm-tind-4829») er påkrevd for Microsoft Forms-prøver, slik at du kan låse opp og avslutte SEB etter innlevering.';
+      if (trimmedPwd.length < MIN_QUIT_PASSWORD_LENGTH || !hasLetters(trimmedPwd)) {
+        return 'Avslutningspassord / kodeord (minst 12 tegn med bokstaver, f.eks. «fjord-storm-tind-varde-482915») er påkrevd for Microsoft Forms-prøver, slik at du kan låse opp og avslutte SEB etter innlevering.';
       }
     }
     if (trimmedPwd.length > 0) {
-      if (trimmedPwd.length < MIN_QUIT_PASSWORD_LEN || /^\d+$/.test(trimmedPwd) || !hasLetters(trimmedPwd)) {
-        return 'Avslutningspassordet må være minst 12 tegn og inneholde bokstaver (f.eks. «fjord-storm-tind-4829»), eller la feltet stå tomt.';
+      if (trimmedPwd.length < MIN_QUIT_PASSWORD_LENGTH || !hasLetters(trimmedPwd)) {
+        return 'Avslutningspassordet må være minst 12 tegn og inneholde bokstaver (f.eks. «fjord-storm-tind-varde-482915»), eller la feltet stå tomt.';
       }
     }
     if (form.sourceType !== 'pdf' && form.sourceType !== 'forms' && !htmlToPlainText(form.promptHtml)) {
