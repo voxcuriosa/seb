@@ -1,47 +1,38 @@
 import { useState } from 'react';
 import { Eye, EyeOff, KeyRound, AlertTriangle, ShieldCheck, RefreshCw, Copy, Check } from 'lucide-react';
 
-export const MIN_QUIT_PASSWORD_LENGTH = 12;
+export const MIN_QUIT_PASSWORD_LENGTH = 8;
 
 const RAW_CODE_WORDS = [
-  'sol', 'fjord', 'stein', 'skog', 'vann', 'fjell', 'storm', 'kyst',
-  'nord', 'elv', 'breen', 'hav', 'lyn', 'gard', 'tind', 'dal',
-  'vind', 'furu', 'gran', 'lyng', 'myr', 'svaberg', 'bekk', 'foss',
-  'odde', 'holme', 'sund', 'varde', 'vidde', 'hei', 'eng', 'berg',
-  'strand', 'vik', 'nes', 'kolle', 'skar', 'knaus', 'stjerne', 'frost',
-  'dugg', 'solgang', 'brim', 'sky', 'regn', 'hagl', 'bris', 'kuling',
-  'orkan', 'flod', 'fjare', 'brenning', 'skavl', 'fonn', 'isbre', 'tundra',
-  'klippe', 'skrent', 'stup', 'juvet', 'gjel', 'moen', 'lund', 'holt',
-  'kratt', 'kilde', 'tjern', 'kanal', 'bukt', 'gapet', 'skagen', 'kapp',
-  'terrasse', 'horisont', 'zenit', 'gryning', 'skumring', 'alm', 'ask', 'osp',
-  'eik', 'lind', 'pil', 'selje', 'rogn', 'hassel', 'einer', 'barlind',
-  'kristtorn', 'lerk', 'poppel', 'platan', 'seder', 'mose', 'lav', 'bregne',
-  'siv', 'timian', 'mynte', 'salvie', 'malurt', 'nesle', 'tistel', 'soleie',
-  'fiol', 'lilje', 'tulipan', 'iris', 'krokus', 'asters', 'georgine', 'rose',
-  'knopp', 'stilk', 'blad', 'rot', 'stamme', 'bark', 'kongle', 'never',
-  'elg', 'hjort', 'rein', 'gaupe', 'jerv', 'ulv', 'rev', 'grevling',
-  'oter', 'bever', 'ekorn', 'hare', 'piggsvin', 'lemen', 'ilder', 'sel',
-  'hval', 'delfin', 'nise', 'torsk', 'sei', 'hyse', 'lange', 'kveite',
-  'flyndre', 'makrell', 'sild', 'brisling', 'laks', 'sik', 'abbor', 'gjedde',
-  'krabbe', 'hummer', 'reke', 'musling', 'snegle', 'falk', 'hauk', 'hubro',
-  'ugle', 'ravn', 'trost', 'spurv', 'meis', 'lerke', 'svale', 'stork',
-  'hegre', 'trane', 'svane', 'and', 'skarv', 'terne', 'lunde', 'rype',
-  'orrfugl', 'tiur', 'spett', 'gauk', 'stare', 'anker', 'seil', 'mast',
-  'ror', 'baug', 'akter', 'dekk', 'lugar', 'lanterne', 'kompass', 'sekstant',
-  'kikkert', 'kart', 'varder', 'stier', 'leir', 'telt', 'ryggsekk', 'sovepose',
-  'primus', 'termos', 'lykt', 'fakkel', 'stue', 'loft', 'kjeller', 'bjelke',
-  'sperre', 'gavlen', 'muren', 'porten', 'ambolt', 'hammer', 'meisel', 'vater',
-  'passer', 'linjal', 'blyant', 'kritt', 'blekk', 'papir', 'permen', 'bokstav',
-  'kapittel', 'strofe', 'rytme', 'klang', 'akkord', 'melodi', 'harpe', 'fiolin',
-  'tromme', 'orgel', 'klaver', 'cymbal', 'basun', 'krystall', 'granitt', 'kvarts',
-  'marmor', 'skifer', 'basalt', 'gneis', 'kobber', 'bronse', 'nikkel', 'satin',
-  'morgen', 'kveld', 'midnatt', 'vinter', 'sommer', 'april', 'august', 'oktober',
-  'november', 'desember', 'mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag', 'komet',
-  'planet', 'galakse', 'ekko', 'glimt', 'gnist', 'flamme', 'aske', 'kull',
-  'malm', 'smaragd', 'rubin', 'safir', 'topas', 'opal', 'agat', 'jaspis'
+  'sol', 'sky', 'vind', 'regn', 'hagl', 'lyn', 'storm', 'bris', 'frost', 'dugg',
+  'fjord', 'fjell', 'skog', 'vann', 'elv', 'hav', 'bekk', 'foss', 'dal', 'hei',
+  'eng', 'berg', 'vik', 'nes', 'sund', 'odde', 'holme', 'varde', 'vidde', 'tind',
+  'myr', 'kyst', 'bukt', 'tjern', 'lund', 'kilde', 'stup', 'skar', 'kolle', 'isbre',
+  'topp', 'kant', 'sti', 'vei', 'bro', 'kai', 'havn', 'gard', 'tun', 'park',
+  'furu', 'gran', 'eik', 'osp', 'ask', 'alm', 'lind', 'pil', 'rogn', 'selje',
+  'lerk', 'lyng', 'mose', 'gress', 'blad', 'rot', 'bark', 'gren', 'kvist', 'knopp',
+  'stilk', 'rose', 'fiol', 'lilje', 'korn', 'havre', 'bygg', 'hvete', 'busk', 'hekk',
+  'plen', 'sopp', 'eple', 'banan', 'melon', 'potet', 'salat', 'agurk', 'tomat', 'erter',
+  'elg', 'hjort', 'rein', 'ulv', 'rev', 'gaupe', 'jerv', 'oter', 'bever', 'ekorn',
+  'hare', 'hund', 'katt', 'hest', 'sau', 'lam', 'geit', 'kalv', 'fugl', 'ugle',
+  'ravn', 'falk', 'hauk', 'trost', 'spurv', 'meis', 'svale', 'stork', 'svane', 'and',
+  'terne', 'rype', 'tiur', 'spett', 'lerke', 'hegre', 'trane', 'fisk', 'laks', 'torsk',
+  'sei', 'sild', 'reke', 'sel', 'hval', 'frosk', 'humle', 'nise', 'hyse', 'lunde',
+  'hus', 'tak', 'vegg', 'gulv', 'rom', 'stue', 'loft', 'gang', 'trapp', 'port',
+  'mur', 'bord', 'stol', 'benk', 'sofa', 'seng', 'pute', 'dyne', 'teppe', 'lampe',
+  'lykt', 'lys', 'ovn', 'peis', 'skap', 'hylle', 'skuff', 'speil', 'kopp', 'glass',
+  'fat', 'skje', 'kniv', 'gryte', 'panne', 'mugge', 'boks', 'kurv', 'sekk', 'veske',
+  'sko', 'jakke', 'lue', 'vott', 'bok', 'ark', 'side', 'perm', 'penn', 'kritt',
+  'blekk', 'papir', 'kart', 'tavle', 'pult', 'skole', 'seil', 'mast', 'anker', 'ror',
+  'baug', 'dekk', 'jolle', 'kano', 'ferge', 'telt', 'leir', 'tur', 'ski', 'stav',
+  'slede', 'hytte', 'gnist', 'glimt', 'ekko', 'klang', 'rytme', 'tone', 'sang', 'harpe',
+  'dag', 'kveld', 'natt', 'uke', 'mars', 'april', 'mai', 'juni', 'juli', 'nord',
+  'vest', 'hvit', 'gul', 'brun', 'rosa', 'klar', 'trygg', 'rask', 'sterk', 'varm',
+  'kald', 'frisk', 'mild', 'jern', 'gull', 'tau', 'knute', 'ring', 'hjul', 'vogn',
+  'tog', 'buss', 'fly', 'ball', 'spill', 'kamp', 'seier', 'krone', 'flagg', 'kake'
 ];
 
-export const CODE_WORDS = [...new Set(RAW_CODE_WORDS.filter((w) => /^[a-z]+$/.test(w)))];
+export const CODE_WORDS = [...new Set(RAW_CODE_WORDS.filter((w) => /^[a-z]{3,5}$/.test(w)))];
 
 export function randomUniformInt(max) {
   if (!Number.isInteger(max) || max <= 0 || max > 0x100000000) {
@@ -59,14 +50,14 @@ export function randomUniformInt(max) {
 
 export function generateReadableCode() {
   const picked = [];
-  while (picked.length < 4) {
+  while (picked.length < 3) {
     const word = CODE_WORDS[randomUniformInt(CODE_WORDS.length)];
     if (!picked.includes(word)) {
       picked.push(word);
     }
   }
-  const digits = 100000 + randomUniformInt(900000);
-  return `${picked[0]}-${picked[1]}-${picked[2]}-${picked[3]}-${digits}`;
+  const digits = 10 + randomUniformInt(90);
+  return `${picked[0]}-${picked[1]}-${picked[2]}-${digits}`;
 }
 
 /**
@@ -123,7 +114,7 @@ export default function QuitPasswordField({ value, onChange, required = false })
 
       <p className="text-xs text-slate-300 leading-relaxed">
         {required
-          ? 'Siden Microsoft Forms ikke kan lukke SEB automatisk, må du sette en avslutningsfrase (minst 12 tegn, f.eks. «fjord-storm-tind-varde-482915»). Når eleven har levert og viser kvitteringsskjermen på pulten, oppgir eller taster du inn koden for å avslutte SEB.'
+          ? 'Siden Microsoft Forms ikke kan lukke SEB automatisk, må du sette et avslutningspassord (minst 8 tegn med bokstaver, f.eks. «sol-elg-fjord-42»). Når eleven har levert og viser kvitteringsskjermen på pulten, oppgir eller taster du inn koden for å avslutte SEB.'
           : 'Lar deg avslutte SEB manuelt på en elevmaskin (f.eks. ved tekniske problemer). Uten kodeord kan SEB bare avsluttes ved fullført innlevering.'}
       </p>
 
@@ -134,7 +125,7 @@ export default function QuitPasswordField({ value, onChange, required = false })
             value={value}
             onChange={(e) => onChange(e.target.value)}
             autoComplete="new-password"
-            placeholder="Minst 12 tegn (f.eks. fjord-storm-tind-varde-482915)"
+            placeholder="Minst 8 tegn med bokstaver (f.eks. sol-elg-fjord-42)"
             aria-label="Avslutningspassord"
             aria-required={required}
             className={`w-full bg-slate-950 border rounded-xl px-3.5 py-2.5 pr-16 text-sm text-white placeholder-slate-500 focus:outline-none font-mono ${
@@ -186,14 +177,14 @@ export default function QuitPasswordField({ value, onChange, required = false })
       {tooShort && (
         <p className="text-xs text-amber-200 flex items-start gap-1.5">
           <AlertTriangle size={14} className="shrink-0 mt-0.5 text-amber-300" aria-hidden="true" />
-          Kodeordet må være minst 12 tegn (f.eks. «fjord-storm-tind-varde-482915»), slik at SHA-256-hashen i .seb-filen ikke kan knekkes med ordbokssøk.
+          Kodeordet må være minst 8 tegn med bokstaver (f.eks. «sol-elg-fjord-42»), slik at korte ord og PIN-koder ikke kan gjettes fra .seb-filen.
         </p>
       )}
 
       {missingLetters && (
         <p className="text-xs text-amber-200 flex items-start gap-1.5">
           <AlertTriangle size={14} className="shrink-0 mt-0.5 text-amber-300" aria-hidden="true" />
-          Kodeord uten bokstaver er ikke tillatt fordi de kan knekkes fra .seb-filen. Kombiner ord og tall (f.eks. «fjord-storm-tind-varde-482915»).
+          Kodeord uten bokstaver er ikke tillatt fordi rene tallkoder kan knekkes fra .seb-filen. Kombiner ord og tall (minst 8 tegn med bokstaver, f.eks. «sol-elg-fjord-42»).
         </p>
       )}
 

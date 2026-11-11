@@ -38,7 +38,7 @@ function lint(xml) {
 
 describe('buildStandaloneSebPlist', () => {
   it('lager gyldig plist med riktige nøkler og herdet prosess-/URL-oppsett', async () => {
-    const hash = await sha256Hex('fjord-storm-tind-varde-482915');
+    const hash = await sha256Hex('sol-elg-fjord-42');
     const xml = buildStandaloneSebPlist({
       examId: 'Ab12_x',
       allowedWebsites: websites,
@@ -61,7 +61,7 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toMatch(/<key>examSessionClearCookiesOnStart<\/key>\s*<true\/>/);
     expect(xml).toMatch(/<key>allowQuit<\/key>\s*<true\/>/);
     expect(xml).toContain(`<string>${hash}</string>`);
-    expect(xml).not.toContain('fjord-storm-tind-varde-482915');
+    expect(xml).not.toContain('sol-elg-fjord-42');
     for (const expr of [
       'voxcuriosa.no/*',
       '*.voxcuriosa.no/*',
@@ -338,24 +338,24 @@ describe('sebEnvironment', () => {
   });
 });
 
-describe('QuitPasswordField ordliste og passordentropi', () => {
-  it('har minst 256 unike a-z-ord og genererer 4 ord + 6 sifre med >= 52 bits entropi', () => {
-    expect(MIN_QUIT_PASSWORD_LENGTH).toBe(12);
-    expect(CODE_WORDS.length).toBeGreaterThanOrEqual(256);
+describe('QuitPasswordField ordliste og passordgenerator', () => {
+  it('har minst 180 unike korte ord (3-5 bokstaver) og genererer 3 korte ord + 2 sifre', () => {
+    expect(MIN_QUIT_PASSWORD_LENGTH).toBe(8);
+    expect(CODE_WORDS.length).toBeGreaterThanOrEqual(180);
     expect(new Set(CODE_WORDS).size).toBe(CODE_WORDS.length);
-    expect(CODE_WORDS.every((w) => /^[a-z]+$/.test(w))).toBe(true);
-
-    const n = CODE_WORDS.length;
-    const combinations = n * (n - 1) * (n - 2) * (n - 3) * 900000;
-    expect(Math.log2(combinations)).toBeGreaterThanOrEqual(52);
+    expect(CODE_WORDS.every((w) => /^[a-z]{3,5}$/.test(w))).toBe(true);
 
     const code = generateReadableCode();
-    expect(code).toMatch(/^[a-z]+-[a-z]+-[a-z]+-[a-z]+-\d{6}$/);
-    expect(code.length).toBeGreaterThanOrEqual(12);
+    expect(code).toMatch(/^[a-z]{3,5}-[a-z]{3,5}-[a-z]{3,5}-\d{2}$/);
+    expect(code.length).toBeGreaterThanOrEqual(MIN_QUIT_PASSWORD_LENGTH);
     const parts = code.split('-');
-    expect(new Set(parts.slice(0, 4)).size).toBe(4);
-    expect(randomUniformInt(256)).toBeGreaterThanOrEqual(0);
-    expect(randomUniformInt(256)).toBeLessThan(256);
+    expect(parts).toHaveLength(4);
+    expect(new Set(parts.slice(0, 3)).size).toBe(3);
+    const digits = Number(parts[3]);
+    expect(digits).toBeGreaterThanOrEqual(10);
+    expect(digits).toBeLessThanOrEqual(99);
+    expect(randomUniformInt(180)).toBeGreaterThanOrEqual(0);
+    expect(randomUniformInt(180)).toBeLessThan(180);
   });
 });
 

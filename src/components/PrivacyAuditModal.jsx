@@ -127,7 +127,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               </div>
               <div className="flex items-start gap-2">
                 <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" aria-hidden="true" />
-                <span><strong>Microsoft Forms og 12+ tegns avslutningsfrase:</strong> Forms åpnes direkte i SEB mot skolens Microsoft 365 og Feide-leietaker, beskyttet av en avslutningsfrase på minst 12 tegn med bokstaver.</span>
+                <span><strong>Microsoft Forms og avslutningskode (minst 8 tegn):</strong> Forms åpnes direkte i SEB mot skolens Microsoft 365 og Feide-leietaker, beskyttet av et avslutningspassord på minst 8 tegn med bokstaver (3 korte ord + 2 sifre ved generering, f.eks. «sol-elg-fjord-42»).</span>
               </div>
               <div className="flex items-start gap-2 sm:col-span-2">
                 <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" aria-hidden="true" />

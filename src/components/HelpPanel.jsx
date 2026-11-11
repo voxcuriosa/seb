@@ -12,7 +12,7 @@ export default function HelpPanel({ onClose }) {
       <div className="grid md:grid-cols-3 gap-4">
         <section>
           <h3 className="font-black text-emerald-300 mb-1">1. Opprett prøve</h3>
-          <p>Lås opp med lærer-PIN (holdes kun i minnet i aktiv fane). Skriv eller lim inn oppgavetekst, last opp Word/PDF, eller lim inn en lenke til Microsoft Forms. Velg hjelpemidler, nettsider og avslutningskode (minst 12 tegn med bokstaver, påkrevd for Forms).</p>
+          <p>Lås opp med lærer-PIN (holdes kun i minnet i aktiv fane). Skriv eller lim inn oppgavetekst, last opp Word/PDF, eller lim inn en lenke til Microsoft Forms. Velg hjelpemidler, nettsider og avslutningskode (minst 8 tegn med bokstaver, påkrevd for Forms).</p>
         </section>
         <section>
           <h3 className="font-black text-emerald-300 mb-1">2. Del i Teams</h3>
@@ -38,7 +38,7 @@ export default function HelpPanel({ onClose }) {
           <li><strong>Pålogging i SEB (Passord og Microsoft Authenticator):</strong> Fordi Safe Exam Browser blokkerer lokale OS-dialoger for Windows Hello og Touch ID (ansikt, fingeravtrykk og lokal maskin-PIN), skal eleven velge <strong>«Bruk passordet mitt / Use my password»</strong> (eventuelt sammen med <strong>Microsoft Authenticator</strong> på mobil ved tofaktor) når påloggingsbildet vises.</li>
           <li><strong>Tømming av øktkapsler på låne-PC:</strong> SEB sletter automatisk innloggingskapsler (cookies) ved oppstart av alle prøver og ved avslutning av Forms- og Clarify-prøver, slik at en elevs Feide-økt aldri blir liggende igjen på en låne-PC.</li>
           <li><strong>Slik deles den i Teams:</strong> Velg «Opprett -&gt; Oppgave» i Teams (ikke «Spørreskjema») og lim inn SEB-lenken. Husk å ha «Ett svar per person» påslått inne i Microsoft Forms.</li>
-          <li><strong>Påkrevd avslutningskode (minst 12 tegn):</strong> Fordi Forms ikke kan lukke SEB automatisk, må du sette en kodefrase på minst 12 tegn med bokstaver (f.eks. «fjord-storm-tind-varde-482915»). Både avslutningsdialogen i ressurspanelet og SEBs egen avslutningssnarvei krever denne koden. Hold koden hemmelig under prøven og oppgi den ved pulten når eleven viser kvitteringsskjermen, eller på tavla når prøvetiden er ute.</li>
+          <li><strong>Påkrevd avslutningskode (minst 8 tegn):</strong> Fordi Forms ikke kan lukke SEB automatisk, må du sette et avslutningspassord på minst 8 tegn med bokstaver (3 korte ord + 2 sifre ved tilfeldig generering, f.eks. «sol-elg-fjord-42»). Både avslutningsdialogen i ressurspanelet og SEBs egen avslutningssnarvei krever denne koden. Hold koden hemmelig under prøven og oppgi den ved pulten når eleven viser kvitteringsskjermen, eller på tavla når prøvetiden er ute.</li>
         </ul>
       </div>
 
@@ -62,10 +62,10 @@ export default function HelpPanel({ onClose }) {
       <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-1.5">
         <div className="flex items-center gap-1.5 text-white font-bold">
           <KeyRound size={15} className="text-emerald-400" />
-          <span>Slik fungerer Avslutningspassord (minst 12 tegn):</span>
+          <span>Slik fungerer Avslutningspassord (minst 8 tegn):</span>
         </div>
         <p className="leading-relaxed">
-          Avslutningspassordet fungerer som en nøkkel for læreren (minst 12 tegn med bokstaver, f.eks. «fjord-storm-tind-varde-482915»):
+          Avslutningspassordet fungerer som en nøkkel for læreren (minst 8 tegn med bokstaver, f.eks. 3 korte ord + 2 sifre som «sol-elg-fjord-42»):
         </p>
         <ul className="space-y-1 list-disc pl-4 text-slate-300">
           <li><strong>Normal avslutning (skriveprøve):</strong> Elevene fullfører ved å trykke «Fullfør», laste ned besvarelsen som PDF og bekrefte lagring. Da slettes lokalt utkast og SEB låser seg opp automatisk uten passord.</li>
