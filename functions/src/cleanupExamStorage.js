@@ -7,6 +7,7 @@
 import { onDocumentDeleted } from 'firebase-functions/v2/firestore';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
+import { isValidExamId } from './validate.js';
 
 export const cleanupExamStorage = onDocumentDeleted(
   {
@@ -17,29 +18,33 @@ export const cleanupExamStorage = onDocumentDeleted(
   },
   async (event) => {
     const examId = event.params.examId;
-    if (!examId) return;
+    if (!isValidExamId(examId)) return;
 
     const data = event.data?.data();
-    const pdfPath = data?.pdfPath || `sebExams/${examId}/oppgave.pdf`;
     const bucketName = process.env.SEB_STORAGE_BUCKET || 'voxcuriosa-seb-storage';
 
     try {
       const db = getFirestore();
-      await db.collection('sebExamContent').doc(examId).delete();
+      const contentRef = db.collection('sebExamContent').doc(examId);
+      const contentSnap = await contentRef.get();
+      const storedPdfPath =
+        (contentSnap.exists ? contentSnap.get('pdfPath') : null) ||
+        data?.pdfPath ||
+        null;
+
+      await contentRef.delete();
 
       const bucket = getStorage().bucket(bucketName);
-      try {
-        const file = bucket.file(pdfPath);
-        const [exists] = await file.exists();
-        if (exists) {
-          await file.delete();
+      if (typeof storedPdfPath === 'string' && storedPdfPath.startsWith(`sebExams/${examId}/`)) {
+        try {
+          await bucket.file(storedPdfPath).delete();
+        } catch (storageErr) {
+          if (storageErr?.code !== 404 && Number(storageErr?.code) !== 404) throw storageErr;
         }
-      } catch (storageErr) {
-        if (storageErr?.code !== 404 && Number(storageErr?.code) !== 404) throw storageErr;
       }
 
       try {
-        // Sletter eventuelle andre restfiler i samme prøvemappe i Storage
+        // Sletter alle filer under prøvemappen i Storage (både tilfeldig PDF-filnavn og ev. eldre oppgave.pdf)
         await bucket.deleteFiles({ prefix: `sebExams/${examId}/`, force: true });
       } catch (prefixErr) {
         if (prefixErr?.code !== 404 && Number(prefixErr?.code) !== 404) throw prefixErr;

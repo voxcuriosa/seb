@@ -86,8 +86,8 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               Elevenes PDF-er kan leses og vurderes direkte i Teams uten å bruke Fane 2. Dersom læreren velger å slippe inn PDF-er eller «Student Work»-mappen i Fane 2 for å kontrollere sjekksum og signatur, behandles filene utelukkende lokalt i nettleserens minne:
             </p>
             <ul className="text-xs text-slate-300 space-y-1 list-disc pl-4">
-              <li>Koden i Fane 2 inneholder ingen <code className="text-slate-400">fetch</code>, <code className="text-slate-400">XMLHttpRequest</code> eller Firebase-klienter, og pakkes inn i <code className="text-slate-400">withZeroNetworkFirewall</code> ved kjøring.</li>
-              <li>Dette håndheves automatisk før hver commit og i CI av <code className="text-emerald-400">scripts/privacy-guard.mjs</code>.</li>
+              <li>Koden i Fane 2 inneholder ingen <code className="text-slate-400">fetch</code>, <code className="text-slate-400">XMLHttpRequest</code>, <code className="text-slate-400">sendBeacon</code> eller Firebase-klienter.</li>
+              <li>Dette håndheves av den statiske personvernvakten (<code className="text-emerald-400">scripts/privacy-guard.mjs</code>) før hver commit og i CI, kombinert med den automatiserte kjøretidstesten <code className="text-slate-400">withZeroNetworkFirewall</code> i <code className="text-slate-400">src/test/fane2NetworkAudit.test.js</code> som verifiserer 0 nettverkskall under full PDF- og signaturkontroll.</li>
               <li>PDF-innholdet kontrolleres lokalt i RAM med <code className="text-slate-400">pdf.js</code>, <code className="text-slate-400">pdf-lib</code> og den offentlige nøkkelen i <code className="text-slate-400">src/utils/integrity/publicKey.js</code>.</li>
             </ul>
           </div>
@@ -102,7 +102,7 @@ export default function PrivacyAuditModal({ isOpen, onClose }) {
               Ved ferdigstillelse sender elevens nettleser <em>kun</em> to verdier: <code className="text-emerald-400">&#123; examId, sha256 &#125;</code> til Cloud Function <code className="text-slate-300">signSebSubmission</code>.
             </p>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Serveren mottar <strong>ingen tekst, ingen ord og intet elevnavn</strong>, men utelukkende den matematiske kontrollsummen som er saltet lokalt med et kryptografisk tilfeldig 128-bits <code className="text-slate-300">nonce</code> (som kun ligger i elevens lokale PDF). En aktiv, rutelåst nettverksbrannmur (<code className="text-slate-300">runtimeNetworkFirewall.js</code>) verifiserer ved kjøring at ingen utgående forespørsel fra prøverommet kan overstige 512 byte eller inneholde andre nøkler enn <code className="text-slate-300">&#123; examId &#125;</code> (oppstart i SEB) eller <code className="text-slate-300">&#123; examId, sha256 &#125;</code> (signering).
+              Serveren mottar <strong>ingen tekst, ingen ord og intet elevnavn</strong>, men utelukkende den matematiske kontrollsummen som er saltet lokalt med et kryptografisk tilfeldig 128-bits <code className="text-slate-300">nonce</code> (som kun ligger i elevens lokale PDF). En aktiv, rutelåst nettverksbrannmur (<code className="text-slate-300">installRuntimeNetworkFirewall</code> i <code className="text-slate-300">runtimeNetworkFirewall.js</code>) låser ved kjøring alle utgående kall i prøverommet (<code className="text-slate-300">/exam/*</code>) direkte i nettleseren, slik at ingen forespørsel kan overstige 512 byte eller inneholde andre nøkler enn <code className="text-slate-300">&#123; examId &#125;</code> (oppstart i SEB) eller <code className="text-slate-300">&#123; examId, sha256 &#125;</code> (signering).
             </p>
           </div>
 

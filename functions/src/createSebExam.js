@@ -80,7 +80,7 @@ export const createSebExam = onCall(
     const ref = db.collection('sebExams').doc();
     let pdfPath = null;
     if (clean.pdfBuffer) {
-      pdfPath = `sebExams/${ref.id}/oppgave.pdf`;
+      pdfPath = `sebExams/${ref.id}/oppgave-${randomBytes(12).toString('hex')}.pdf`;
       const bucket = getStorage().bucket(bucketName);
       await bucket.file(pdfPath).save(clean.pdfBuffer, {
         resumable: false,

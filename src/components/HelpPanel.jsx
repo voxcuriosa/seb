@@ -38,7 +38,7 @@ export default function HelpPanel({ onClose }) {
           <li><strong>Pålogging i SEB (Passord og Microsoft Authenticator):</strong> Fordi Safe Exam Browser blokkerer lokale OS-dialoger for Windows Hello og Touch ID (ansikt, fingeravtrykk og lokal maskin-PIN), skal eleven velge <strong>«Bruk passordet mitt / Use my password»</strong> (eventuelt sammen med <strong>Microsoft Authenticator</strong> på mobil ved tofaktor) når påloggingsbildet vises.</li>
           <li><strong>Tømming av øktkapsler på låne-PC:</strong> SEB sletter automatisk innloggingskapsler (cookies) ved oppstart av alle prøver og ved avslutning av Forms- og Clarify-prøver, slik at en elevs Feide-økt aldri blir liggende igjen på en låne-PC.</li>
           <li><strong>Slik deles den i Teams:</strong> Velg «Opprett -&gt; Oppgave» i Teams (ikke «Spørreskjema») og lim inn SEB-lenken. Husk å ha «Ett svar per person» påslått inne i Microsoft Forms.</li>
-          <li><strong>Påkrevd avslutningskode (minst 12 tegn):</strong> Fordi Forms ikke kan lukke SEB automatisk, må du sette en kodefrase på minst 12 tegn med bokstaver (f.eks. «fjord-storm-tind-4829»). Både avslutningsdialogen i ressurspanelet og SEBs egen avslutningssnarvei krever denne koden. Hold koden hemmelig under prøven og oppgi den ved pulten når eleven viser kvitteringsskjermen, eller på tavla når prøvetiden er ute.</li>
+          <li><strong>Påkrevd avslutningskode (minst 12 tegn):</strong> Fordi Forms ikke kan lukke SEB automatisk, må du sette en kodefrase på minst 12 tegn med bokstaver (f.eks. «fjord-storm-tind-varde-482915»). Både avslutningsdialogen i ressurspanelet og SEBs egen avslutningssnarvei krever denne koden. Hold koden hemmelig under prøven og oppgi den ved pulten når eleven viser kvitteringsskjermen, eller på tavla når prøvetiden er ute.</li>
         </ul>
       </div>
 
@@ -65,7 +65,7 @@ export default function HelpPanel({ onClose }) {
           <span>Slik fungerer Avslutningspassord (minst 12 tegn):</span>
         </div>
         <p className="leading-relaxed">
-          Avslutningspassordet fungerer som en nøkkel for læreren (minst 12 tegn med bokstaver, f.eks. «fjord-storm-tind-4829»):
+          Avslutningspassordet fungerer som en nøkkel for læreren (minst 12 tegn med bokstaver, f.eks. «fjord-storm-tind-varde-482915»):
         </p>
         <ul className="space-y-1 list-disc pl-4 text-slate-300">
           <li><strong>Normal avslutning (skriveprøve):</strong> Elevene fullfører ved å trykke «Fullfør», laste ned besvarelsen som PDF og bekrefte lagring. Da slettes lokalt utkast og SEB låser seg opp automatisk uten passord.</li>

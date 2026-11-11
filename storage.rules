@@ -2,15 +2,16 @@ rules_version = '2';
 
 // Oppgave-PDF-er for SEB-prøver.
 // - Ingen klient kan skrive (alt skrives av Cloud Function createSebExam med Admin SDK).
-// - Oppgave-PDF inneholder ingen elevdata eller sensitiv informasjon.
-// - Elever kan lese oppgaven hvis de kjenner den nøyaktige 20-tegns prøve-ID-en.
+// - Oppgave-PDF lagres med uforutsigbart 96-bits filnavn (oppgave-<hex>.pdf) som kun utleveres
+//   inne i Safe Exam Browser via Cloud Function getSebExamContent (bakoverkompatibelt med oppgave.pdf).
 // - Listing er sperret for alle.
 service firebase.storage {
   match /b/{bucket}/o {
-    match /sebExams/{examId}/oppgave.pdf {
-      // Tillat kun lesing når examId har gyldig format, prøvedokumentet fortsatt finnes i Firestore,
-      // og oppgave-PDF-en ikke har passert 90-dagersfristen (TTL).
+    match /sebExams/{examId}/{fileName} {
+      // Tillat kun lesing når examId og filnavn har gyldig format, prøvedokumentet fortsatt finnes
+      // i Firestore, og oppgave-PDF-en ikke har passert 90-dagersfristen (TTL).
       allow get: if examId.matches('^[A-Za-z0-9]{10,40}$')
+                 && fileName.matches('^oppgave(-[a-f0-9]{24})?\\.pdf$')
                  && resource != null
                  && request.time < resource.timeCreated + duration.value(90, 'd')
                  && firestore.exists(/databases/(default)/documents/sebExams/$(examId));

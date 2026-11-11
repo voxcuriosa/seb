@@ -12,7 +12,7 @@
  *       kroppen kan maks være 512 byte og kan KUN inneholde enten { data: { examId } }
  *       (henting av oppgaveinnhold i SEB) eller { data: { examId, sha256 } } (signering
  *       av kontrollsum ved levering), med streng examId-validering og null ekstra nøkler.
- *  2. I Fane 2 (withZeroNetworkFirewall):
+ *  2. Under automatiserte kjøretidstester for Fane 2 (withZeroNetworkFirewall):
  *     - Ethvert forsøk på å kalle fetch, XMLHttpRequest eller sendBeacon under
  *       PDF-kontroll blokkeres på direkten med feilmelding.
  */

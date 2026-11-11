@@ -70,10 +70,15 @@ export const deleteSebExam = onCall(
 
     const bucketName = process.env.SEB_STORAGE_BUCKET || 'voxcuriosa-seb-storage';
     const bucket = getStorage().bucket(bucketName);
-    try {
-      await bucket.file(`sebExams/${examId}/oppgave.pdf`).delete();
-    } catch (err) {
-      if (err?.code !== 404 && Number(err?.code) !== 404) throw err;
+    const storedPdfPath =
+      (contentSnap.exists ? contentSnap.get('pdfPath') : null) ||
+      (examSnap.exists ? examSnap.get('pdfPath') : null);
+    if (typeof storedPdfPath === 'string' && storedPdfPath.startsWith(`sebExams/${examId}/`)) {
+      try {
+        await bucket.file(storedPdfPath).delete();
+      } catch (err) {
+        if (err?.code !== 404 && Number(err?.code) !== 404) throw err;
+      }
     }
     try {
       await bucket.deleteFiles({ prefix: `sebExams/${examId}/`, force: true });
