@@ -9,7 +9,7 @@ import subprocess
 import sys
 from ftplib import FTP_TLS
 
-FTP_HOST = "voxcuriosa.no"
+FTP_HOST = "sleipner.domene.no"
 FTP_USER = "cpjvfkip"
 PORTAL_INDEX = "/Users/christianborchgrevink-vigeland/Documents/Privat/vox_portal/index.html"
 
