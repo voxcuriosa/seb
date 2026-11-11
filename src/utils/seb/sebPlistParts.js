@@ -163,13 +163,12 @@ export function buildPermittedProcessesXml(allowedApps = {}, { includeSystemAuth
     ? `  <key>permittedProcesses</key>\n  <array>\n${parts.join('\n')}\n  </array>`
     : '  <key>permittedProcesses</key>\n  <array/>';
 
-  if (allowedApps?.voxlex) {
-    // VoxLex på macOS er bygget med Tauri v2 (WKWebView) og kommuniserer lokalt mellom
-    // brukergrensesnitt og Rust-bakgrunnsprosess via WKURLSchemeHandler (ipc://localhost),
-    // som macOS ruter gjennom XPC-hjelpeprosessen com.apple.WebKit.Networking.
-    // SEB 3.6+ har com.apple.WebKit.Networking i sin standardliste over forbudte prosesser
-    // på macOS. Ved å sette active=false for denne hjelpeprosessen når VoxLex er tillatt,
-    // lar SEB hjelpeprosessen leve slik at knapper og oppslag i VoxLex fungerer under prøven.
+  if (allowedApps?.voxlex || allowedApps?.lingdys) {
+    // VoxLex på macOS (Tauri v2 / WKWebView) og Lingdys sin HTML-konvertering (/usr/bin/textutil
+    // på eksterne nettsider og Microsoft Forms) starter macOS sin XPC-hjelpeprosess
+    // com.apple.WebKit.Networking. SEB 3.6+ har denne i sin standardliste over forbudte prosesser
+    // på macOS. Ved å sette active=false når VoxLex eller Lingdys er tillatt, lar SEB
+    // hjelpeprosessen leve slik at både oppslag i VoxLex og opplesing i Lingdys fungerer uten heng.
     return `${permittedXml}
   <key>prohibitedProcesses</key>
   <array>

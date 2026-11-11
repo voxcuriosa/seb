@@ -60,6 +60,21 @@ export default function EssayEditor({ initialDoc, lang, onLangChange, onChange, 
         ).run();
         return true;
       },
+      // Ved Cmd+C (bl.a. simulert av Lingdys) legges kun text/plain på utklippstavlen,
+      // slik at Lingdys slipper å konvertere public.html via /usr/bin/textutil (~750 ms).
+      // handlePaste under leser allerede kun text/plain og deler på '\n'.
+      handleDOMEvents: {
+        copy: (view, event) => {
+          if (view.state.selection.empty || !event.clipboardData) return false;
+          const { from, to } = view.state.selection;
+          const text = view.state.doc.textBetween(from, to, '\n');
+          if (!text) return false;
+          event.preventDefault();
+          event.clipboardData.clearData();
+          event.clipboardData.setData('text/plain', text);
+          return true;
+        }
+      },
       // Ingen slipp av eksterne filer eller HTML i skrivefeltet.
       handleDrop: (view, event, slice, moved) => !moved
     },

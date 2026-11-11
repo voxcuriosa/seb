@@ -166,6 +166,17 @@ describe('buildStandaloneSebPlist', () => {
     expect(xml).toMatch(/<key>allowSwitchToApplications<\/key>\s*<true\/>/);
   });
 
+  it('lar com.apple.WebKit.Networking leve på macOS også når kun Lingdys er valgt (uten VoxLex)', () => {
+    const xml = buildStandaloneSebPlist({
+      examId: 'ling1',
+      allowedApps: { ordnett: false, voxlex: false, lingdys: true }
+    });
+    expect(lint(xml)).toMatch(/OK/);
+    expect(xml).toContain('no.lingit.lingdys');
+    expect(xml).toContain('com.apple.WebKit.Networking');
+    expect(xml).toContain('<key>prohibitedProcesses</key>');
+  });
+
   it('pakker .seb-filen i SEBs binære plnd-format (gzip("plnd" + gzip(xml))) slik at den ikke er klartekst i Notisblokk', async () => {
     const xml = buildStandaloneSebPlist({ examId: 'bin_test' });
     const encoded = await encodeSebFileBytes(xml);
